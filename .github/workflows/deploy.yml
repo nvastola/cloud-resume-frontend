@@ -1,0 +1,165 @@
+name: Deploy Cloud Resume
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  TERRAFORM_VERSION: '1.5.0'
+  NODE_VERSION: '18'
+
+jobs:
+  build:
+    name: Build Website
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      # Add any build steps here if you're using a framework
+      # For now, we'll just prepare the files
+      - name: Prepare website files
+        run: |
+          echo "Website files ready for deployment"
+          ls -la website/
+      
+      - name: Upload website artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: website-files
+          path: website/
+
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Terraform Init
+        run: |
+          cd infrastructure
+          terraform init
+      
+      - name: Terraform Plan
+        run: |
+          cd infrastructure
+          terraform plan -out=tfplan
+      
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd infrastructure
+          terraform apply -auto-approve tfplan
+      
+      - name: Get Terraform Outputs
+        id: terraform-outputs
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd infrastructure
+          echo "storage_account=$(terraform output -raw storage_account_name)" >> $GITHUB_OUTPUT
+          echo "cdn_endpoint=$(terraform output -raw frontdoor_endpoint_name)" >> $GITHUB_OUTPUT
+          echo "cdn_profile=$(terraform output -raw frontdoor_profile_name)" >> $GITHUB_OUTPUT
+
+  deploy-website:
+    name: Deploy Website Files
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Download website artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: website-files
+          path: ./website
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Upload to Azure Storage
+        run: |
+          az storage blob upload-batch \
+            --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+            --destination '$web' \
+            --source ./website \
+            --overwrite \
+            --auth-mode login
+      
+      - name: Purge CDN Cache
+        run: |
+          az afd endpoint purge \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --profile-name ${{ secrets.AZURE_CDN_PROFILE }} \
+            --endpoint-name ${{ secrets.AZURE_CDN_ENDPOINT }} \
+            --content-paths '/*'
+
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: deploy-website
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install Cypress
+        run: |
+          npm init -y
+          npm install --save-dev cypress
+      
+      - name: Wait for CDN propagation
+        run: sleep 60
+      
+      - name: Run Cypress tests
+        run: |
+          npx cypress run --config baseUrl=https://nvastola.com
+        continue-on-error: true
+      
+      - name: Basic URL check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://nvastola.com)
+          if [ $response -eq 200 ]; then
+            echo "✅ Website is accessible (HTTP $response)"
+          else
+            echo "❌ Website returned HTTP $response"
+            exit 1
+          fi
+      
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
