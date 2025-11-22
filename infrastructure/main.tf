@@ -12,13 +12,12 @@ terraform {
     }
   }
 
-  # Commenting out backend for local testing
-  # backend "azurerm" {
-  #   resource_group_name  = "terraform-state-rg"
-  #   storage_account_name = "noahterraformstate"
-  #   container_name       = "tfstate"
-  #   key                  = "cloud-resume.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "terraform-state-rg"
+    storage_account_name = "noahterraformstate"
+    container_name       = "tfstate"
+    key                  = "cloud-resume.tfstate"
+  }
 }
 
 provider "azurerm" {
