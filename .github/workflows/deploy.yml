@@ -126,17 +126,11 @@ jobs:
             --overwrite \
             --auth-mode login
       
-      - name: Purge CDN Cache
-        timeout-minutes: 5
+      - name: Purge CloudFlare Cache (Optional)
         continue-on-error: true
         run: |
-          echo "Purging CDN cache..."
-          az afd endpoint purge \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --profile-name ${{ secrets.AZURE_CDN_PROFILE }} \
-            --endpoint-name ${{ secrets.AZURE_CDN_ENDPOINT }} \
-            --content-paths '/*' \
-            --no-wait || echo "Purge initiated (may take several minutes to complete)"
+          echo "💡 To purge CloudFlare cache, set up a CloudFlare API token"
+          echo "For now, CloudFlare auto-purges cache based on file changes"
 
   smoke-test:
     name: Smoke Test
