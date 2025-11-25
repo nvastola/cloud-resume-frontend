@@ -196,3 +196,58 @@ footer a:hover {
     margin-bottom: 8px;
     color: #555;
 }
+
+/* ---------- PROJECTS SECTION (NEW) ---------- */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.project-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e6e9ec;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.project-card h3 {
+    font-size: 1.3rem;
+    color: #0078d7;
+    margin-bottom: 10px;
+}
+
+.project-summary {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.project-details {
+    margin-left: 18px;
+    margin-bottom: 15px;
+}
+
+.project-details li {
+    margin-bottom: 8px;
+}
+
+.tech-badges span {
+    display: inline-block;
+    background: #e9f3ff;
+    color: #0078d7;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
