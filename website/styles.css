@@ -251,3 +251,65 @@ footer a:hover {
     margin-right: 8px;
     margin-bottom: 8px;
 }
+
+/* ---------- EXPERIENCE SECTION (NEW) ---------- */
+.experience-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.experience-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e6e9ec;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.experience-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.experience-header h3 {
+    font-size: 1.3rem;
+    color: #0078d7;
+    margin-bottom: 2px;
+}
+
+.experience-header .company {
+    font-size: 1.05rem;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.experience-header .date {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+.experience-details {
+    margin-left: 18px;
+    margin-bottom: 15px;
+}
+
+.experience-details li {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.exp-badges span {
+    background: #e9f3ff;
+    color: #0078d7;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    display: inline-block;
+}
