@@ -32,3 +32,47 @@ window.addEventListener('DOMContentLoaded', event => {
     });
 
 });
+
+// Visitor Counter - Fetches and displays visitor count from Azure Function
+
+async function updateVisitorCount() {
+    try {
+        // Production API URL
+        const apiUrl = 'https://noah-resume-api.azurewebsites.net/api/getvisitorcount';
+        
+        // Call the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Parse the JSON response
+        const data = await response.json();
+        
+        // Update the counter display
+        const counterElement = document.getElementById('visitor-count');
+        if (counterElement) {
+            counterElement.textContent = data.count;
+        }
+        
+        console.log('Visitor count updated:', data.count);
+        
+    } catch (error) {
+        console.error('Error fetching visitor count:', error);
+        
+        // Display error message to user
+        const counterElement = document.getElementById('visitor-count');
+        if (counterElement) {
+            counterElement.textContent = 'Error loading count';
+        }
+    }
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', updateVisitorCount);
