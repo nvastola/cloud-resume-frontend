@@ -47,12 +47,22 @@ def increment_counter(table_client, current_count):
     table_client.upsert_entity(entity, mode=UpdateMode.REPLACE)
     return current_count + 1
 
-@app.route(route="GetVisitorCount", auth_level=func.AuthLevel.ANONYMOUS, methods=["GET", "POST"])
+@app.route(route="GetVisitorCount", auth_level=func.AuthLevel.ANONYMOUS, methods=["GET", "POST", "OPTIONS"])
 def GetVisitorCount(req: func.HttpRequest) -> func.HttpResponse:
     """
     HTTP trigger function that increments and returns visitor count.
     Supports CORS for frontend integration.
+    Handles both GET/POST requests and OPTIONS preflight.
     """
+    
+    # Handle OPTIONS (CORS preflight) requests
+    if req.method == "OPTIONS":
+        response = func.HttpResponse(status_code=200)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+    
     logging.info('Visitor counter function triggered.')
     
     try:
@@ -91,12 +101,3 @@ def GetVisitorCount(req: func.HttpRequest) -> func.HttpResponse:
         error_response.headers['Access-Control-Allow-Origin'] = '*'
         
         return error_response
-
-@app.route(route="GetVisitorCount", auth_level=func.AuthLevel.ANONYMOUS, methods=["OPTIONS"])
-def GetVisitorCountOptions(req: func.HttpRequest) -> func.HttpResponse:
-    """Handle CORS preflight requests"""
-    response = func.HttpResponse(status_code=200)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return response
