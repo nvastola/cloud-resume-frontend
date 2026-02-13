@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting Up Nexus Repository Manager: When Things Don't Start | Noah Vastola</title>
+    <meta name="description" content="Troubleshooting silent failures, architecture mismatches, and blob store cleanup when setting up Nexus Repository Manager on DigitalOcean">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-yellow: #fbbf24;
+            --accent-red: #ef4444;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --code-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Article Header */
+        .article-header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-blue);
+        }
+
+        .article-header h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item i {
+            color: var(--accent-cyan);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* Article Content */
+        .article-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .article-body {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+        }
+
+        .article-body h2 {
+            font-size: 2rem;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-cyan);
+        }
+
+        .article-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .article-body h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .article-body h4 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .article-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-body ul, .article-body ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .article-body li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .article-body ul li::marker {
+            color: var(--accent-cyan);
+        }
+
+        /* Code Blocks */
+        .article-body code {
+            background: var(--code-bg);
+            color: var(--accent-green);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .article-body pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .article-body pre code {
+            background: none;
+            padding: 0;
+            color: var(--accent-green);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Blockquotes */
+        .article-body blockquote {
+            border-left: 4px solid var(--accent-cyan);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* Images */
+        .article-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+
+        .callout.success {
+            background: rgba(16, 185, 129, 0.05);
+            border-left-color: var(--accent-green);
+        }
+
+        .callout.warning {
+            background: rgba(251, 191, 36, 0.05);
+            border-left-color: var(--accent-yellow);
+        }
+
+        .callout.error {
+            background: rgba(239, 68, 68, 0.05);
+            border-left-color: var(--accent-red);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout.success .callout-title { color: var(--accent-green); }
+        .callout.warning .callout-title { color: var(--accent-yellow); }
+        .callout.error .callout-title { color: var(--accent-red); }
+        .callout .callout-title { color: var(--accent-blue); }
+
+        /* Table */
+        .article-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .article-body th {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .article-body td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .article-body tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Footer Navigation */
+        .article-footer {
+            max-width: 900px;
+            margin: 3rem auto 0;
+            padding: 2rem;
+        }
+
+        .back-to-blog {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-to-blog:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Related Posts */
+        .related-posts {
+            max-width: 900px;
+            margin: 4rem auto 0;
+            padding: 0 2rem 4rem;
+        }
+
+        .related-posts h3 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .related-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .related-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+        }
+
+        .related-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .related-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .article-header h1 {
+                font-size: 2rem;
+            }
+
+            .article-body {
+                padding: 2rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .article-body h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="../blog.html" class="nav-link">
+                    <i class="fas fa-arrow-left"></i> All Posts
+                </a>
+                <a href="../index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Portfolio
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="article-header">
+        <div class="breadcrumb">
+            <a href="../index.html">Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="../blog.html">Blog</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Setting Up Nexus</span>
+        </div>
+
+        <h1>Setting Up Nexus Repository Manager: When Things Don't Start (And What To Do About It)</h1>
+
+        <div class="article-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <span>February 11, 2026</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                <span>10 min read</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                <span>Noah Vastola</span>
+            </div>
+        </div>
+
+        <div class="tags">
+            <span class="tag">Nexus</span>
+            <span class="tag">DigitalOcean</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Java</span>
+            <span class="tag">Gradle</span>
+            <span class="tag">Maven</span>
+        </div>
+    </header>
+
+    <!-- Article Content -->
+    <main class="article-content">
+        <article class="article-body">
+
+            <h2>Run Nexus on Droplet and Publish Artifact to Nexus</h2>
+            
+            <p>
+                After getting my first Java application running on DigitalOcean, the next project seemed straightforward: 
+                install Nexus Repository Manager on another server and use it to store build artifacts. Nexus is basically 
+                a private storage system for JAR files, Docker images, npm packages—anything your team builds that you want 
+                to store centrally.
+            </p>
+
+            <p>
+                The idea makes sense. Instead of developers building artifacts locally and passing them around, you build once, 
+                store it in Nexus, and everyone pulls from the same source. Version control for your compiled code.
+            </p>
+
+            <p>
+                I followed the installation guide, downloaded Nexus, set up the directories, configured the service, and ran 
+                the start command.
+            </p>
+
+            <p>Nothing happened.</p>
+
+            <h2>The Silent Failure</h2>
+
+            <p>
+                When I checked if Nexus was running with <code>systemctl status nexus</code>, it said "active (running)." Great! 
+                Except when I tried to access it at <code>http://&lt;server-ip&gt;:8081</code>, I got nothing. Connection refused.
+            </p>
+
+            <p>I checked if anything was listening on port 8081:</p>
+
+            <pre><code>sudo netstat -tulpn | grep 8081</code></pre>
+
+            <p>
+                Nothing. No process listening on that port. But the service status said it was running. How could it be running 
+                if nothing was listening?
+            </p>
+
+            <p>
+                I checked the logs in <code>/opt/sonatype-work/nexus3/log/</code> but they were... empty. No errors. No warnings. 
+                Just silence.
+            </p>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> The Worst Kind of Error
+                </div>
+                <p>
+                    This is the worst kind of error: the silent failure. No logs, no error messages, no indication of what's wrong. 
+                    Just a service that claims to be running but isn't actually doing anything.
+                </p>
+            </div>
+
+            <h3>Running Nexus in the Foreground</h3>
+
+            <p>
+                After some frustrated Googling, I found a suggestion to run Nexus in foreground mode instead of as a background 
+                service. This would force it to output logs directly to the terminal:
+            </p>
+
+            <pre><code>/opt/nexus/bin/nexus run</code></pre>
+
+            <p>The moment I ran this, I got actual output. And buried in that output was an error:</p>
+
+            <pre><code>/opt/nexus/bin/nexus: /opt/nexus/bin/nexus: cannot execute binary file: Exec format error</code></pre>
+
+            <p>
+                Exec format error. That's... not something you see every day.
+            </p>
+
+            <p>
+                I stared at this for a moment before it clicked: I must have downloaded the wrong version of Nexus.
+            </p>
+
+            <h3>The Architecture Mismatch</h3>
+
+            <p>I ran <code>uname -m</code> to check my server's architecture:</p>
+
+            <pre><code>uname -m</code></pre>
+
+            <p>Output: <code>x86_64</code></p>
+
+            <p>
+                Then I checked what I had downloaded. The filename was something like <code>nexus-3.x.x-unix-aarch64.tar.gz</code>.
+            </p>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> Architecture Mismatch
+                </div>
+                <p>
+                    There it was. <code>aarch64</code>. That's ARM architecture. My server was <code>x86_64</code> (Intel/AMD 
+                    architecture). I had downloaded the ARM version of Nexus and tried to run it on an x86 server. That's like 
+                    trying to run a Mac app on a Windows machine—the operating system might be similar, but the processor 
+                    architecture is completely different.
+                </p>
+            </div>
+
+            <p>
+                I deleted everything, downloaded the correct unix tarball (which is x86_64), extracted it, and tried again.
+            </p>
+
+            <p>
+                This time when I ran <code>/opt/nexus/bin/nexus run</code>, I actually saw Nexus starting up. Logs scrolled by. 
+                Services initialized. And finally:
+            </p>
+
+            <pre><code>Started Sonatype Nexus OSS</code></pre>
+
+            <p>
+                I accessed <code>http://&lt;server-ip&gt;:8081</code> in my browser, and there it was: the Nexus login page.
+            </p>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Success!
+                </div>
+                <p>
+                    Lesson learned: Always verify your server's architecture before downloading binaries. And when something fails 
+                    silently, try running it in foreground mode to see the actual error output.
+                </p>
+            </div>
+
+            <h2>Setting Up Nexus for Real Use</h2>
+
+            <p>
+                With Nexus finally running, I logged in with the default admin credentials and immediately changed the admin 
+                password (security first).
+            </p>
+
+            <p>
+                The next step was creating a dedicated user for uploading artifacts. In a real company, you wouldn't give 
+                developers the admin credentials to Nexus. You'd create users with specific permissions.
+            </p>
+
+            <p>
+                I navigated to <strong>Security → Users</strong> and created a new user. Let's call them <code>ci-user</code>. 
+                Then I created a custom role for this user.
+            </p>
+
+            <h3>Understanding Nexus Permissions</h3>
+
+            <p>
+                Nexus has a pretty granular permission system. For every action you can perform (browse, read, edit, delete, add), 
+                there's a specific privilege. And for every repository, you can assign different privileges.
+            </p>
+
+            <p>I noticed two main categories of permissions:</p>
+
+            <ul>
+                <li><strong>Repository Admin</strong> - For operations teams managing Nexus itself</li>
+                <li><strong>Repository View</strong> - For developers uploading and downloading artifacts</li>
+            </ul>
+
+            <p>
+                Since my user just needs to publish and retrieve artifacts, I went with the "View" permissions. I gave the role 
+                these privileges:
+            </p>
+
+            <ul>
+                <li><code>nx-repository-view-maven2-maven-snapshots-*</code> (all actions on Maven snapshots)</li>
+                <li><code>nx-repository-view-maven2-maven-releases-*</code> (all actions on Maven releases)</li>
+            </ul>
+
+            <p>I assigned this role to <code>ci-user</code>, and now I had a non-admin account ready for publishing artifacts.</p>
+
+            <h2>Publishing from a Gradle Project</h2>
+
+            <p>Nexus was running. The user was set up. Now I needed to actually use it.</p>
+
+            <p>The project I was working with used Gradle, so the first step was configuring Gradle to talk to Nexus. This required three things:</p>
+
+            <ol>
+                <li>A plugin to enable publishing</li>
+                <li>Publication configuration (what to publish)</li>
+                <li>Repository configuration (where to publish)</li>
+            </ol>
+
+            <h3>Adding the Maven Publish Plugin</h3>
+
+            <p>In <code>build.gradle</code>, I added:</p>
+
+            <pre><code>plugins {
+    id 'maven-publish'
+}</code></pre>
+
+            <p>
+                This plugin gives Gradle the ability to publish to Maven-format repositories. Even though this is a Gradle project, 
+                both Gradle and Maven use the same artifact format for Java libraries.
+            </p>
+
+            <h3>Configuring What to Publish</h3>
+
+            <p>Next, I defined what artifact I wanted to publish:</p>
+
+            <pre><code>publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact("build/libs/myapp-${version}.jar") {
+                extension 'jar'
+            }
+        }
+    }
+}</code></pre>
+
+            <p>This tells Gradle: "When you build, take the JAR file from <code>build/libs/</code> and prepare it for publishing."</p>
+
+            <h3>Configuring Where to Publish</h3>
+
+            <p>Now for the repository configuration—this is where I point Gradle to my Nexus server:</p>
+
+            <pre><code>publishing {
+    repositories {
+        maven {
+            name 'nexus'
+            url "http://&lt;nexus-ip&gt;:8081/repository/maven-snapshots/"
+            credentials {
+                username project.findProperty("repoUser") ?: "default"
+                password project.findProperty("repoPassword") ?: "default"
+            }
+            allowInsecureProtocol = true
+        }
+    }
+}</code></pre>
+
+            <p>A few things to note here:</p>
+
+            <ul>
+                <li><strong>The URL structure:</strong> <code>http://ip:port/repository/repository-name</code><br>
+                    You can find the exact URL for each repository in Nexus by clicking on the repository and looking at the URL field.</li>
+                <li><strong>The credentials:</strong> I'm NOT hardcoding the username and password in <code>build.gradle</code>. 
+                    That file gets checked into Git, and you never want credentials in version control.</li>
+            </ul>
+
+            <p>Instead, I created a <code>gradle.properties</code> file:</p>
+
+            <pre><code>repoUser=ci-user
+repoPassword=&lt;password&gt;</code></pre>
+
+            <p>And I added <code>gradle.properties</code> to <code>.gitignore</code> immediately.</p>
+
+            <div class="callout warning">
+                <div class="callout-title">
+                    <i class="fas fa-exclamation-triangle"></i> Security Note
+                </div>
+                <p>
+                    <code>allowInsecureProtocol</code>: Since I'm using HTTP instead of HTTPS, Gradle requires this explicit flag. 
+                    In production, you'd use HTTPS and wouldn't need this line.
+                </p>
+            </div>
+
+            <h3>Publishing the Artifact</h3>
+
+            <p>With everything configured, I built the project:</p>
+
+            <pre><code>./gradle build</code></pre>
+
+            <p>This created <code>build/libs/myapp-1.0-SNAPSHOT.jar</code>.</p>
+
+            <p>Then I published it to Nexus:</p>
+
+            <pre><code>./gradle publish</code></pre>
+
+            <p>
+                I watched as Gradle authenticated with Nexus, uploaded the JAR file, and... success!
+            </p>
+
+            <p>
+                I went back to Nexus, clicked <strong>Browse → Components</strong>, selected <code>maven-snapshots</code>, and 
+                there it was:
+            </p>
+
+            <pre><code>com.example
+└── myapp
+    └── 1.0-SNAPSHOT
+        ├── myapp-1.0-SNAPSHOT.jar
+        ├── myapp-1.0-SNAPSHOT.pom
+        └── maven-metadata.xml</code></pre>
+
+            <p>My first artifact in a real artifact repository.</p>
+
+            <h2>Publishing from a Maven Project</h2>
+
+            <p>The process for Maven projects is similar but with different configuration files.</p>
+
+            <h3>Configuring the Maven Plugin</h3>
+
+            <p>In <code>pom.xml</code>, I added the <code>maven-deploy-plugin</code>:</p>
+
+            <pre><code>&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+            &lt;artifactId&gt;maven-deploy-plugin&lt;/artifactId&gt;
+            &lt;version&gt;2.8.2&lt;/version&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+            <h3>Setting the Repository URL</h3>
+
+            <p>Also in <code>pom.xml</code>, I added the distribution management section:</p>
+
+            <pre><code>&lt;distributionManagement&gt;
+    &lt;snapshotRepository&gt;
+        &lt;id&gt;nexus-snapshots&lt;/id&gt;
+        &lt;url&gt;http://&lt;nexus-ip&gt;:8081/repository/maven-snapshots/&lt;/url&gt;
+    &lt;/snapshotRepository&gt;
+&lt;/distributionManagement&gt;</code></pre>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <i class="fas fa-info-circle"></i> Important
+                </div>
+                <p>
+                    The <code>&lt;id&gt;</code> is important—it's how Maven knows which credentials to use.
+                </p>
+            </div>
+
+            <h3>Configuring Credentials</h3>
+
+            <p>
+                Maven stores credentials in a global settings file, not in the project. I created <code>~/.m2/settings.xml</code>:
+            </p>
+
+            <pre><code>&lt;settings&gt;
+    &lt;servers&gt;
+        &lt;server&gt;
+            &lt;id&gt;nexus-snapshots&lt;/id&gt;
+            &lt;username&gt;ci-user&lt;/username&gt;
+            &lt;password&gt;&lt;password&gt;&lt;/password&gt;
+        &lt;/server&gt;
+    &lt;/servers&gt;
+&lt;/settings&gt;</code></pre>
+
+            <p>
+                The <code>&lt;id&gt;</code> here matches the <code>&lt;id&gt;</code> in <code>pom.xml</code>. That's how Maven 
+                connects the dots: "Oh, this repository uses nexus-snapshots credentials."
+            </p>
+
+            <h3>Building and Publishing</h3>
+
+            <pre><code>mvn package  # Build the JAR
+mvn deploy   # Upload to Nexus</code></pre>
+
+            <p>And just like that, the Maven project's artifact appeared in Nexus alongside the Gradle one.</p>
+
+            <h2>The Blob Store Cleanup Surprise</h2>
+
+            <p>
+                A few days later, I was checking disk space on my server and noticed Nexus was using way more space than expected. 
+                I had deleted some old artifacts from the UI, but the disk space hadn't decreased.
+            </p>
+
+            <div class="callout warning">
+                <div class="callout-title">
+                    <i class="fas fa-exclamation-triangle"></i> Deletion Isn't Immediate
+                </div>
+                <p>
+                    Turns out, Nexus doesn't actually delete artifacts when you delete them from the UI. It marks them as deleted 
+                    (a "soft delete"), but the files remain on disk.
+                </p>
+            </div>
+
+            <p>To actually free up space, you need to run two tasks:</p>
+
+            <ol>
+                <li><strong>Cleanup task</strong> - Marks artifacts for deletion based on your rules</li>
+                <li><strong>Compact blob store</strong> - Actually removes the marked artifacts from disk</li>
+            </ol>
+
+            <p>
+                I set up a cleanup task in <strong>Settings → Tasks</strong> to run nightly, and then manually ran the blob store 
+                compaction.
+            </p>
+
+            <p>After the compaction ran, I checked disk usage again:</p>
+
+            <pre><code>du -sh /opt/sonatype-work/nexus3/blobs/</code></pre>
+
+            <p>
+                The size had dropped significantly. The UI storage metrics didn't update immediately, so I had to run 
+                <strong>System → Tasks → Repair - Recalculate blob store storage</strong> to refresh the numbers.
+            </p>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <i class="fas fa-info-circle"></i> Key Takeaway
+                </div>
+                <p>
+                    Deleting artifacts in Nexus is a two-step process, and the UI doesn't always show accurate disk usage right away.
+                </p>
+            </div>
+
+            <h2>What I Learned</h2>
+
+            <p>This project taught me several things that weren't obvious from the documentation:</p>
+
+            <ul>
+                <li>
+                    <strong>Silent failures are the worst.</strong> When a service claims to be running but isn't, run it in 
+                    foreground mode to see the actual error output.
+                </li>
+                <li>
+                    <strong>Architecture matters.</strong> Download the right binary for your CPU architecture. ARM ≠ x86. 
+                    Always verify with <code>uname -m</code>.
+                </li>
+                <li>
+                    <strong>Credentials don't belong in version control.</strong> Use <code>gradle.properties</code> for Gradle 
+                    projects and <code>~/.m2/settings.xml</code> for Maven projects. Add these files to <code>.gitignore</code>.
+                </li>
+                <li>
+                    <strong>Nexus cleanup is two-phase.</strong> Deleting artifacts in the UI doesn't free disk space immediately. 
+                    You need both a cleanup task and blob store compaction.
+                </li>
+                <li>
+                    <strong>Permission design matters.</strong> Don't give everyone admin access. Create roles with the minimum 
+                    permissions needed for each use case.
+                </li>
+                <li>
+                    <strong>Maven and Gradle use the same artifact format.</strong> Both publish to Maven-format repositories, 
+                    so you can use one Nexus repository for both build tools.
+                </li>
+            </ul>
+
+            <h2>Next Steps</h2>
+
+            <p>
+                With Nexus running and artifacts being published, the next phase of the bootcamp is containerization. I'll be 
+                learning Docker, building container images, and eventually deploying these same applications using Docker Compose 
+                on AWS.
+            </p>
+
+            <p>
+                I'm expecting more version conflicts, more networking issues, and probably some new failure modes I haven't 
+                encountered yet. But that's the whole point—every error teaches you how these systems actually work under the hood.
+            </p>
+
+            <blockquote>
+                If you're working on something similar and run into issues, feel free to reach out. I'm documenting everything 
+                as I go, mistakes and all.
+            </blockquote>
+
+        </article>
+    </main>
+
+    <!-- Footer Navigation -->
+    <footer class="article-footer">
+        <a href="../blog.html" class="back-to-blog">
+            <i class="fas fa-arrow-left"></i> Back to All Posts
+        </a>
+    </footer>
+
+    <!-- Related Posts -->
+    <section class="related-posts">
+        <h3>Related in the Series</h3>
+        <div class="related-grid">
+            <a href="devops-project-1.html" class="related-card">
+                <h4>Deploying a Java App to DigitalOcean</h4>
+                <p>The first project covering Gradle compatibility, SSH keys, and security best practices...</p>
+            </a>
+            <!-- <a href="#" class="related-card">
+                <h4>Building My First CI/CD Pipeline with Jenkins</h4>
+                <p>Coming soon: Automating builds and deployments...</p>
+            </a>
+            <a href="#" class="related-card">
+                <h4>Infrastructure as Code with Terraform</h4>
+                <p>Coming soon: Provisioning infrastructure automatically...</p>
+            </a> -->
+        </div>
+    </section>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Nav shadow on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 100) {
+                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

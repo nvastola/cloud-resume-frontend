@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Noah Vastola - DevOps & Cloud Engineering</title>
+    <meta name="description" content="Documenting my journey through cloud infrastructure, DevOps, and real troubleshooting stories">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --card-hover: #2d3a52;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .logo:hover {
+            color: var(--accent-cyan);
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Header Section */
+        .header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* Featured Post */
+        .featured-post {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .featured-post::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-green));
+        }
+
+        .featured-post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(6, 182, 212, 0.2);
+        }
+
+        .featured-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .featured-post h2 {
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .featured-post .meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .meta-item i {
+            color: var(--accent-cyan);
+        }
+
+        .featured-post .excerpt {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .read-more:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Blog Posts Grid */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .blog-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(6, 182, 212, 0.15);
+        }
+
+        .blog-card-header {
+            padding: 2rem 2rem 1rem;
+        }
+
+        .blog-card h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .blog-card h3 a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .blog-card h3 a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .blog-card .meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .blog-card .excerpt {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .blog-card-footer {
+            padding: 0 2rem 2rem;
+            margin-top: auto;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .read-more-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .read-more-link:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 2rem;
+            margin: 4rem 0 2rem;
+            text-align: center;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        /* Template Note */
+        .template-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--accent-orange);
+        }
+
+        .template-note strong {
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            max-width: 1200px;
+            margin: 4rem auto 0;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .featured-post {
+                padding: 2rem;
+            }
+
+            .featured-post h2 {
+                font-size: 1.6rem;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Coming Soon Badge */
+        .coming-soon {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent-purple);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-blog"></i> Blog
+            </a>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>DevOps & Cloud Engineering Blog</h1>
+        <p class="subtitle">
+            Documenting my journey through cloud infrastructure, DevOps, and the real troubleshooting 
+            stories behind the projects. The learning happens in the debugging.
+        </p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+
+                <!-- Featured Post -->
+        <article class="featured-post">
+            <span class="featured-badge">
+                <i class="fas fa-star"></i> Featured Post
+            </span>
+            <h2>Deploy Nexus Repository Manager for Centralized Artifact Management</h2>
+            <div class="meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    February 11, 2026
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    10 min read
+                </span>
+            </div>
+            <p class="excerpt">
+                Setting up a centralized artifact repository with Nexus on DigitalOcean turned into a deep dive through repository management, RBAC configuration, and build tool integration. From configuring Maven and Gradle repositories to implementing proper cleanup policies, here's what I learned about managing artifacts like a production environment and why understanding blob stores matters more than you'd think.
+            </p>
+            <a href="blog/devops-project-2.html" class="read-more">
+                Read Full Story <i class="fas fa-arrow-right"></i>
+            </a>
+        </article>
+
+        <h2 class="section-title">All Posts</h2>
+
+        <!-- Blog Posts Grid -->
+        <div class="posts-grid">
+
+            <!-- Blog Post 1 (Same as featured, shown in grid) -->
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="blog/devops-project-1.html">Deploy Java Application to Production Linux Server</a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            February 10, 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            8 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        What I learned the hard way about Gradle compatibility, architecture mismatches, and blob store cleanup 
+                        when deploying my first cloud server and artifact repository.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">DigitalOcean</span>
+                        <span class="tag">Linux</span>
+                        <span class="tag">Java</span>
+                        <span class="tag">Gradle</span>
+                    </div>
+                    <a href="blog/devops-project-1.html" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+            <!-- Blog Post 2 -->
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="blog/devops-project-2.html">Deploy Nexus Repository Manager for Centralized Artifact Management</a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            February 11, 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            10 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        Setting up a centralized artifact repository with Nexus on DigitalOcean. From RBAC configuration to integrating Maven and Gradle builds, here's how I learned to manage artifacts like a production environment.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Nexus</span>
+                        <span class="tag">DigitalOcean</span>
+                        <span class="tag">Linux</span>
+                        <span class="tag">Java</span>
+                        <span class="tag">Gradle</span>
+                        <span class="tag">Maven</span>
+                    </div>
+                    <a href="blog/devops-project-2.html" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+            <!-- Template Blog Post 2 - Copy this structure
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="#">Building My First CI/CD Pipeline with Jenkins <span class="coming-soon">Coming Soon</span></a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            March 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            10 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        From pipeline syntax errors to webhook configurations, here's how I automated my deployment workflow 
+                        and learned why CI/CD is about more than just running scripts.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Jenkins</span>
+                        <span class="tag">CI/CD</span>
+                        <span class="tag">Docker</span>
+                        <span class="tag">Automation</span>
+                    </div>
+                    <a href="#" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+             Template Blog Post 3
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="#">Kubernetes Fundamentals: My First Pod to Production Deployment <span class="coming-soon">Coming Soon</span></a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            March 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            12 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        Demystifying Kubernetes concepts through hands-on deployment. Understanding pods, services, deployments, 
+                        and why networking in K8s makes your head spin at first.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Kubernetes</span>
+                        <span class="tag">Containers</span>
+                        <span class="tag">Orchestration</span>
+                    </div>
+                    <a href="#" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+             Template Blog Post 4
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="#">Infrastructure as Code with Terraform: Lessons from My First AWS Deployment <span class="coming-soon">Coming Soon</span></a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            April 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            9 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        Why state files matter, how to structure your modules, and the moment I realized infrastructure as code 
+                        is about predictability, not just automation.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Terraform</span>
+                        <span class="tag">AWS</span>
+                        <span class="tag">IaC</span>
+                    </div>
+                    <a href="#" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+             Template Blog Post 5
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="#">Docker Deep Dive: Building Optimized Images and Understanding Layers <span class="coming-soon">Coming Soon</span></a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            April 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            7 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        How I went from 2GB to 200MB images, why layer caching matters, and the difference between COPY and ADD 
+                        that nobody tells you about.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Docker</span>
+                        <span class="tag">Containers</span>
+                        <span class="tag">Optimization</span>
+                    </div>
+                    <a href="#" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+
+             Template Blog Post 6
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h3><a href="#">Monitoring with Prometheus and Grafana: Making Metrics Actually Useful <span class="coming-soon">Coming Soon</span></a></h3>
+                    <div class="meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            May 2026
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            11 min read
+                        </span>
+                    </div>
+                    <p class="excerpt">
+                        Setting up a monitoring stack that actually helps you catch problems before they become incidents. 
+                        From metric collection to meaningful alerts.
+                    </p>
+                </div>
+                <div class="blog-card-footer">
+                    <div class="tags">
+                        <span class="tag">Prometheus</span>
+                        <span class="tag">Grafana</span>
+                        <span class="tag">Monitoring</span>
+                        <span class="tag">Observability</span>
+                    </div>
+                    <a href="#" class="read-more-link">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article> -->
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Noah Vastola. Sharing the journey, one deployment at a time.</p>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Nav shadow on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 100) {
+                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

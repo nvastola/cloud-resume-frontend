@@ -1,378 +1,1240 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="Noah Vastola - Cloud & Infrastructure Enthusiast" />
-        <meta name="author" content="Noah Vastola" />
-        <title>Noah Vastola - Portfolio</title>
-        <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
-        <!-- Font Awesome icons (free version)-->
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <!-- Google fonts-->
-        <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
-        <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
-        <style>
-            .cert-link {
-                text-decoration: none;
-                color: inherit;
-                display: block;
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Vastola | Cloud Engineering & DevOps Portfolio</title>
+    <meta name="description" content="Noah Vastola - Cloud Engineering & DevOps Portfolio showcasing AWS, Kubernetes, Terraform, and CI/CD projects">
+    <meta name="author" content="Noah Vastola">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --card-hover: #2d3a52;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero .description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Skills Section */
+        .skills-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-category {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .skill-category:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
+        }
+
+        .skill-category h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background: var(--bg-tertiary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .skill-tag:hover {
+            background: var(--card-hover);
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+        }
+
+        /* Projects Section */
+        .projects-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-intro {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-intro p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 1rem auto 0;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(6, 182, 212, 0.15);
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .project-card h3 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-status {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .project-highlights {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-highlights li {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .project-highlights li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tech-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .project-link:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Experience Section */
+        .experience-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .experience-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .experience-card h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .experience-card .company {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .experience-card .date {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .experience-card ul {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .experience-card ul li {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .experience-card ul li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+        }
+
+        /* Certifications */
+        .certs-section {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .cert-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .cert-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
+        }
+
+        .cert-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+        }
+
+        .cert-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .cert-card .issuer {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 6rem;
+            padding: 3rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-cyan);
+            transform: translateY(-3px);
+        }
+
+        .footer-content p {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
             }
-            .cert-badge {
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                cursor: pointer;
+
+            .hero .subtitle {
+                font-size: 1.2rem;
             }
-            .cert-link:hover .cert-badge {
-                transform: scale(1.05);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
             }
-            .cert-link:hover {
-                text-decoration: none;
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
             }
-        </style>
-    </head>
-    <body id="page-top">
-        <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
-            <a class="navbar-brand js-scroll-trigger" href="#page-top">
-                <span class="d-block d-lg-none">Noah Vastola</span>
-                <span class="d-none d-lg-block"><img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="assets/img/profile.jpg" alt="..." /></span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#experience">Experience</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#skills">Skills</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects">Projects</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#blog">Learning</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#contact">Contact</a></li>
-                </ul>
+
+            .project-header, .experience-header {
+                flex-direction: column;
+            }
+        }
+
+        /* Terminal Effect */
+        .terminal {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27c93f; }
+
+        .terminal-content {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-cyan);
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+        }
+
+        .view-more-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .view-more-link:hover {
+            background: rgba(6, 182, 212, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .visitor-counter {
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            color: #6c757d; /* or whatever matches your theme */
+        }
+
+        .visitor-counter p {
+            margin: 0;
+        }
+
+        #visitor-count {
+            font-weight: 600;
+            color: #0d6efd; /* or your primary color */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-code"></i> Noah Vastola
             </div>
-        </nav>
-        <!-- Page Content-->
-        <div class="container-fluid p-0">
-            <!-- About-->
-            <section class="resume-section" id="about">
-                <div class="resume-section-content">
-                    <h1 class="mb-0">
-                        Noah
-                        <span class="text-primary">Vastola</span>
-                    </h1>
-                    <div class="subheading mb-5">
-                        Baton Rouge, Louisiana · 
-                        <a href="mailto:noahvastola@gmail.com">noahvastola@gmail.com</a>
-                    </div>
-                    <p class="lead mb-5">I'm an IT professional focused on cloud, infrastructure, and systems administration. I enjoy building reliable, secure environments and learning the tools that power modern organizations. My experience includes Windows Server administration, Active Directory, virtualization, and troubleshooting enterprise networks.</p>
-                    <!-- Visitor Counter -->
-                    <div class="visitor-counter">
-                    <p>👁️ Visitor Count: <span id="visitor-count">Loading...</span></p>
-                    </div>
-                    <div class="social-icons">
-                        <a class="social-icon" href="https://www.linkedin.com/in/noahvastola/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-                        <a class="social-icon" href="https://github.com/nvastola" target="_blank"><i class="fab fa-github"></i></a>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Experience-->
-            <section class="resume-section" id="experience">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Experience</h2>
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Web System Administrator (Contract)</h3>
-                            <div class="subheading mb-3">Louisiana Association of Public Adjusters (LAPA)</div>
-                            <ul>
-                                <li>Administer production WordPress infrastructure supporting 200+ members with 99.9% uptime through automated monitoring, daily backups, and incident response protocols.</li>
-                                <li>Execute zero-downtime deployments of WordPress core/plugin upgrades using staging-to-production workflow with compatibility testing and rollback capability.</li>
-                                <li>Integrated Stripe payment processing and Mailchimp email automation via API/webhooks, reducing manual user registration time by 90%. (30 min → less than 1 min per applicant)</li>
-                                <li>Configured Office 365 SMTP relay with SPF/DKIM authentication and troubleshot email delivery issues through systematic log analysis and DNS validation.</li>
-                                <li>Implemented security controls including SSL/TLS configuration, RBAC for multi-tier membership system, and secure error logging with production environment isolation.</li>
-                            </ul>
-                            <div>
-                                <span class="badge bg-primary me-1">WordPress Administration</span>
-                                <span class="badge bg-primary me-1">SMTP/Mailing Systems</span>
-                                <span class="badge bg-primary me-1">API Integration</span>
-                                <span class="badge bg-primary">System Monitoring</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0"><span class="text-primary">December 2025 - Present</span></div>
-                    </div>
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">IT Support Technician I (Intern)</h3>
-                            <div class="subheading mb-3">LSU AgCenter</div>
-                            <ul>
-                                <li>Deployed 150+ Windows devices during enterprise PC refresh using Dell Image Assist for automated OS deployment, driver installation, and application provisioning with zero data loss over 6-month project</li>
-                                <li>Participated in incident response during critical CrowdStrike BSOD outage affecting 250+ endpoints, restoring operations within hours through coordinated safe mode remediation.</li>
-                                <li>Enhanced security posture by enforcing MFA and investigating phishing attempts aligned with Zero Trust principles.</li>
-                                <li>Resolved network issues (VPN, APIPA, wireless, AD replication) through systematic troubleshooting and root cause analysis.</li>
-                                <li>Created and maintained support documentation to streamline issue resolution and improve team efficiency.</li>
-                            </ul>
-                            <div>
-                                <span class="badge bg-primary me-1">Windows Deployment</span>
-                                <span class="badge bg-primary me-1">Active Directory</span>
-                                <span class="badge bg-primary me-1">Incident Response</span>
-                                <span class="badge bg-primary">Network Troubleshooting</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0"><span class="text-primary">January 2024 - Present</span></div>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Education-->
-            <section class="resume-section" id="education">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Education</h2>
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Louisiana State University A&M</h3>
-                            <div class="subheading mb-3">Bachelor of Science</div>
-                            <div>Information Systems & Analytics</div>
-                            <p>GPA: 3.67</p>
-                            <ul class="mb-3">
-                                <li>Foundations of Information Systems</li>
-                                <li>Design of Information Systems Solutions</li>
-                                <li>Data and Information Management</li>
-                                <li>Cyber Risk Management</li>
-                            </ul>
-                        </div>
-                        <div class="flex-shrink-0"><span class="text-primary">Expected December 2026</span></div>
-                    </div>
-                    <div class="mb-5">
-                        <h3 class="mb-4">Professional Certifications</h3>
-                        <div class="row">
-                            <div class="col-md-4 col-sm-6 mb-4 text-center">
-                                <a href="https://www.credly.com/badges/9db2ed64-bb62-480e-8937-6c7e6bb6e20f" target="_blank" class="cert-link">
-                                    <img src="assets/img/net.png" alt="CompTIA Network+ ce" class="img-fluid cert-badge" style="max-width: 200px; transition: transform 0.3s;">
-                                    <p class="mt-2 mb-0"><strong>Network+ ce</strong></p>
-                                    <p class="text-muted small">Issued June 2025</p>
-                                </a>
-                            </div>
-                            <div class="col-md-4 col-sm-6 mb-4 text-center">
-                                <a href="https://www.credly.com/badges/39ea38a1-ea7b-43ce-b983-d9993624f4cc" target="_blank" class="cert-link">
-                                    <img src="assets/img/sec.png" alt="CompTIA Security+ ce" class="img-fluid cert-badge" style="max-width: 200px; transition: transform 0.3s;">
-                                    <p class="mt-2 mb-0"><strong>Security+ ce</strong></p>
-                                    <p class="text-muted small">Issued August 2025</p>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Skills-->
-            <section class="resume-section" id="skills">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Skills</h2>
-                    <div class="row">
-                        <!-- Left Column -->
-                        <div class="col-md-6">
-                            <div class="subheading mb-3">Systems & Infrastructure</div>
-                            <ul class="mb-4">
-                                <li>Linux (Ubuntu)</li>
-                                <li>Active Directory</li>
-                                <li>Windows Server</li>
-                                <li>Group Policy</li>
-                                <li>Powershell</li>
-                                <li>DNS/DHCP</li>
-                            </ul>
-                
-                            <div class="subheading mb-3">Web & DevOps</div>
-                            <ul class="mb-4">
-                                <li>WordPress/PHP/MySQL</li>
-                                <li>SMTP relay</li>
-                                <li>SSL/TLS</li>
-                                <li>Git</li>
-                                <li>CI/CD (Github Actions)</li>
-                                <li>Infrastructure as Code</li>
-                            </ul>
-                        </div>
-            
-                        <!-- Right Column -->
-                        <div class="col-md-6">
-                            <div class="subheading mb-3">Cloud & Security</div>
-                            <ul class="mb-4">
-                                <li>Azure (Functions, Blob Storage, Cosmos DB)</li>
-                                <li>Github Secrets</li>
-                                <li>Wazuh SIEM</li>
-                                <li>CIS Benchmarks</li>
-                                <li>Vulnerability Management</li>
-                            </ul>
-                
-                            <div class="subheading mb-3">Tools & Protocols</div>
-                            <ul class="fa-ul mb-0">
-                                <li>
-                                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                                    API Integration
-                                </li>
-                                <li>
-                                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                                    RBAC
-                                </li>
-                                <li>
-                                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                                    Log analysis
-                                </li>
-                                <li>
-                                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                                    Incident Response
-                                </li>
-                                <li>
-                                    <span class="fa-li"><i class="fas fa-check"></i></span>
-                                    Technical Documentation
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Projects-->
-            <section class="resume-section" id="projects">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Projects</h2>
-                    
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Cloud-Native Resume Website (Azure)</h3>
-                            <p class="mb-3">Deployed a production-ready serverless web application with automated CI/CD and infrastructure-as-code on Azure.</p>
-                            <ul>
-                                <li>Architected serverless web application using Azure Functions (Python), Blob Storage, Cosmos DB, and Key Vault with Terraform infrastructure-as-code templates.</li>
-                                <li>Automated CI/CD pipeline with GitHub Actions achieving under 2 min deployment times; configured custom domain with SSL/TLS and Azure Front Door CDN.</li>
-                            </ul>
-                            <div>
-                                <span class="badge bg-secondary me-1">Azure</span>
-                                <span class="badge bg-secondary me-1">Terraform</span>
-                                <span class="badge bg-secondary me-1">CI/CD</span>
-                                <span class="badge bg-secondary">Serverless Architecture</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Enterprise Windows Domain Lab</h3>
-                            <p class="mb-3">Built and administered a Windows domain environment with enterprise-grade security and automation.</p>
-                            <ul>
-                                <li>Deployed Windows Server 2022 environment with redundant DCs, 5 OUs, and 10+ GPOs enforcing security policies. (password complexity, LAPS, audit logging)</li>
-                                <li>Automated user provisioning and AD management using PowerShell scripts reducing admin time by 75%.</li>
-                            </ul>
-                            <div>
-                                <span class="badge bg-secondary me-1">Active Directory</span>
-                                <span class="badge bg-secondary me-1">Group Policy</span>
-                                <span class="badge bg-secondary me-1">PowerShell</span>
-                                <span class="badge bg-secondary">Windows Server</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-column flex-md-row justify-content-between">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Security, Automation & Systems</h3>
-                            <p class="mb-3">Hardened enterprise systems using industry security benchmarks and real-time monitoring tools.</p>
-                            <ul>
-                                <li>Deployed Wazuh SIEM aggregating logs from 10+ endpoints with custom detection rules for privilege escalation, failed logins, and malware indicators.</li>
-                                <li>Applied CIS benchmark hardening to Windows/Linux systems implementing 50+ security controls.</li>
-                            </ul>
-                            <div>
-                                <span class="badge bg-secondary me-1">SIEM</span>
-                                <span class="badge bg-secondary me-1">Security Hardening</span>
-                                <span class="badge bg-secondary me-1">CIS Benchmarks</span>
-                                <span class="badge bg-secondary">Log Analysis</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Blog-->
-            <section class="resume-section" id="blog">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Learning</h2>
-                    <p class="lead mb-4">Documenting what I'm learning about cloud infrastructure, systems administration, and IT operations.</p>
-                    
-                    <!-- Example blog post structure - you can add real posts here -->
-                    <div class="d-flex flex-column flex-md-row justify-content-between mb-4">
-                        <div class="flex-grow-1">
-                            <h3 class="mb-0">Completing the Cloud Resume Challenge</h3>
-                            <div class="subheading mb-3">My journey building a serverless resume with Azure, Terraform, and CI/CD</div>
-                            <p>Discover how I built a cloud-native resume using Azure Static Web Apps, Azure Functions, CosmosDB, and Infrastructure as Code. Learn about the challenges I faced with Terraform, implementing a visitor counter API, and setting up automated deployments with GitHub Actions...</p>
-                            <a href="#!" class="text-primary">Read more →</a>
-                        </div>
-                        <div class="flex-shrink-0"><span class="text-primary">Coming Soon</span></div>
-                    </div>
-                    <div class="row">
-                            <div class="col-md-4 col-sm-6 mb-4 text-center">
-                                <h3 class="mb-0">Currently Studying</h3>
-                                <a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification" target="_blank" class="cert-link">
-                                    <img src="assets/img/az.png" alt="Azure Administer Associate" class="img-fluid cert-badge" style="max-width: 200px; transition: transform 0.3s;">
-                                    <p class="mt-2 mb-0"><strong>Azure Administer Associate</strong></p>
-                                </a>
-                            </div>
-                            <div class="col-md-4 col-sm-6 mb-4 text-center">
-                                <h3 class="mb-0">Currently Reading</h3>
-                                <a href="https://www.amazon.com/Practice-System-Network-Administration-Enterprise/dp/0321919165" target="_blank" class="cert-link">
-                                    <img src="assets/img/snav1.jpg" alt="Practice of System and Network Administration" class="img-fluid cert-badge" style="max-width: 200px; transition: transform 0.3s;">
-                                    <p class="mt-2 mb-0"><strong>Practice of System and Network Administration</strong></p>
-                                </a>
-                            </div>
-                    </div>
-                </div>
-            </section>
-            <hr class="m-0" />
-            <!-- Contact-->
-            <section class="resume-section" id="contact">
-                <div class="resume-section-content">
-                    <h2 class="mb-5">Contact</h2>
-                    <p class="lead mb-4">I'm always interested in connecting with fellow IT professionals and discussing opportunities in cloud infrastructure and systems administration.</p>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <h3 class="h4 mb-3">Get in Touch</h3>
-                            <ul class="fa-ul mb-0">
-                                <li class="mb-3">
-                                    <span class="fa-li"><i class="fas fa-envelope"></i></span>
-                                    <a href="mailto:noahvastola@gmail.com">noahvastola@gmail.com</a>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fa-li"><i class="fab fa-linkedin"></i></span>
-                                    <a href="https://www.linkedin.com/in/noahvastola" target="_blank">LinkedIn Profile</a>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fa-li"><i class="fab fa-github"></i></span>
-                                    <a href="https://github.com/nvastola" target="_blank">GitHub Profile</a>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fa-li"><i class="fas fa-file-pdf"></i></span>
-                                    <a href="assets/doc/Resume.pdf" target="_blank">Download Resume</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h3 class="h4 mb-3">Areas of Interest</h3>
-                            <ul class="list-unstyled">
-                                <li class="mb-2">☁️ Cloud Infrastructure (Azure, AWS)</li>
-                                <li class="mb-2">🔒 Systems Security & Compliance</li>
-                                <li class="mb-2">⚙️ Infrastructure Automation</li>
-                                <li class="mb-2">🌐 Enterprise Networking</li>
-                                <li class="mb-2">📊 DevOps & Site Reliability</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#certifications">Certifications</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </div>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Core theme JS-->
-        <script src="js/scripts.js"></script>
-        <script src="visitor-counter.js"></script>
-    </body>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="about">
+        <h1>Noah Vastola</h1>
+        <p class="subtitle">Cloud Engineering & DevOps | Baton Rouge, Louisiana</p>
+        <div class="description">
+            <p style="margin-bottom: 1.5rem;">I'm currently the Technology Director for the Louisiana Association of Public Adjusters, where I manage web infrastructure, security implementations, and member-facing systems. While working this role alongside my IT Support position at the LSU AgCenter, I'm actively building production-level cloud engineering skills through hands-on projects and real-world deployments.</p>
+            
+            <p style="margin-bottom: 1.5rem;">I'm working through the full DevOps toolkit: deploying applications to AWS cloud infrastructure, building CI/CD pipelines with Jenkins, orchestrating containers with Kubernetes, automating infrastructure with Terraform and Ansible, and implementing monitoring with Prometheus. Projects also go on my blog — I document the problems I solve and the troubleshooting process because that's where the real learning happens.</p>
+            
+            <p style="margin-bottom: 1.5rem;">My background includes CompTIA Network+ and Security+ certifications, along with hands-on experience in Windows Deployment, Active Directory, and enterprise IT support. This foundation gives me a solid understanding of how infrastructure actually works before it moves to the cloud, which shapes how I approach cloud architecture and automation.</p>
+            
+            <p style="margin-bottom: 1.5rem;"><strong>I'm graduating from LSU in December 2026 with a degree in Information Systems & Analytics and I'm actively looking for cloud engineering or DevOps roles where I can apply the infrastructure and automation skills I've been building.</strong></p>
+        
+            <!-- Visitor Counter -->
+            <div class="visitor-counter">
+                <p>👁️ Visitor Count: <span id="visitor-count">Loading...</span></p>
+            </div>
+
+        </div>
+        <div class="cta-buttons">
+            <a href="#projects" class="btn btn-primary">
+                <i class="fas fa-rocket"></i> Projects
+            </a>
+            <a href="https://github.com/nvastola" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-github"></i> GitHub Profile
+            </a>
+        </div>
+
+        <!-- Terminal Effect -->
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-btn red"></div>
+                <div class="terminal-btn yellow"></div>
+                <div class="terminal-btn green"></div>
+            </div>
+            <div class="terminal-content">
+                <div><span class="terminal-prompt">$ </span>kubectl get engineer --selector="name=noah"</div>
+                <div class="terminal-output">NAME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATUS &nbsp;&nbsp;SKILLS</div>
+                <div class="terminal-output">noah-vastola &nbsp;&nbsp;Ready &nbsp;&nbsp;&nbsp;Azure,Git,Terraform,Linux,Python</div>
+                <!-- <div class="terminal-output"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker,CI/CD,Linux,Windows-Server</div> -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section class="experience-section" id="experience">
+        <h2 class="section-title">Experience</h2>
+
+        <div class="experience-card">
+            <div class="experience-header">
+                <div>
+                    <h3>Technology Director (Contract)</h3>
+                    <div class="company">Louisiana Association of Public Adjusters (LAPA)</div>
+                </div>
+                <div class="date">December 2025 - Present</div>
+            </div>
+            <ul>
+                <li>Administer production WordPress infrastructure supporting 200+ members with 99.9% uptime through automated monitoring, daily backups, and incident response protocols.</li>
+                <li>Execute zero-downtime deployments of WordPress core/plugin upgrades using staging-to-production workflow with compatibility testing and rollback capability.</li>
+                <li>Integrated Stripe payment processing and Mailchimp email automation via API/webhooks, reducing manual user registration time by 90%. (30 min → less than 1 min per applicant)</li>
+                <li>Configured Office 365 SMTP relay with SPF/DKIM authentication and troubleshot email delivery issues through systematic log analysis and DNS validation.</li>
+                <li>Implemented security controls including SSL/TLS configuration, RBAC for multi-tier membership system, and secure error logging with production environment isolation.</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">WordPress Administration</span>
+                <span class="tech-badge">SMTP/Mailing Systems</span>
+                <span class="tech-badge">API Integration</span>
+                <span class="tech-badge">System Monitoring</span>
+            </div>
+        </div>
+
+        <div class="experience-card">
+            <div class="experience-header">
+                <div>
+                    <h3>IT Support Technician I (Intern)</h3>
+                    <div class="company">LSU AgCenter</div>
+                </div>
+                <div class="date">Jan 2024 - Present</div>
+            </div>
+            <ul>
+                <li>Deployed 150+ Windows devices during enterprise PC refresh using Dell Image Assist for automated OS deployment, driver installation, and application provisioning with zero data loss over 3-month project</li>
+                <li>Participated in incident response during CrowdStrike BSOD outage affecting 250+ endpoints, restoring operations within hours.</li>
+                <li>Enhanced security posture by enforcing MFA, investigating phishing attempts, and applying Zero Trust principles.</li>
+                <li>Resolved network issues (VPN, APIPA, wireless, AD replication) through systematic troubleshooting and root cause analysis.</li>
+                <li>Created and maintained support documentation to streamline issue resolution and improve team efficiency.</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Windows Deployment</span>
+                <span class="tech-badge">Active Directory</span>
+                <span class="tech-badge">Incident Response</span>
+                <span class="tech-badge">Network Troubleshooting</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="skills-section" id="skills">
+        <h2 class="section-title">Technical Skills</h2>
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3><i class="fas fa-cloud"></i> Cloud Platforms</h3>
+                <div class="skill-tags">
+                    <!-- <span class="skill-tag">AWS (EC2, S3, VPC, EKS, ECR)</span> -->
+                    <span class="skill-tag">Azure</span>
+                    <span class="skill-tag">DigitalOcean</span>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3><i class="fas fa-shipping-fast"></i> CI/CD & Version Control</h3>
+                <div class="skill-tags">
+                    <!-- <span class="skill-tag">Jenkins</span> -->
+                    <span class="skill-tag">GitHub Actions</span>
+                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">GitHub</span>
+                    <span class="skill-tag">GitLab</span>
+                </div>
+            </div>
+            <!--
+            <div class="skill-category">
+                <h3><i class="fas fa-dharmachakra"></i> Container & Orchestration</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Docker</span>
+                    <span class="skill-tag">Docker Compose</span>
+                    <span class="skill-tag">Kubernetes</span>
+                    <span class="skill-tag">Helm</span>
+                    <span class="skill-tag">AWS EKS</span>
+                </div>
+            </div>
+            -->
+            <div class="skill-category">
+                <h3><i class="fas fa-code"></i> Programming & Scripting</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">Bash</span>
+                    <span class="skill-tag">PowerShell</span>
+                    <!-- <span class="skill-tag">Java</span> -->
+                    <!-- <span class="skill-tag">JavaScript</span> -->
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3><i class="fas fa-cog"></i> Infrastructure as Code & Automation</h3>
+                <div class="skill-tags">
+                    <!-- <span class="skill-tag">Ansible</span> -->
+                    <span class="skill-tag">Terraform</span>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3><i class="fas fa-chart-line"></i> Monitoring & Security</h3>
+                <div class="skill-tags">
+                    <!-- <span class="skill-tag">Prometheus</span>
+                    <span class="skill-tag">Grafana</span> -->
+                    <span class="skill-tag">Wazuh SIEM</span>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3><i class="fas fa-server"></i> Systems Administration</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Linux (Ubuntu<!--, RHEL-->)</span>
+                    <span class="skill-tag">Windows Server</span>
+                    <span class="skill-tag">Active Directory</span>
+                    <span class="skill-tag">Group Policy</span>
+                    <span class="skill-tag">DNS/DHCP</span>
+                    <span class="skill-tag">VMware</span>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3><i class="fas fa-tools"></i> Build & Package Management</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Maven</span>
+                    <span class="skill-tag">Gradle</span>
+                    <span class="skill-tag">npm</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--
+    <section class="projects-section" id="devops-projects">
+        <h2 class="section-title">DevOps Bootcamp Projects</h2>
+        <div class="section-intro">
+            <p>Hands-on projects from TechWorld with Nana's DevOps Bootcamp covering cloud infrastructure, CI/CD pipelines, container orchestration, and infrastructure automation.</p>
+        </div>
+
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Complete CI/CD Pipeline with EKS and AWS ECR</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Built an end-to-end CI/CD pipeline integrating Kubernetes deployment on AWS EKS with automated image builds pushed to AWS ECR. Implemented version incrementing, automated testing, and deployment workflows using Jenkins.
+            </p>
+            <ul class="project-highlights">
+                <li>Created private AWS ECR Docker repository for secure image storage</li>
+                <li>Built Kubernetes manifests for Deployment and Service configurations</li>
+                <li>Integrated Jenkins pipeline to automatically deploy newly built images to EKS cluster</li>
+                <li>Implemented automatic version commit back to Git repository</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Kubernetes</span>
+                <span class="tech-badge">Jenkins</span>
+                <span class="tech-badge">AWS EKS</span>
+                <span class="tech-badge">AWS ECR</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Maven</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Git</span>
+            </div>
+            <div class="project-links">
+                <a href="blog/devops-projects-1.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Deploy Microservices application in Kubernetes with Production & Security Best Practices</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Deployed a multi-tier online shop application to a production Kubernetes cluster following enterprise security and scalability patterns. Configured persistent storage, service mesh networking, and high-availability Redis caching.
+            </p>
+            <ul class="project-highlights">
+                <li>Created Kubernetes manifests for Deployments and Services for all microservices of an online shop application</li>
+                <li>Deployed microservices to Linode's managed Kubernetes cluster (LKE) with production-grade configurations</li>
+                <li>Implemented Redis StatefulSet with persistent volumes for session management and caching</li>
+                <li>Configured service-to-service communication and ingress routing for external access</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Kubernetes</span>
+                <span class="tech-badge">Redis</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Linode LKE</span>
+            </div>
+            <div class="project-links">
+                <a href="blog/devops-projects-1.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Complete CI/CD with Terraform</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Automated AWS infrastructure provisioning and integrated it into a complete CI/CD pipeline. The pipeline provisions EC2 instances on-demand and deploys applications using Docker Compose, eliminating manual server configuration.
+            </p>
+            <ul class="project-highlights">
+                <li>Created Terraform modules to provision VPC, Subnet, Route Table, Internet Gateway, EC2, and Security Groups</li>
+                <li>Configured Terraform to automatically deploy Docker containers to provisioned EC2 instances</li>
+                <li>Integrated Terraform provisioning into Jenkins CI/CD pipeline for automated infrastructure deployment</li>
+                <li>Configured S3 as remote backend for Terraform state management</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Terraform</span>
+                <span class="tech-badge">Jenkins</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">AWS</span>
+                <span class="tech-badge">Git</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Maven</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Docker Hub</span>
+            </div>
+            <div class="project-links">
+                <a href="blog/devops-projects-1.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="projects/bootcamp.html" class="view-more-link">
+                <i class="fas fa-folder-open"></i> View All Projects
+            </a>
+        </div>
+    </section> 
+-->
+    <!-- Projects Section -->
+    <section class="projects-section" id="projects">
+        <h2 class="section-title">Projects</h2>
+        <div class="section-intro">
+            <p>Production-focused cloud infrastructure, automation, and container orchestration projects.</p>
+        </div>
+
+        <!-- Cloud Resume Challenge -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Cloud-Native Resume Website</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Built a serverless resume website hosted on Azure with Infrastructure as Code and CI/CD automation.
+            </p>
+            <ul class="project-highlights">
+                <li>Deployed static website using Azure Static Web Apps with custom domain and SSL/TLS</li>
+                <li>Built serverless visitor counter API using Azure Functions and CosmosDB</li>
+                <li>Automated infrastructure deployment using Terraform with Azure backend state management</li>
+                <li>Implemented CI/CD pipeline with GitHub Actions for automated testing and deployment</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Azure</span>
+                <span class="tech-badge">Terraform</span>
+                <span class="tech-badge">GitHub Actions</span>
+                <span class="tech-badge">Python</span>
+                <span class="tech-badge">JavaScript</span>
+            </div>
+        </div>
+
+        <!-- Java Application Deployment -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Deploy Java Application to Production Linux Server</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Provisioned and hardened a DigitalOcean droplet, then deployed a Java application following security and operations best practices. Configured the server for production workloads with proper user access controls and automated application startup.
+            </p>
+            <ul class="project-highlights">
+                <li>Provisioned Ubuntu droplet and configured SSH key-based authentication</li>
+                <li>Created non-root user with sudo privileges following least-privilege principle</li>
+                <li>Deployed Java Gradle application with automated startup using systemd service</li>
+                <li>Configured firewall rules and disabled root login for production security hardening</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">DigitalOcean</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Gradle</span>
+            </div>
+
+            <div class="project-links">
+                <a href="blog/devops-project-1.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Run Nexus and Publish Artifact -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Deploy Nexus Repository Manager for Centralized Artifact Management</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Deployed and configured Nexus Repository Manager on DigitalOcean to serve as a centralized artifact repository for Java applications. Implemented role-based access control and integrated with multiple build tools for automated artifact publishing.
+            </p>
+            <ul class="project-highlights">
+                <li>Deployed Nexus Repository Manager on Ubuntu droplet with persistent storage configuration</li>
+                <li>Configured Maven and Gradle hosted repositories for snapshot and release artifacts</li>
+                <li>Implemented RBAC with custom user roles and repository-level permissions</li>
+                <li>Integrated Gradle and Maven build pipelines to automatically publish artifacts to Nexus</li>
+                <li>Configured repository cleanup policies and storage quota management</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Nexus</span>
+                <span class="tech-badge">DigitalOcean</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Gradle</span>
+                <span class="tech-badge">Maven</span>
+            </div>
+
+            <div class="project-links">
+                <a href="blog/devops-project-2.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Enterprise Windows Domain Lab -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Enterprise Windows Domain Lab</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Built and administered a Windows domain environment with enterprise-grade security and automation.
+            </p>
+            <ul class="project-highlights">
+                <li>Deployed Windows Server 2022 environment with redundant DCs, 5 OUs, and 10+ GPOs enforcing security policies (password complexity, LAPS, audit logging)</li>
+                <li>Automated user provisioning and AD management using PowerShell scripts reducing admin time by 75%</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Active Directory</span>
+                <span class="tech-badge">Group Policy</span>
+                <span class="tech-badge">PowerShell</span>
+                <span class="tech-badge">Windows Server</span>
+            </div>
+        </div>
+
+        <!-- Security & SIEM -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Security, Automation & Systems</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Hardened enterprise systems using industry security benchmarks and real-time monitoring tools.
+            </p>
+            <ul class="project-highlights">
+                <li>Deployed Wazuh SIEM aggregating logs from 10+ endpoints with custom detection rules for privilege escalation, failed logins, and malware indicators</li>
+                <li>Applied CIS benchmark hardening to Windows/Linux systems implementing 50+ security controls</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">SIEM</span>
+                <span class="tech-badge">Security Hardening</span>
+                <span class="tech-badge">CIS Benchmarks</span>
+                <span class="tech-badge">Log Analysis</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="projects/projects.html" class="view-more-link">
+                <i class="fas fa-folder-open"></i> View All Projects
+            </a>
+        </div>
+
+    </section>
+
+    <!-- Blog Section -->
+    <section class="projects-section" id="blog">
+        <h2 class="section-title">Latest from the Blog</h2>
+        <div class="section-intro">
+            <p>Documenting my journey through cloud infrastructure, DevOps, and the real troubleshooting stories behind the projects.</p>
+        </div>
+
+        <!-- Featured Blog Post -->
+        <div class="project-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05)); border: 2px solid var(--accent-cyan);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <span style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-star"></i> Latest Post
+                </span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <i class="fas fa-calendar"></i> February 11 2026
+                </span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <i class="fas fa-clock"></i> 10 min read
+                </span>
+            </div>
+            
+            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Deploy Nexus Repository Manager for Centralized Artifact Management</h3>
+            
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.05rem;">
+                Setting up a centralized artifact repository with Nexus on DigitalOcean turned into a deep dive through repository management, RBAC configuration, and build tool integration. From configuring Maven and Gradle repositories to implementing proper cleanup policies, here's what I learned about managing artifacts like a production environment and why understanding blob stores matters more than you'd think.
+            </p>
+            
+            <div class="tech-stack" style="margin-bottom: 1.5rem;">
+                <span class="tech-badge">Nexus</span>
+                <span class="tech-badge">DigitalOcean</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Gradle</span>
+                <span class="tech-badge">Maven</span>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <a href="blog/devops-project-2.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                    <i class="fas fa-book-open"></i> Read Full Story
+                </a>
+                <a href="blog.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-cyan); text-decoration: none; font-weight: 600; transition: color 0.3s;">
+                    View All Blog Posts <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Currently Learning/Reading Section -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem;">
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
+                    <i class="fas fa-graduation-cap"></i> Currently Learning
+                </h3>
+                <img src="assets/img/docker.png" alt="Docker" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
+                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Docker</p>
+            </div>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">
+                <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
+                    <i class="fas fa-book"></i> Currently Reading
+                </h3>
+                <img src="assets/img/snav1.jpg" alt="Practice of System and Network Administration" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
+                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Practice of System and Network Administration</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications -->
+    <section class="certs-section" id="certifications">
+        <h2 class="section-title">Certifications & Education</h2>
+        <div class="cert-grid">
+            <div class="cert-card">
+                <div class="cert-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Security+</h4>
+                <p class="issuer">CompTIA (2025)</p>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h4>Network+</h4>
+                <p class="issuer">CompTIA (2025)</p>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h4>B.S. Information Systems & Analytics</h4>
+                <p class="issuer">Louisiana State University<br>GPA: 3.67 | Dec 2026</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <h2 style="margin-bottom: 1.5rem; font-size: 2rem;">Let's Connect</h2>
+            <p style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.1rem; line-height: 1.8;">
+                I'm actively seeking cloud engineering and DevOps roles starting December 2026. 
+                Let's connect if you're building teams that value automation, reliability, and continuous improvement.
+            </p>
+            <div class="social-links">
+                <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://github.com/nvastola" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="blog.html" title="Blog">
+                    <i class="fas fa-blog"></i>
+                </a>
+                <a href="mailto:noahvastola@gmail.com" title="Email">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a href="assets/doc/Resume.pdf" target="_blank" title="Resume">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+            </div>
+            <p>&copy; 2026 Noah Vastola. Built with passion for cloud infrastructure.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+            
+            lastScroll = currentScroll;
+        });
+    </script>
+
+    <!-- Visitor Counter Script -->
+    <script src="js/scripts.js"></script>
+
+</body>
 </html>

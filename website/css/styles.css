@@ -10970,3 +10970,466 @@ section.resume-section .resume-section-content {
     padding-bottom: 5rem;
   }
 }
+
+/* Dark Mode Variables and Enhancements - FIXED VERSION */
+/* Add this to the END of your existing styles.css file */
+
+/* ============================================
+   DARK MODE IMPLEMENTATION
+   ============================================ */
+
+/* Light mode (default) colors */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-heading: #343a40;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --nav-bg: #6B5B95;
+  --section-intro-bg: linear-gradient(135deg, #6f42c1 0%, #0d6efd 100%);
+  --project-card-shadow: rgba(0,0,0,0.05);
+  --project-card-shadow-hover: rgba(0,0,0,0.1);
+  --blog-post-bg: #f8f9fa;
+  --blog-post-border: #20c997;
+  --skills-category-bg: #f8f9fa;
+  --skill-item-bg: #ffffff;
+  --skill-item-border: #dee2e6;
+  --visitor-counter-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --link-color: #6B5B95;
+}
+
+/* Dark mode colors */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-heading: #f0f0f0;
+  --border-color: #404040;
+  --card-bg: #2d2d2d;
+  --nav-bg: #6B5B95;
+  --section-intro-bg: linear-gradient(135deg, #7952d1 0%, #1d7efd 100%);
+  --project-card-shadow: rgba(0,0,0,0.3);
+  --project-card-shadow-hover: rgba(0,0,0,0.5);
+  --blog-post-bg: #2d2d2d;
+  --blog-post-border: #20c997;
+  --skills-category-bg: #2d2d2d;
+  --skill-item-bg: #3a3a3a;
+  --skill-item-border: #505050;
+  --visitor-counter-bg: linear-gradient(135deg, #7785fa 0%, #8659b2 100%);
+  --link-color: #9B8AC4;
+}
+
+/* Apply colors with smooth transitions */
+body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Headings - CRITICAL for dark mode */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--text-heading) !important;
+  transition: color 0.3s ease;
+}
+
+/* Paragraphs and text elements */
+p, li, span, div {
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+p.lead {
+  color: var(--text-secondary);
+}
+
+.subheading {
+  color: var(--text-secondary) !important;
+  transition: color 0.3s ease;
+}
+
+/* Links */
+a {
+  color: var(--link-color);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+/* HR dividers */
+hr {
+  border-color: var(--border-color) !important;
+  opacity: 0.25;
+  transition: border-color 0.3s ease;
+}
+
+/* Dark Mode Toggle Button */
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--bs-primary);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.dark-mode-toggle:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   CARD-BASED LAYOUTS (All Sections)
+   ============================================ */
+
+/* Experience Cards */
+.experience-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px var(--project-card-shadow);
+}
+
+.experience-card:hover {
+  box-shadow: 0 4px 12px var(--project-card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.experience-card h3 {
+  color: var(--text-heading) !important;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.experience-card ul {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.experience-card ul li {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* Project Cards (DevOps & Independent) */
+.project-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px var(--project-card-shadow);
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 12px var(--project-card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.project-card h3 {
+  color: var(--bs-primary);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-card p,
+.project-card ul,
+.project-card li {
+  color: var(--text-primary) !important;
+}
+
+.project-card .tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tech-badge {
+  background: var(--bs-secondary);
+  color: white !important;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Badges */
+.badge {
+  color: white !important;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .badge {
+  border: 1px solid var(--border-color);
+}
+
+/* Blog Post Cards */
+.blog-post {
+  background: var(--blog-post-bg);
+  border-left: 4px solid var(--blog-post-border);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.blog-post:hover {
+  border-left-width: 6px;
+}
+
+.blog-post h3 {
+  color: var(--text-heading) !important;
+  margin-bottom: 0.5rem;
+}
+
+.blog-post p {
+  color: var(--text-primary) !important;
+}
+
+.blog-date {
+  color: var(--text-secondary) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Section Headers */
+.section-intro {
+  background: var(--section-intro-bg);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.section-intro h2 {
+  color: white !important;
+  margin-bottom: 0.5rem;
+}
+
+.section-intro p {
+  margin-bottom: 0;
+  opacity: 0.95;
+  color: white !important;
+}
+
+/* Skills Grid */
+.skills-category {
+  background: var(--skills-category-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.skills-category h4 {
+  color: var(--bs-primary);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.skill-item {
+  display: inline-block;
+  background: var(--skill-item-bg);
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid var(--skill-item-border);
+  font-weight: 500;
+  color: var(--text-primary) !important;
+  transition: all 0.3s ease;
+}
+
+/* View More Link */
+.view-more-link {
+  display: inline-block;
+  background: var(--bs-primary);
+  color: white !important;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.view-more-link:hover {
+  background: var(--bs-secondary);
+  color: white !important;
+  transform: translateX(5px);
+  text-decoration: none;
+}
+
+/* Visitor Counter */
+.visitor-counter {
+  background: var(--visitor-counter-bg);
+  color: white;
+  padding: 1rem;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.visitor-counter p {
+  margin: 0;
+  font-weight: 600;
+  color: white !important;
+}
+
+/* Enhanced Education Section */
+.education-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.education-item h3,
+.education-item h4 {
+  color: var(--text-heading) !important;
+}
+
+.education-item p,
+.education-item div {
+  color: var(--text-primary);
+}
+
+.coursework-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.course-item {
+  background: var(--skills-category-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--bs-primary);
+  font-weight: 500;
+  color: var(--text-primary) !important;
+  transition: all 0.3s ease;
+}
+
+.course-item:hover {
+  border-left-width: 5px;
+  transform: translateX(3px);
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.achievement-item:last-child {
+  border-bottom: none;
+}
+
+.achievement-item div {
+  color: var(--text-primary);
+}
+
+.achievement-icon {
+  color: var(--bs-primary);
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+/* Cert badges and links */
+.cert-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.cert-link p {
+  color: var(--text-primary) !important;
+}
+
+.cert-badge {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--project-card-shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cert-link:hover .cert-badge {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px var(--project-card-shadow-hover);
+}
+
+.cert-link:hover {
+  text-decoration: none;
+}
+
+/* Social Icons */
+.social-icons .social-icon {
+  background-color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.social-icons .social-icon:hover {
+  background-color: var(--bs-primary);
+}
+
+/* Dark mode adjustments for navbar */
+[data-theme="dark"] #sideNav {
+  background-color: #2d2d2d;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dark-mode-toggle {
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+  
+  .coursework-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .dark-mode-toggle {
+    display: none;
+  }
+}

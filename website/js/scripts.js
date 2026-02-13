@@ -76,3 +76,54 @@ async function updateVisitorCount() {
 
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', updateVisitorCount);
+
+// Dark Mode Toggle Functionality
+// Add this to your existing scripts.js or create a new file
+
+(function() {
+    'use strict';
+
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+    // Create and add the dark mode toggle button
+    function createDarkModeToggle() {
+        const toggle = document.createElement('button');
+        toggle.className = 'dark-mode-toggle';
+        toggle.setAttribute('aria-label', 'Toggle dark mode');
+        toggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        document.body.appendChild(toggle);
+        return toggle;
+    }
+
+    // Toggle theme function
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        // Update button icon
+        const toggleButton = document.querySelector('.dark-mode-toggle');
+        if (toggleButton) {
+            toggleButton.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = createDarkModeToggle();
+        toggleButton.addEventListener('click', toggleTheme);
+    });
+
+    // Optional: Detect system preference if no saved preference exists
+    if (!localStorage.getItem('theme')) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+})();

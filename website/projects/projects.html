@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Projects | Noah Vastola</title>
+    <meta name="description" content="Complete portfolio of cloud infrastructure, DevOps automation, and container orchestration projects">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --card-hover: #2d3a52;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .logo:hover {
+            color: var(--accent-cyan);
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Header Section */
+        .header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .header .description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* Module Section */
+        .module-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .module-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .module-header:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 5px 20px rgba(6, 182, 212, 0.1);
+        }
+
+        .module-header h2 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .module-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .chevron {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            transition: transform 0.3s;
+        }
+
+        .module-header.active .chevron {
+            transform: rotate(180deg);
+        }
+
+        .module-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .module-content.active {
+            max-height: 10000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .module-inner {
+            padding: 2rem 0;
+        }
+
+        /* Project Card */
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(6, 182, 212, 0.15);
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-card h3 {
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-coming-soon {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .project-highlights {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-highlights li {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .project-highlights li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tech-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .project-link:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Template Instructions */
+        .template-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-orange);
+        }
+
+        .template-note strong {
+            color: var(--accent-orange);
+        }
+
+        /* Footer */
+        .footer {
+            max-width: 1200px;
+            margin: 4rem auto 0;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .back-to-portfolio {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-to-portfolio:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .module-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .module-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .project-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-cyan);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-code"></i> Noah Vastola
+            </a>
+            <a href="../index.html#projects" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>All Projects</h1>
+        <p class="subtitle">Cloud Infrastructure • CI/CD Automation • Container Orchestration</p>
+        <p class="description">
+            Comprehensive collection of DevOps projects demonstrating hands-on experience with cloud platforms, infrastructure automation, containerization, and production deployment practices.
+        </p>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Projects Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">10</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Technologies</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        
+        <!-- MODULE 5: Cloud & IaaS Basics -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-cloud" style="color: var(--accent-cyan);"></i>
+                    Cloud & Infrastructure Basics
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+
+                    <!-- PROJECT 1: Deploy Java Application -->
+                    <div class="project-card">
+                        <h3>
+                            Deploy Java Application to Production Linux Server
+                            <span class="status-badge status-completed">✓ Completed</span>
+                        </h3>
+                        <p>Provisioned and hardened a DigitalOcean droplet, then deployed a Java Gradle application following security and operations best practices. Configured the server for production workloads with proper user access controls and automated application startup.</p>
+                        <ul class="project-highlights">
+                            <li>Provisioned Ubuntu 22.04 droplet and configured SSH key-based authentication</li>
+                            <li>Created non-root user with sudo privileges following least-privilege principle</li>
+                            <li>Deployed Java Gradle application with automated startup using systemd service</li>
+                            <li>Configured UFW firewall rules and disabled root SSH login for security hardening</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">DigitalOcean</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">Gradle</span>
+                            <span class="tech-badge">systemd</span>
+                            <span class="tech-badge">SSH</span>
+                        </div>
+                        <div class="project-links">
+                           <!-- <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a> -->
+                            <a href="../blog/devops-project-1.html" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 6: Artifact Repository Manager with Nexus -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-box" style="color: var(--accent-blue);"></i>
+                    Artifact Repository Management
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                    <!-- PROJECT 2: Nexus Repository Manager -->
+                    <div class="project-card">
+                        <h3>
+                            Deploy Nexus Repository Manager for Centralized Artifact Management
+                            <span class="status-badge status-completed">✓ Completed</span>
+                        </h3>
+                        <p>Deployed and configured Nexus Repository Manager on DigitalOcean to serve as a centralized artifact repository for Java applications. Implemented role-based access control and integrated with multiple build tools for automated artifact publishing.</p>
+                        <ul class="project-highlights">
+                            <li>Deployed Nexus Repository Manager on Ubuntu droplet with persistent storage configuration</li>
+                            <li>Configured Maven and Gradle hosted repositories for snapshot and release artifacts</li>
+                            <li>Implemented RBAC with custom user roles and repository-level permissions</li>
+                            <li>Integrated Gradle and Maven build pipelines to automatically publish artifacts to Nexus</li>
+                            <li>Configured repository cleanup policies and storage quota management</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Nexus</span>
+                            <span class="tech-badge">DigitalOcean</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">Gradle</span>
+                            <span class="tech-badge">Maven</span>
+                            <span class="tech-badge">RBAC</span>
+                        </div>
+                        <div class="project-links">
+                            <!-- <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a> -->
+                            <a href="../blog/devops-project-2.html" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 7: Containers with Docker -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fab fa-docker" style="color: var(--accent-blue);"></i>
+                    Containerization with Docker
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                    <!-- PROJECT 3: Docker Compose Multi-Container Deployment -->
+                    <div class="project-card">
+                        <h3>
+                            Deploy Multi-Container Application with Docker Compose
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Deploy a full-stack application stack using Docker Compose on a remote server. Orchestrate multiple containers including application backend, MongoDB database, and Mongo Express admin interface with persistent storage and service networking.</p>
+                        <ul class="project-highlights">
+                            <li>Create Docker Compose configuration for multi-tier application architecture</li>
+                            <li>Authenticate with private AWS ECR to pull custom application images</li>
+                            <li>Configure container networking and volume mounts for database persistence</li>
+                            <li>Deploy Node.js application with MongoDB and Mongo Express using docker-compose up</li>
+                            <li>Implement health checks and restart policies for production reliability</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Docker Compose</span>
+                            <span class="tech-badge">AWS ECR</span>
+                            <span class="tech-badge">Node.js</span>
+                            <span class="tech-badge">MongoDB</span>
+                            <span class="tech-badge">Mongo Express</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 8: Build Automation & CI/CD with Jenkins -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-code-branch" style="color: var(--accent-green);"></i>
+                    CI/CD with Jenkins
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                    <!-- PROJECT 4: Jenkins Shared Library -->
+                    <div class="project-card">
+                        <h3>
+                            Build Reusable Jenkins Shared Library
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Create a centralized Jenkins Shared Library to standardize CI/CD pipeline code across multiple projects. Implement reusable Groovy functions for common build, test, and deployment tasks to eliminate code duplication and enforce best practices organization-wide.</p>
+                        <ul class="project-highlights">
+                            <li>Create dedicated Git repository with proper JSL directory structure (vars/, src/, resources/)</li>
+                            <li>Develop reusable Groovy functions for Docker builds, artifact publishing, and deployments</li>
+                            <li>Configure global shared library in Jenkins for organization-wide access</li>
+                            <li>Integrate library functions into Jenkinsfiles using @Library annotation</li>
+                            <li>Implement versioning and testing strategies for library updates</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Jenkins</span>
+                            <span class="tech-badge">Groovy</span>
+                            <span class="tech-badge">Git</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Maven</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 9: AWS Services -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fab fa-aws" style="color: var(--accent-orange);"></i>
+                    AWS Cloud Services
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                    <!-- PROJECT 5: Complete CI/CD Pipeline with Versioning -->
+                    <div class="project-card">
+                        <h3>
+                            End-to-End CI/CD Pipeline with Automated Versioning
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Build a complete CI/CD pipeline automating the entire software delivery lifecycle from code commit to production deployment. Implement automatic semantic versioning, Docker image builds, and zero-downtime deployments using Jenkins and Docker Compose.</p>
+                        <ul class="project-highlights">
+                            <li>Implement automatic version incrementing based on commit messages (semantic versioning)</li>
+                            <li>Build Java Maven artifacts and create optimized Docker images</li>
+                            <li>Push versioned images to Docker Hub with automated tagging strategy</li>
+                            <li>Deploy applications to AWS EC2 using Docker Compose with rolling updates</li>
+                            <li>Automatically commit version bumps back to Git repository</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Jenkins</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Docker Compose</span>
+                            <span class="tech-badge">AWS EC2</span>
+                            <span class="tech-badge">Git</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">Maven</span>
+                            <span class="tech-badge">Docker Hub</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 10: Container Orchestration with Kubernetes -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-dharmachakra" style="color: var(--accent-blue);"></i>
+                    Container Orchestration with Kubernetes
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                    <div class="project-card">
+                        <h3>
+                            Deploy Production Microservices on Kubernetes
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Deploy a multi-tier online shop application to a production Kubernetes cluster following enterprise security and scalability patterns. Configure persistent storage, service mesh networking, and high-availability Redis caching with proper resource limits and health checks.</p>
+                        <ul class="project-highlights">
+                            <li>Create Kubernetes manifests for Deployments, Services, ConfigMaps, and Secrets</li>
+                            <li>Deploy microservices architecture to Linode Kubernetes Engine (LKE) cluster</li>
+                            <li>Implement Redis StatefulSet with persistent volumes for session management</li>
+                            <li>Configure Ingress controllers and service-to-service communication</li>
+                            <li>Apply resource requests/limits, liveness/readiness probes for production reliability</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Kubernetes</span>
+                            <span class="tech-badge">Redis</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Linode LKE</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 11: Kubernetes on AWS (EKS) -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fab fa-aws" style="color: var(--accent-orange);"></i>
+                    Kubernetes on AWS (EKS)
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                    <div class="project-card">
+                        <h3>
+                            Complete CI/CD Pipeline with Kubernetes on AWS EKS
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Build an end-to-end CI/CD pipeline integrating Kubernetes deployment on AWS EKS with automated image builds pushed to AWS ECR. Implement version incrementing, automated testing, and deployment workflows using Jenkins to orchestrate the entire software delivery process.</p>
+                        <ul class="project-highlights">
+                            <li>Create private AWS ECR Docker repository for secure image storage</li>
+                            <li>Build Kubernetes manifests for Deployment and Service configurations</li>
+                            <li>Integrate Jenkins pipeline to automatically build and push images to ECR</li>
+                            <li>Deploy containerized applications to AWS EKS cluster using kubectl</li>
+                            <li>Implement automatic version commit back to Git repository</li>
+                            <li>Configure IAM roles and policies for EKS cluster access from Jenkins</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Kubernetes</span>
+                            <span class="tech-badge">Jenkins</span>
+                            <span class="tech-badge">AWS EKS</span>
+                            <span class="tech-badge">AWS ECR</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">Maven</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Git</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 12: Infrastructure as Code with Terraform -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-layer-group" style="color: var(--accent-cyan);"></i>
+                    Infrastructure as Code with Terraform
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                    <div class="project-card">
+                        <h3>
+                            Automated Infrastructure Provisioning with Terraform CI/CD
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Automate AWS infrastructure provisioning and integrate it into a complete CI/CD pipeline. The pipeline provisions EC2 instances, VPCs, and networking on-demand, then deploys applications using Docker, eliminating manual server configuration and enabling infrastructure as code practices.</p>
+                        <ul class="project-highlights">
+                            <li>Create Terraform modules to provision VPC, Subnet, Route Table, Internet Gateway, and Security Groups</li>
+                            <li>Configure Terraform to automatically provision EC2 instances and deploy Docker containers</li>
+                            <li>Integrate Terraform infrastructure provisioning into Jenkins CI/CD pipeline</li>
+                            <li>Implement S3 backend for centralized Terraform state management with locking</li>
+                            <li>Build modular, reusable infrastructure code following DRY principles</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Terraform</span>
+                            <span class="tech-badge">Jenkins</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">AWS</span>
+                            <span class="tech-badge">Git</span>
+                            <span class="tech-badge">Java</span>
+                            <span class="tech-badge">Maven</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Docker Hub</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 13: Programming with Python -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fab fa-python" style="color: var(--accent-blue);"></i>
+                    Python Programming
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                                        <!-- PROJECT 9: Python Programming Fundamentals -->
+                    <div class="project-card">
+                        <h3>
+                            Build DevOps Utilities with Python
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Develop Python scripts for common DevOps tasks including log parsing, system monitoring, and API interactions. Learn Python fundamentals through practical automation scenarios relevant to infrastructure management and application deployment.</p>
+                        <ul class="project-highlights">
+                            <li>Write Python scripts for parsing and analyzing application logs</li>
+                            <li>Interact with REST APIs to automate cloud resource management</li>
+                            <li>Implement error handling, logging, and command-line argument parsing</li>
+                            <li>Work with Python libraries for system administration (os, subprocess, requests)</li>
+                            <li>Package scripts for distribution and execution across environments</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Python</span>
+                            <span class="tech-badge">REST APIs</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Logging</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 14: Automation with Python -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-robot" style="color: var(--accent-green);"></i>
+                    Python Automation
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                                        <!-- PROJECT 10: Python Automation -->
+                    <div class="project-card">
+                        <h3>
+                            Automate Infrastructure Tasks with Python
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Create Python automation scripts to streamline repetitive infrastructure tasks including server health checks, backup automation, and resource cleanup. Implement scheduled jobs and event-driven automation to reduce manual operations and improve reliability.</p>
+                        <ul class="project-highlights">
+                            <li>Build automated health check scripts for monitoring server status and services</li>
+                            <li>Create backup automation for databases and critical application data</li>
+                            <li>Implement automated resource cleanup to manage cloud costs (unused volumes, old snapshots)</li>
+                            <li>Schedule Python scripts using cron for periodic execution</li>
+                            <li>Send notifications via Slack/email when automation tasks complete or fail</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Python</span>
+                            <span class="tech-badge">AWS SDK (Boto3)</span>
+                            <span class="tech-badge">Cron</span>
+                            <span class="tech-badge">Linux</span>
+                            <span class="tech-badge">Slack API</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 15: Configuration Management with Ansible -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-cogs" style="color: var(--accent-cyan);"></i>
+                    Configuration Management with Ansible
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                    <div class="project-card">
+                        <h3>
+                            Terraform and Ansible Integration for Configuration Management
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Integrate Ansible configuration management with Terraform infrastructure provisioning for complete infrastructure automation. Automatically execute Ansible playbooks to configure servers immediately after Terraform provisions them, creating a seamless infrastructure deployment workflow.</p>
+                        <ul class="project-highlights">
+                            <li>Create Ansible playbooks for application deployment and server configuration</li>
+                            <li>Configure Terraform provisioners to execute Ansible playbooks automatically</li>
+                            <li>Implement dynamic inventory generation from Terraform outputs</li>
+                            <li>Deploy Docker containers and configure services using Ansible roles</li>
+                            <li>Combine infrastructure provisioning (Terraform) with configuration management (Ansible)</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Ansible</span>
+                            <span class="tech-badge">Terraform</span>
+                            <span class="tech-badge">AWS</span>
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Linux</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 16: Monitoring with Prometheus -->
+        <div class="module-section">
+            <div class="module-header" onclick="toggleModule(this)">
+                <h2>
+                    <i class="fas fa-chart-line" style="color: var(--accent-orange);"></i>
+                    Monitoring with Prometheus
+                </h2>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="module-content">
+                <div class="module-inner">
+                    <!-- Add your projects here -->
+                     <!-- PROJECT CARD TEMPLATE - Copy this structure for each project -->
+                    <div class="project-card">
+                        <h3>
+                            Deploy Prometheus Monitoring Stack on Kubernetes
+                            <span class="status-badge status-coming-soon">Coming Soon</span>
+                        </h3>
+                        <p>Deploy a production-grade monitoring stack using Prometheus Operator on AWS EKS. Configure Prometheus for metrics collection, Grafana for visualization, and Alert Manager for incident notifications, providing complete observability for Kubernetes workloads.</p>
+                        <ul class="project-highlights">
+                            <li>Provision AWS EKS cluster using eksctl with proper node groups and networking</li>
+                            <li>Deploy Prometheus Operator stack using Helm charts (kube-prometheus-stack)</li>
+                            <li>Configure Prometheus to scrape metrics from Kubernetes services and pods</li>
+                            <li>Set up Grafana dashboards for cluster monitoring and application metrics</li>
+                            <li>Configure Alert Manager rules for proactive incident detection and notification</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Prometheus</span>
+                            <span class="tech-badge">Kubernetes</span>
+                            <span class="tech-badge">Helm</span>
+                            <span class="tech-badge">AWS EKS</span>
+                            <span class="tech-badge">eksctl</span>
+                            <span class="tech-badge">Grafana</span>
+                            <span class="tech-badge">Linux</span>
+                        </div>
+                        <!-- <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-blog"></i> Blog Post
+                            </a>
+                        </div> -->
+                    </div>
+                    <!-- END OF TEMPLATE -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <a href="../index.html#projects" class="back-to-portfolio">
+            <i class="fas fa-arrow-left"></i> Back to Portfolio
+        </a>
+    </footer>
+
+    <script>
+        // Toggle module accordion
+        function toggleModule(header) {
+            const content = header.nextElementSibling;
+            const allHeaders = document.querySelectorAll('.module-header');
+            const allContents = document.querySelectorAll('.module-content');
+            
+            // Close all other modules
+            allHeaders.forEach(h => {
+                if (h !== header) {
+                    h.classList.remove('active');
+                }
+            });
+            allContents.forEach(c => {
+                if (c !== content) {
+                    c.classList.remove('active');
+                }
+            });
+            
+            // Toggle current module
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        // Smooth scroll for links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 100) {
+                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
