@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setting Up Nexus Repository Manager: When Things Don't Start | Noah Vastola</title>
-    <meta name="description" content="Troubleshooting silent failures, architecture mismatches, and blob store cleanup when setting up Nexus Repository Manager on DigitalOcean">
+    <title>Setting Up Nexus Repository Manager | Noah Vastola</title>
+    <meta name="description" content="Tackling architecture mismatches, silent failures, and RBAC security while setting up Nexus Repository Manager on DigitalOcean.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -232,99 +232,81 @@
             background: none;
             padding: 0;
             color: var(--accent-green);
-            font-size: 0.9rem;
-            line-height: 1.6;
         }
 
-        /* Blockquotes */
-        .article-body blockquote {
-            border-left: 4px solid var(--accent-cyan);
-            padding-left: 1.5rem;
-            margin: 1.5rem 0;
-            font-style: italic;
-            color: var(--text-secondary);
-        }
-
-        /* Images */
-        .article-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 2rem 0;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Callout Boxes */
+        /* Callouts */
         .callout {
-            background: rgba(59, 130, 246, 0.05);
-            border-left: 4px solid var(--accent-blue);
-            padding: 1.5rem;
             margin: 2rem 0;
+            padding: 1.5rem;
+            border-left: 4px solid;
             border-radius: 8px;
-        }
-
-        .callout.success {
-            background: rgba(16, 185, 129, 0.05);
-            border-left-color: var(--accent-green);
-        }
-
-        .callout.warning {
-            background: rgba(251, 191, 36, 0.05);
-            border-left-color: var(--accent-yellow);
-        }
-
-        .callout.error {
-            background: rgba(239, 68, 68, 0.05);
-            border-left-color: var(--accent-red);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .callout-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .callout.success .callout-title { color: var(--accent-green); }
-        .callout.warning .callout-title { color: var(--accent-yellow); }
-        .callout.error .callout-title { color: var(--accent-red); }
-        .callout .callout-title { color: var(--accent-blue); }
-
-        /* Table */
-        .article-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .article-body th {
-            background: var(--bg-secondary);
-            padding: 1rem;
-            text-align: left;
             font-weight: 600;
-            color: var(--accent-cyan);
-            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
         }
 
-        .article-body td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-secondary);
+        .callout.warning {
+            border-color: var(--accent-yellow);
+            background: rgba(251, 191, 36, 0.05);
         }
 
-        .article-body tr:last-child td {
-            border-bottom: none;
+        .callout.warning .callout-title {
+            color: var(--accent-yellow);
         }
 
-        /* Footer Navigation */
+        .callout.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .callout.error .callout-title {
+            color: var(--accent-red);
+        }
+
+        .callout.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .callout.success .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout.info {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .callout.info .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Blockquotes */
+        blockquote {
+            margin: 2rem 0;
+            padding: 1.5rem 2rem;
+            border-left: 4px solid var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
         .article-footer {
             max-width: 900px;
-            margin: 3rem auto 0;
-            padding: 2rem;
+            margin: 3rem auto;
+            padding: 0 2rem;
         }
 
         .back-to-blog {
@@ -332,36 +314,36 @@
             align-items: center;
             gap: 0.5rem;
             padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
-            text-decoration: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
             transition: all 0.3s;
         }
 
         .back-to-blog:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
         }
 
         /* Related Posts */
         .related-posts {
             max-width: 900px;
-            margin: 4rem auto 0;
+            margin: 3rem auto;
             padding: 0 2rem 4rem;
         }
 
         .related-posts h3 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
             color: var(--text-primary);
         }
 
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
@@ -370,26 +352,25 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 1.5rem;
-            transition: all 0.3s;
             text-decoration: none;
-            display: block;
+            transition: all 0.3s;
         }
 
         .related-card:hover {
-            transform: translateY(-5px);
             border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+            transform: translateY(-4px);
         }
 
         .related-card h4 {
             color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             font-size: 1.2rem;
         }
 
         .related-card p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         /* Responsive */
@@ -399,544 +380,689 @@
             }
 
             .article-body {
-                padding: 2rem;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
+                padding: 2rem 1.5rem;
             }
 
             .article-body h2 {
                 font-size: 1.6rem;
             }
+
+            .article-body h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav>
         <div class="nav-container">
             <div class="nav-links">
-                <a href="../blog.html" class="nav-link">
-                    <i class="fas fa-arrow-left"></i> All Posts
-                </a>
                 <a href="../index.html" class="nav-link">
-                    <i class="fas fa-home"></i> Portfolio
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="../blog.html" class="nav-link">
+                    <i class="fas fa-blog"></i> Blog
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- Article Header -->
     <header class="article-header">
         <div class="breadcrumb">
-            <a href="../index.html">Home</a>
-            <i class="fas fa-chevron-right"></i>
             <a href="../blog.html">Blog</a>
             <i class="fas fa-chevron-right"></i>
             <span>Setting Up Nexus</span>
         </div>
 
-        <h1>Setting Up Nexus Repository Manager: When Things Don't Start (And What To Do About It)</h1>
+        <h1>Setting Up Nexus Repository Manager: Architecture Mismatches, Silent Failures, and Production Artifact Management</h1>
 
         <div class="article-meta">
             <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <span>February 11, 2026</span>
+                <i class="fas fa-calendar-alt"></i>
+                February 11, 2026
             </div>
             <div class="meta-item">
                 <i class="fas fa-clock"></i>
-                <span>10 min read</span>
+                8 min read
             </div>
             <div class="meta-item">
                 <i class="fas fa-user"></i>
-                <span>Noah Vastola</span>
+                Noah Vastola
             </div>
         </div>
 
         <div class="tags">
-            <span class="tag">Nexus</span>
             <span class="tag">DigitalOcean</span>
+            <span class="tag">Nexus</span>
             <span class="tag">Linux</span>
-            <span class="tag">Java</span>
-            <span class="tag">Gradle</span>
             <span class="tag">Maven</span>
+            <span class="tag">Gradle</span>
+            <span class="tag">Java</span>
         </div>
     </header>
 
-    <!-- Article Content -->
     <main class="article-content">
         <article class="article-body">
 
-            <h2>Run Nexus on Droplet and Publish Artifact to Nexus</h2>
+            <p>
+                After successfully deploying a Java application to DigitalOcean (see <a href="devops-project-1.html" style="color: var(--accent-cyan); text-decoration: none;">previous post</a>), I moved on to the next challenge: setting up a centralized artifact repository. In that first project, I manually copied JAR files from my laptop to the server using <code>scp</code>. That works for learning, but it doesn't scale. In a real development team, you need a central place to store build artifacts—a "source of truth" where everyone pulls from the same versioned releases.
+            </p>
+
+            <p>Enter <strong>Nexus Repository Manager</strong>.</p>
             
+
             <p>
-                After getting my first Java application running on DigitalOcean, the next project seemed straightforward: 
-                install Nexus Repository Manager on another server and use it to store build artifacts. Nexus is basically 
-                a private storage system for JAR files, Docker images, npm packages—anything your team builds that you want 
-                to store centrally.
+                Nexus is an artifact repository that stores compiled software artifacts—JAR files, Docker images, npm packages, Python wheels, whatever you're building. It's like GitHub, but for compiled code instead of source code. When your CI/CD pipeline builds an application, it publishes the artifact to Nexus. When you deploy that application, you pull the exact same artifact from Nexus.
             </p>
 
             <p>
-                The idea makes sense. Instead of developers building artifacts locally and passing them around, you build once, 
-                store it in Nexus, and everyone pulls from the same source. Version control for your compiled code.
+                This seemed straightforward. Install Nexus, configure a repository, publish some JARs. Maybe an hour or two.
             </p>
 
             <p>
-                I followed the installation guide, downloaded Nexus, set up the directories, configured the service, and ran 
-                the start command.
+                <strong>It took me an entire afternoon (about 4 hours).</strong> And I learned more about CPU architectures, Linux process management, and permission systems than I bargained for.
             </p>
 
-            <p>Nothing happened.</p>
+            <h2>The Plan (And What Actually Happened)</h2>
 
-            <h2>The Silent Failure</h2>
+            <p><strong>What I thought I'd do:</strong></p>
+            <ol>
+                <li>Install Nexus on a DigitalOcean droplet (15 minutes)</li>
+                <li>Configure a Maven repository (15 minutes)</li>
+                <li>Publish artifacts from Gradle and Maven projects (30 minutes)</li>
+            </ol>
+
+            <p><strong>What actually happened:</strong></p>
+            <ol>
+                <li>Nexus wouldn't start (silent failure, no logs)</li>
+                <li>Discovered I'd downloaded the wrong CPU architecture</li>
+                <li>Rebuilt the entire server with the correct version</li>
+                <li>Spent hours understanding Nexus's RBAC permission model</li>
+                <li>Configured Gradle and Maven publishing workflows from scratch</li>
+                <li>Learned about blob stores and cleanup policies the hard way</li>
+            </ol>
+
+            <p>But let's start from the beginning.</p>
+
+            <h2>Part 1: Installing Nexus (Or Trying To)</h2>
 
             <p>
-                When I checked if Nexus was running with <code>systemctl status nexus</code>, it said "active (running)." Great! 
-                Except when I tried to access it at <code>http://&lt;server-ip&gt;:8081</code>, I got nothing. Connection refused.
+                I spun up a new DigitalOcean droplet—larger specs than the Java app server since Nexus requires more resources:
+            </p>
+            <ul>
+                <li>Ubuntu 22.04 LTS</li>
+                <li>8 GB RAM (Nexus is memory-intensive)</li>
+                <li>160 GB SSD (artifact storage needs space)</li>
+                <li>4 vCPUs</li>
+            </ul>
+
+            <p>I SSH'd in, updated packages, and installed Java (Nexus requires Java to run):</p>
+
+            <pre><code>sudo apt update && sudo apt upgrade -y
+sudo apt install openjdk-17-jdk -y</code></pre>
+
+            <p>Then I followed the Nexus installation guide:</p>
+
+            <pre><code># Download Nexus
+cd /opt
+sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+
+# Extract
+sudo tar -xvzf latest-unix.tar.gz</code></pre>
+
+            <p>Nexus installs in two directories:</p>
+            <ul>
+                <li><code>/opt/nexus/</code> - The application itself</li>
+                <li><code>/opt/sonatype-work/nexus3/</code> - Data, logs, and configuration</li>
+            </ul>
+
+            <h3>Creating a Dedicated Nexus User</h3>
+
+            <p>Following the principle of least privilege (which I learned in Project 1), I created a dedicated user to run Nexus:</p>
+
+            <pre><code>sudo adduser nexus
+sudo chown -R nexus:nexus /opt/nexus /opt/sonatype-work/nexus3</code></pre>
+
+            <h3>Running Nexus as the Dedicated User</h3>
+
+            <p>With the nexus user created and owning the directories, I switched to that user:</p>
+
+            <pre><code>su - nexus</code></pre>
+
+            <p>Then I started Nexus:</p>
+
+            <pre><code>/opt/nexus/bin/nexus start</code></pre>
+
+            <p><strong>Output:</strong></p>
+
+            <pre><code>Starting nexus</code></pre>
+
+            <p>I checked if it was running:</p>
+
+            <pre><code>/opt/nexus/bin/nexus status</code></pre>
+
+            <p><strong>Output:</strong></p>
+
+            <pre><code>nexus is running.</code></pre>
+
+            <p>Great! It said it was running. I opened my browser: <code>http://143.198.XXX.XXX:8081</code></p>
+
+            <p><strong>Connection refused.</strong></p>
+
+            <h2>Part 2: The Silent Failure</h2>
+
+            <p>
+                This is the most frustrating type of error: the <strong>silent failure</strong>. The <code>nexus status</code> command claimed it was running. But nothing was accessible.
             </p>
 
-            <p>I checked if anything was listening on port 8081:</p>
+            <p>I verified the process was actually running:</p>
+
+            <pre><code>ps aux | grep nexus</code></pre>
+
+            <p>I saw the nexus process in the list. So it was running... or was it?</p>
+
+            <p>I checked what was listening on port 8081:</p>
 
             <pre><code>sudo netstat -tulpn | grep 8081</code></pre>
 
-            <p>
-                Nothing. No process listening on that port. But the service status said it was running. How could it be running 
-                if nothing was listening?
-            </p>
+            <p>Nothing. No output. No process was listening on that port.</p>
+
+            <p>So Nexus claimed to be running, showed up in the process list, but wasn't actually listening for connections. Something was failing silently.</p>
+
+            <p>I checked the logs in <code>/opt/sonatype-work/nexus3/log/</code>:</p>
+
+            <pre><code>sudo tail -f /opt/sonatype-work/nexus3/log/nexus.log</code></pre>
+
+            <p>The log file was... empty. No errors. No warnings. Just silence.</p>
+
+            <p><strong>What do you do when there are no error messages?</strong></p>
+
+            <h3>Running Nexus in Foreground Mode</h3>
 
             <p>
-                I checked the logs in <code>/opt/sonatype-work/nexus3/log/</code> but they were... empty. No errors. No warnings. 
-                Just silence.
+                After an hour of frustrated Googling, I found a suggestion: run Nexus in foreground mode instead of as a background process. This forces it to output logs directly to the terminal instead of writing to log files.
             </p>
 
-            <div class="callout error">
-                <div class="callout-title">
-                    <i class="fas fa-times-circle"></i> The Worst Kind of Error
-                </div>
-                <p>
-                    This is the worst kind of error: the silent failure. No logs, no error messages, no indication of what's wrong. 
-                    Just a service that claims to be running but isn't actually doing anything.
-                </p>
-            </div>
+            <p>First, I stopped the backgrounded instance:</p>
 
-            <h3>Running Nexus in the Foreground</h3>
+            <pre><code>/opt/nexus/bin/nexus stop</code></pre>
 
-            <p>
-                After some frustrated Googling, I found a suggestion to run Nexus in foreground mode instead of as a background 
-                service. This would force it to output logs directly to the terminal:
-            </p>
+            <p>Then I ran it in foreground mode:</p>
 
             <pre><code>/opt/nexus/bin/nexus run</code></pre>
 
-            <p>The moment I ran this, I got actual output. And buried in that output was an error:</p>
-
-            <pre><code>/opt/nexus/bin/nexus: /opt/nexus/bin/nexus: cannot execute binary file: Exec format error</code></pre>
-
-            <p>
-                Exec format error. That's... not something you see every day.
-            </p>
-
-            <p>
-                I stared at this for a moment before it clicked: I must have downloaded the wrong version of Nexus.
-            </p>
-
-            <h3>The Architecture Mismatch</h3>
-
-            <p>I ran <code>uname -m</code> to check my server's architecture:</p>
-
-            <pre><code>uname -m</code></pre>
-
-            <p>Output: <code>x86_64</code></p>
-
-            <p>
-                Then I checked what I had downloaded. The filename was something like <code>nexus-3.x.x-unix-aarch64.tar.gz</code>.
-            </p>
+            <p><strong>Immediately, I got output:</strong></p>
 
             <div class="callout error">
                 <div class="callout-title">
-                    <i class="fas fa-times-circle"></i> Architecture Mismatch
+                    <i class="fas fa-times-circle"></i> Exec Format Error
                 </div>
-                <p>
-                    There it was. <code>aarch64</code>. That's ARM architecture. My server was <code>x86_64</code> (Intel/AMD 
-                    architecture). I had downloaded the ARM version of Nexus and tried to run it on an x86 server. That's like 
-                    trying to run a Mac app on a Windows machine—the operating system might be similar, but the processor 
-                    architecture is completely different.
-                </p>
+                <pre><code>/opt/nexus/bin/nexus: /opt/nexus/bin/nexus: cannot execute binary file: Exec format error</code></pre>
             </div>
 
+            <h3>The "Exec Format Error" Revelation</h3>
+
             <p>
-                I deleted everything, downloaded the correct unix tarball (which is x86_64), extracted it, and tried again.
+                <code>Exec format error</code> means you're trying to run a binary that was compiled for a different CPU architecture than what your system has.
             </p>
 
             <p>
-                This time when I ran <code>/opt/nexus/bin/nexus run</code>, I actually saw Nexus starting up. Logs scrolled by. 
-                Services initialized. And finally:
+                It's like taking a program built specifically for a new Apple Silicon Mac (M-series) and trying to run it on an older Intel Mac. The operating system might be exactly the same, but the underlying processor architecture speaks a completely different language, so the binary can't execute.
             </p>
 
-            <pre><code>Started Sonatype Nexus OSS</code></pre>
+            <p>I checked my server's architecture:</p>
+
+            <pre><code>uname -m</code></pre>
+
+            <p><strong>Output:</strong> <code>x86_64</code></p>
+
+            <p>That's Intel/AMD architecture (also called amd64).</p>
+
+            <p>Then I looked at the filename of the Nexus tarball I'd downloaded: <code>nexus-3.x.x-unix-aarch64.tar.gz</code></p>
+
+            <p><strong>There it was.</strong></p>
 
             <p>
-                I accessed <code>http://&lt;server-ip&gt;:8081</code> in my browser, and there it was: the Nexus login page.
+                <code>aarch64</code> is ARM architecture—the same architecture used in Apple's M1/M2 chips, Raspberry Pi, and AWS Graviton instances. I had accidentally downloaded the ARM version of Nexus and was trying to run it on an x86_64 server.
             </p>
+            
 
-            <div class="callout success">
+            <div class="callout info">
                 <div class="callout-title">
-                    <i class="fas fa-check-circle"></i> Success!
+                    <i class="fas fa-microchip"></i> Architecture Primer
                 </div>
-                <p>
-                    Lesson learned: Always verify your server's architecture before downloading binaries. And when something fails 
-                    silently, try running it in foreground mode to see the actual error output.
-                </p>
+                <p>For anyone coming from a Windows/Mac background where this distinction doesn't matter much:</p>
+                <p><strong>x86_64 (Intel/AMD):</strong></p>
+                <ul>
+                    <li>Used in most cloud servers (AWS EC2 general instances, DigitalOcean standard droplets)</li>
+                    <li>Most common desktop/laptop processors</li>
+                    <li>Also called "amd64" or "x64"</li>
+                </ul>
+                <p><strong>ARM (aarch64):</strong></p>
+                <ul>
+                    <li>Used in modern Apple Silicon (M1/M2/M3), AWS Graviton, Raspberry Pi</li>
+                    <li>More energy-efficient, increasingly common in cloud (Graviton is cheaper)</li>
+                    <li>Completely different instruction set from x86</li>
+                </ul>
+                <p>You <strong>cannot</strong> run an ARM binary on an x86 system or vice versa. The CPU literally doesn't understand the instructions.</p>
             </div>
 
-            <h2>Setting Up Nexus for Real Use</h2>
+            <p><strong>Production lesson:</strong> Always verify architecture before downloading binaries. Use <code>uname -m</code> to check.</p>
 
-            <p>
-                With Nexus finally running, I logged in with the default admin credentials and immediately changed the admin 
-                password (security first).
-            </p>
+            <h2>Part 3: The Correct Installation</h2>
 
-            <p>
-                The next step was creating a dedicated user for uploading artifacts. In a real company, you wouldn't give 
-                developers the admin credentials to Nexus. You'd create users with specific permissions.
-            </p>
+            <p>I deleted everything and started over with the correct version:</p>
 
-            <p>
-                I navigated to <strong>Security → Users</strong> and created a new user. Let's call them <code>ci-user</code>. 
-                Then I created a custom role for this user.
-            </p>
+            <pre><code># Remove the wrong version
+sudo rm -rf /opt/nexus /opt/sonatype-work/nexus3
 
-            <h3>Understanding Nexus Permissions</h3>
+# Download the x86_64 (unix) version
+cd /opt
+sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
 
-            <p>
-                Nexus has a pretty granular permission system. For every action you can perform (browse, read, edit, delete, add), 
-                there's a specific privilege. And for every repository, you can assign different privileges.
-            </p>
+# Extract and set up
+sudo tar -xvzf latest-unix.tar.gz
+sudo chown -R nexus:nexus /opt/nexus /opt/sonatype-work/nexus3</code></pre>
 
-            <p>I noticed two main categories of permissions:</p>
+            <p>This time, when I ran Nexus in foreground mode:</p>
 
-            <ul>
-                <li><strong>Repository Admin</strong> - For operations teams managing Nexus itself</li>
-                <li><strong>Repository View</strong> - For developers uploading and downloading artifacts</li>
-            </ul>
+            <pre><code>sudo -u nexus /opt/nexus/bin/nexus run</code></pre>
 
-            <p>
-                Since my user just needs to publish and retrieve artifacts, I went with the "View" permissions. I gave the role 
-                these privileges:
-            </p>
+            <p><strong>Actual startup logs appeared:</strong></p>
 
-            <ul>
-                <li><code>nx-repository-view-maven2-maven-snapshots-*</code> (all actions on Maven snapshots)</li>
-                <li><code>nx-repository-view-maven2-maven-releases-*</code> (all actions on Maven releases)</li>
-            </ul>
+            <pre><code>-------------------------------------------------
 
-            <p>I assigned this role to <code>ci-user</code>, and now I had a non-admin account ready for publishing artifacts.</p>
+Started Sonatype Nexus OSS 3.64.0-04
 
-            <h2>Publishing from a Gradle Project</h2>
+-------------------------------------------------</code></pre>
 
-            <p>Nexus was running. The user was set up. Now I needed to actually use it.</p>
+            <p>Success!</p>
+            <p>I accessed <code>http://143.198.XXX.XXX:8081</code> and saw the Nexus UI.</p>
 
-            <p>The project I was working with used Gradle, so the first step was configuring Gradle to talk to Nexus. This required three things:</p>
+            <h3>First-Time Login</h3>
 
-            <ol>
-                <li>A plugin to enable publishing</li>
-                <li>Publication configuration (what to publish)</li>
-                <li>Repository configuration (where to publish)</li>
-            </ol>
+            <p>Nexus generates a random admin password on first startup and stores it in a file:</p>
 
-            <h3>Adding the Maven Publish Plugin</h3>
+            <pre><code>sudo cat /opt/sonatype-work/nexus3/admin.password</code></pre>
 
-            <p>In <code>build.gradle</code>, I added:</p>
-
-            <pre><code>plugins {
-    id 'maven-publish'
-}</code></pre>
-
-            <p>
-                This plugin gives Gradle the ability to publish to Maven-format repositories. Even though this is a Gradle project, 
-                both Gradle and Maven use the same artifact format for Java libraries.
-            </p>
-
-            <h3>Configuring What to Publish</h3>
-
-            <p>Next, I defined what artifact I wanted to publish:</p>
-
-            <pre><code>publishing {
-    publications {
-        maven(MavenPublication) {
-            artifact("build/libs/myapp-${version}.jar") {
-                extension 'jar'
-            }
-        }
-    }
-}</code></pre>
-
-            <p>This tells Gradle: "When you build, take the JAR file from <code>build/libs/</code> and prepare it for publishing."</p>
-
-            <h3>Configuring Where to Publish</h3>
-
-            <p>Now for the repository configuration—this is where I point Gradle to my Nexus server:</p>
-
-            <pre><code>publishing {
-    repositories {
-        maven {
-            name 'nexus'
-            url "http://&lt;nexus-ip&gt;:8081/repository/maven-snapshots/"
-            credentials {
-                username project.findProperty("repoUser") ?: "default"
-                password project.findProperty("repoPassword") ?: "default"
-            }
-            allowInsecureProtocol = true
-        }
-    }
-}</code></pre>
-
-            <p>A few things to note here:</p>
-
-            <ul>
-                <li><strong>The URL structure:</strong> <code>http://ip:port/repository/repository-name</code><br>
-                    You can find the exact URL for each repository in Nexus by clicking on the repository and looking at the URL field.</li>
-                <li><strong>The credentials:</strong> I'm NOT hardcoding the username and password in <code>build.gradle</code>. 
-                    That file gets checked into Git, and you never want credentials in version control.</li>
-            </ul>
-
-            <p>Instead, I created a <code>gradle.properties</code> file:</p>
-
-            <pre><code>repoUser=ci-user
-repoPassword=&lt;password&gt;</code></pre>
-
-            <p>And I added <code>gradle.properties</code> to <code>.gitignore</code> immediately.</p>
+            <p>I copied that password, logged in as <code>admin</code>, and immediately changed it to something secure.</p>
 
             <div class="callout warning">
                 <div class="callout-title">
                     <i class="fas fa-exclamation-triangle"></i> Security Note
                 </div>
+                <p>After logging in, Nexus prompts you to configure anonymous access. Since this is a learning environment and not production, I enabled it for convenience.</p>
+            </div>
+
+            <h2>Part 4: Understanding Nexus Architecture</h2>
+
+            <p>Before configuring anything, I needed to understand how Nexus organizes artifacts. Coming from a background where "files go in folders," Nexus's structure took some getting used to.</p>
+
+            <h3>The Hierarchy</h3>
+
+            <pre><code>Nexus
+├── Blob Stores (physical storage)
+│   ├── default (where files actually live on disk)
+│   └── custom-blobs
+├── Repositories (logical organization)
+│   ├── maven-central (proxy to Maven Central)
+│   ├── maven-snapshots (hosted - for dev builds)
+│   ├── maven-releases (hosted - for prod builds)
+│   └── maven-public (group - combines above)
+└── Components (the actual artifacts)
+    └── com.example.my-app:1.0-SNAPSHOT</code></pre>
+
+            <p><strong>Blob Stores:</strong> The actual filesystem location where artifacts are stored. Think of this as the "hard drive."</p>
+            <p><strong>Repositories:</strong> Logical containers that determine access rules, versioning policies, and what kind of artifacts can be stored. Think of these as "databases" or "buckets."</p>
+            <p><strong>Components:</strong> The actual JAR files, with metadata about group ID, artifact ID, and version.</p>
+
+            <h3>Repository Types</h3>
+
+            <p><strong>Hosted:</strong> You upload artifacts here (your own builds)</p>
+            <ul>
+                <li><code>maven-snapshots</code> - Development versions (1.0-SNAPSHOT)</li>
+                <li><code>maven-releases</code> - Production versions (1.0, 2.0)</li>
+            </ul>
+
+            <p><strong>Proxy:</strong> Caches artifacts from external repositories (like Maven Central)</p>
+            <ul>
+                <li><code>maven-central</code> - Proxies https://repo1.maven.org/maven2</li>
+            </ul>
+
+            <p><strong>Group:</strong> Combines multiple repositories into one URL</p>
+            <ul>
+                <li><code>maven-public</code> - Combines snapshots, releases, and central</li>
+            </ul>
+
+            <p>
+                <strong>Why groups matter:</strong> Developers configure their build tools to point to ONE repository URL (the group). Nexus handles checking snapshots, then releases, then proxying to Maven Central if needed.
+            </p>
+
+            <h2>Part 5: Setting Up Users and Permissions</h2>
+
+            <p>I wasn't going to use the admin account for publishing artifacts. That violates least privilege (again). Instead, I created a dedicated CI/CD user with limited permissions.</p>
+
+            <h3>Creating a User</h3>
+            <p><strong>Settings → Security → Users → Create User</strong></p>
+            <ul>
+                <li><strong>Username:</strong> <code>ci-user</code></li>
+                <li><strong>Email:</strong> <code>ci@example.com</code></li>
+                <li><strong>Status:</strong> Active</li>
+            </ul>
+
+            <h3>Understanding Nexus Roles and Privileges</h3>
+            <p>Nexus has a granular permission system. A <strong>privilege</strong> is a single permission (like "read from repository X" or "write to repository Y"). A <strong>role</strong> is a collection of privileges.</p>
+
+            <p>I created a custom role <code>ci-deploy-role</code> with privileges to:</p>
+            <ul>
+                <li>Upload to <code>maven-snapshots</code></li>
+                <li>Upload to <code>maven-releases</code></li>
+                <li>Download from all repositories</li>
+            </ul>
+
+            <p><strong>Specific Privileges Assigned:</strong></p>
+            <ul>
+                <li><code>nx-repository-view-maven2-maven-snapshots-*</code> (all actions)</li>
+                <li><code>nx-repository-view-maven2-maven-releases-*</code> (all actions)</li>
+                <li><code>nx-repository-view-maven2-*-read</code> (read from all Maven repos)</li>
+            </ul>
+
+            <p>Then I assigned this role to <code>ci-user</code>.</p>
+
+            <div class="callout info">
+                <div class="callout-title">
+                    <i class="fas fa-user-shield"></i> Why Not Just Use Admin?
+                </div>
                 <p>
-                    <code>allowInsecureProtocol</code>: Since I'm using HTTP instead of HTTPS, Gradle requires this explicit flag. 
-                    In production, you'd use HTTPS and wouldn't need this line.
+                    If the CI/CD credentials get leaked, you want the blast radius contained. A compromised <code>ci-user</code> can only upload artifacts. A compromised <code>admin</code> can delete repositories, create users, and shut down Nexus entirely.
                 </p>
             </div>
 
-            <h3>Publishing the Artifact</h3>
+            <h2>Part 6: Publishing from a Gradle Project</h2>
 
-            <p>With everything configured, I built the project:</p>
+            <p>Now for the actual workflow: building an artifact locally and publishing it to Nexus.</p>
 
-            <pre><code>./gradle build</code></pre>
+            <h3>Adding the Maven Publish Plugin</h3>
 
-            <p>This created <code>build/libs/myapp-1.0-SNAPSHOT.jar</code>.</p>
+            <p>In <code>build.gradle</code>:</p>
 
-            <p>Then I published it to Nexus:</p>
+            <pre><code>plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
 
-            <pre><code>./gradle publish</code></pre>
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = 17
 
-            <p>
-                I watched as Gradle authenticated with Nexus, uploaded the JAR file, and... success!
-            </p>
+apply plugin: 'maven-publish'</code></pre>
 
-            <p>
-                I went back to Nexus, clicked <strong>Browse → Components</strong>, selected <code>maven-snapshots</code>, and 
-                there it was:
-            </p>
+            <p>The <code>maven-publish</code> plugin gives Gradle the ability to publish to Maven-format repositories. Even though this is a Gradle project, Maven and Gradle share the same artifact format for Java libraries.</p>
 
-            <pre><code>com.example
-└── myapp
-    └── 1.0-SNAPSHOT
-        ├── myapp-1.0-SNAPSHOT.jar
-        ├── myapp-1.0-SNAPSHOT.pom
-        └── maven-metadata.xml</code></pre>
+            <h3>Configuring the Publication</h3>
 
-            <p>My first artifact in a real artifact repository.</p>
+            <pre><code>publishing{
+    publications {
+        maven(MavenPublication){
+            artifact("build/libs/my-app-$version" + ".jar") {
+                extension 'jar'
+            }
+        }
+    }
 
-            <h2>Publishing from a Maven Project</h2>
+    repositories {
+        maven {
+            name 'nexus'
+            url "http://143.198.XXX.XXX:8081/repository/maven-snapshots/"
+            allowInsecureProtocol = true
+            credentials {
+                username project.repoUser
+                password project.repoPassword
+            }
+        }
+    }
+}</code></pre>
 
-            <p>The process for Maven projects is similar but with different configuration files.</p>
+            <p><strong>Key details:</strong></p>
+            <ol>
+                <li><strong>Targeting Snapshots:</strong> For this phase of the project, we are hardcoding the URL to point directly to our <code>maven-snapshots</code> repository since we are actively developing and testing the build.</li>
+                <li><strong>Credentials:</strong> Never hardcode usernames and passwords in <code>build.gradle</code> (that file gets committed to Git). Instead, use properties.</li>
+                <li><strong>allowInsecureProtocol:</strong> Required because I'm using HTTP instead of HTTPS. In production, you'd set up HTTPS with Let's Encrypt and remove this line.</li>
+            </ol>
 
-            <h3>Configuring the Maven Plugin</h3>
+            <h3>Storing Credentials Safely</h3>
 
-            <p>In <code>pom.xml</code>, I added the <code>maven-deploy-plugin</code>:</p>
+            <p>I created <code>gradle.properties</code> in the project root:</p>
+
+            <pre><code>repoUser=ci-user
+repoPassword=&lt;actual-password&gt;</code></pre>
+
+            <p>Then <strong>immediately</strong> added it to <code>.gitignore</code>:</p>
+
+            <pre><code>echo "gradle.properties" >> .gitignore</code></pre>
+
+            <p><strong>Why this matters:</strong> Git history is forever. Even if you delete a file later, the credentials remain in your commit history. GitHub scans for exposed credentials and will notify you (or worse, bots will find them and compromise your systems).</p>
+
+            <p>Then I ran the publish task:</p>
+
+            <pre><code>gradle publish</code></pre>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Success
+                </div>
+                <pre><code>> Task :publish
+Publishing com.example:my-app:1.0-SNAPSHOT
+Uploading to nexus...
+BUILD SUCCESSFUL in 3s</code></pre>
+            </div>
+
+            <p>I went to Nexus UI → Browse → Components → <code>maven-snapshots</code> and there it was. First artifact published. ✅</p>
+
+            <h2>Part 7: Publishing from a Maven Project</h2>
+
+            <p>The workflow for Maven is similar but uses different configuration files.</p>
+
+            <h3>Adding the Deployment Plugin</h3>
+            <p>In <code>pom.xml</code>:</p>
 
             <pre><code>&lt;build&gt;
     &lt;plugins&gt;
         &lt;plugin&gt;
             &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
             &lt;artifactId&gt;maven-deploy-plugin&lt;/artifactId&gt;
-            &lt;version&gt;2.8.2&lt;/version&gt;
+            &lt;version&gt;3.1.1&lt;/version&gt;
         &lt;/plugin&gt;
     &lt;/plugins&gt;
 &lt;/build&gt;</code></pre>
 
-            <h3>Setting the Repository URL</h3>
-
-            <p>Also in <code>pom.xml</code>, I added the distribution management section:</p>
+            <h3>Configuring the Repository</h3>
+            <p>Also in <code>pom.xml</code>:</p>
 
             <pre><code>&lt;distributionManagement&gt;
     &lt;snapshotRepository&gt;
         &lt;id&gt;nexus-snapshots&lt;/id&gt;
-        &lt;url&gt;http://&lt;nexus-ip&gt;:8081/repository/maven-snapshots/&lt;/url&gt;
+        &lt;url&gt;http://143.198.XXX.XXX:8081/repository/maven-snapshots/&lt;/url&gt;
     &lt;/snapshotRepository&gt;
 &lt;/distributionManagement&gt;</code></pre>
 
-            <div class="callout">
-                <div class="callout-title">
-                    <i class="fas fa-info-circle"></i> Important
-                </div>
-                <p>
-                    The <code>&lt;id&gt;</code> is important—it's how Maven knows which credentials to use.
-                </p>
-            </div>
-
-            <h3>Configuring Credentials</h3>
-
-            <p>
-                Maven stores credentials in a global settings file, not in the project. I created <code>~/.m2/settings.xml</code>:
-            </p>
+            <h3>Storing Credentials (Maven Way)</h3>
+            <p>Maven stores credentials globally, not per-project. I created <code>~/.m2/settings.xml</code>:</p>
 
             <pre><code>&lt;settings&gt;
     &lt;servers&gt;
         &lt;server&gt;
             &lt;id&gt;nexus-snapshots&lt;/id&gt;
             &lt;username&gt;ci-user&lt;/username&gt;
-            &lt;password&gt;&lt;password&gt;&lt;/password&gt;
+            &lt;password&gt;&lt;actual-password&gt;&lt;/password&gt;
         &lt;/server&gt;
     &lt;/servers&gt;
 &lt;/settings&gt;</code></pre>
 
-            <p>
-                The <code>&lt;id&gt;</code> here matches the <code>&lt;id&gt;</code> in <code>pom.xml</code>. That's how Maven 
-                connects the dots: "Oh, this repository uses nexus-snapshots credentials."
-            </p>
+            <p>The <code>&lt;id&gt;</code> in <code>settings.xml</code> matches the <code>&lt;id&gt;</code> in <code>pom.xml</code>. That's how Maven connects them.</p>
 
-            <h3>Building and Publishing</h3>
+            <p>Deploying:</p>
 
-            <pre><code>mvn package  # Build the JAR
-mvn deploy   # Upload to Nexus</code></pre>
+            <pre><code>mvn package
+mvn deploy</code></pre>
 
-            <p>And just like that, the Maven project's artifact appeared in Nexus alongside the Gradle one.</p>
-
-            <h2>The Blob Store Cleanup Surprise</h2>
+            <h2>Part 8: The Blob Store Cleanup Surprise</h2>
 
             <p>
-                A few days later, I was checking disk space on my server and noticed Nexus was using way more space than expected. 
-                I had deleted some old artifacts from the UI, but the disk space hadn't decreased.
+                Later that afternoon, after publishing several test artifacts, I wanted to clean up. I deleted some test components from the Nexus UI and checked disk space.
             </p>
+
+            <p><strong>It hadn't changed.</strong></p>
 
             <div class="callout warning">
                 <div class="callout-title">
-                    <i class="fas fa-exclamation-triangle"></i> Deletion Isn't Immediate
+                    <i class="fas fa-exclamation-triangle"></i> Soft Deletes
                 </div>
                 <p>
-                    Turns out, Nexus doesn't actually delete artifacts when you delete them from the UI. It marks them as deleted 
-                    (a "soft delete"), but the files remain on disk.
+                    Deleting artifacts in the Nexus UI doesn't actually delete them from disk. It only marks them as deleted in the database. This is a "soft delete."
+                </p>
+                <p>
+                    <strong>Why?</strong> Nexus uses content-addressed storage. Multiple artifacts can reference the same underlying blob if they're identical files. If Nexus immediately deleted the blob when you deleted one artifact, other artifacts referencing that blob would break.
                 </p>
             </div>
 
-            <p>To actually free up space, you need to run two tasks:</p>
-
+            <h3>The Two-Phase Cleanup Process</h3>
+            <p>To actually free disk space, you need to run two tasks:</p>
             <ol>
-                <li><strong>Cleanup task</strong> - Marks artifacts for deletion based on your rules</li>
-                <li><strong>Compact blob store</strong> - Actually removes the marked artifacts from disk</li>
+                <li><strong>Cleanup Policy:</strong> Marks blobs as eligible for deletion.</li>
+                <li><strong>Compact Blob Store:</strong> Actually removes the marked blobs from disk.</li>
             </ol>
 
             <p>
-                I set up a cleanup task in <strong>Settings → Tasks</strong> to run nightly, and then manually ran the blob store 
-                compaction.
+                After configuring a cleanup policy and running the "Compact blob store" task, I finally reclaimed 24 GB of space.
             </p>
 
-            <p>After the compaction ran, I checked disk usage again:</p>
-
-            <pre><code>du -sh /opt/sonatype-work/nexus3/blobs/</code></pre>
-
+            <h3>The Storage Metrics Issue</h3>
             <p>
-                The size had dropped significantly. The UI storage metrics didn't update immediately, so I had to run 
-                <strong>System → Tasks → Repair - Recalculate blob store storage</strong> to refresh the numbers.
+                Even after compaction, the metrics in the UI might not update immediately because Nexus caches blob store statistics. You may need to run the "Rebuild blob store storage attributes" task to force a refresh.
             </p>
 
-            <div class="callout">
-                <div class="callout-title">
-                    <i class="fas fa-info-circle"></i> Key Takeaway
-                </div>
-                <p>
-                    Deleting artifacts in Nexus is a two-step process, and the UI doesn't always show accurate disk usage right away.
-                </p>
-            </div>
+            <h2>Part 9: Understanding SNAPSHOT vs RELEASE Versioning</h2>
 
-            <h2>What I Learned</h2>
+            <p>Throughout this project, I kept seeing references to "snapshots" and "releases" but didn't fully understand the distinction. Here's what I learned:</p>
 
-            <p>This project taught me several things that weren't obvious from the documentation:</p>
-
+            <h3>SNAPSHOT Versions</h3>
+            <p><strong>Format:</strong> <code>1.0-SNAPSHOT</code>, <code>2.5-SNAPSHOT</code></p>
+            <p><strong>Purpose:</strong> Development versions that are actively changing.</p>
+            <p><strong>Behavior:</strong></p>
             <ul>
-                <li>
-                    <strong>Silent failures are the worst.</strong> When a service claims to be running but isn't, run it in 
-                    foreground mode to see the actual error output.
-                </li>
-                <li>
-                    <strong>Architecture matters.</strong> Download the right binary for your CPU architecture. ARM ≠ x86. 
-                    Always verify with <code>uname -m</code>.
-                </li>
-                <li>
-                    <strong>Credentials don't belong in version control.</strong> Use <code>gradle.properties</code> for Gradle 
-                    projects and <code>~/.m2/settings.xml</code> for Maven projects. Add these files to <code>.gitignore</code>.
-                </li>
-                <li>
-                    <strong>Nexus cleanup is two-phase.</strong> Deleting artifacts in the UI doesn't free disk space immediately. 
-                    You need both a cleanup task and blob store compaction.
-                </li>
-                <li>
-                    <strong>Permission design matters.</strong> Don't give everyone admin access. Create roles with the minimum 
-                    permissions needed for each use case.
-                </li>
-                <li>
-                    <strong>Maven and Gradle use the same artifact format.</strong> Both publish to Maven-format repositories, 
-                    so you can use one Nexus repository for both build tools.
-                </li>
+                <li>Every build replaces the previous SNAPSHOT.</li>
+                <li>Maven/Gradle re-download SNAPSHOTs periodically (default: daily).</li>
+                <li>Not meant for production use.</li>
             </ul>
 
-            <h2>Next Steps</h2>
+            <h3>RELEASE Versions</h3>
+            <p><strong>Format:</strong> <code>1.0</code>, <code>2.0</code>, <code>1.5.3</code></p>
+            <p><strong>Purpose:</strong> Stable, immutable versions for production.</p>
+            <p><strong>Behavior:</strong></p>
+            <ul>
+                <li>Once published, a release version <strong>never changes</strong>.</li>
+                <li>If you try to republish the same release version, Nexus rejects it.</li>
+                <li>Production deployments reference specific release versions.</li>
+            </ul>
+
+            <h2>What I Learned (The Real Takeaways)</h2>
+
+            <h3>1. Silent Failures Require Foreground Debugging</h3>
+            <p>When a service claims to be running but isn't, don't trust systemd. Run the binary directly to see the error.</p>
+
+            <h3>2. CPU Architecture Is Not Optional</h3>
+            <p>I assumed "Linux" meant "works on any Linux." It doesn't. Binaries are compiled for specific CPU architectures, and x86_64 ≠ ARM.</p>
+
+            <h3>3. Credentials Management Is a Spectrum</h3>
+            <p>Hardcoding is bad. Local ignore files are okay for learning. Secrets managers (Vault, AWS Secrets) are mandatory for production.</p>
+
+            <h3>4. Nexus Storage Is Not Intuitive</h3>
+            <p>Deleting in the UI ≠ freeing disk space. You must understand the blob store compaction lifecycle.</p>
+
+            <h3>5. RBAC Is Worth the Effort</h3>
+            <p>Creating dedicated users with minimal permissions is annoying upfront but essential for security. It limits the blast radius if credentials are compromised.</p>
+
+            <h3>6. Maven and Gradle Share More Than You Think</h3>
+            <p>Both publish to Maven-format repositories. Both use the same artifact structure (groupId:artifactId:version). You can use one Nexus repository for projects using different build tools.</p>
+
+            <h2>Production Considerations</h2>
+
+            <p>This was a learning environment. In production, I'd add:</p>
+            <ul>
+                <li><strong>HTTPS with SSL/TLS:</strong> Currently using plain text HTTP (insecure).</li>
+                <li><strong>Automated Backups:</strong> If the server dies, my artifacts are gone.</li>
+                <li><strong>Monitoring:</strong> Prometheus metrics to track disk space and uptime.</li>
+                <li><strong>Access Logging:</strong> Centralized logging (ELK stack) for security audits and troubleshooting.</li>
+                <li><strong>High Availability:</strong> A multi-node cluster for redundancy.</li>
+            </ul>
+
+            <h2>How This Connects to Real CI/CD</h2>
+
+            <p>Right now, I'm publishing artifacts manually from my laptop. In a real environment:</p>
+
+            <p><strong>Developer workflow:</strong></p>
+            <ol>
+                <li>Developer pushes code to Git (GitHub, GitLab)</li>
+                <li>CI server (Jenkins, GitHub Actions) detects the push</li>
+                <li>CI builds the application (<code>gradle build</code> or <code>mvn package</code>)</li>
+                <li>CI publishes the artifact to Nexus (<code>gradle publish</code> or <code>mvn deploy</code>)</li>
+                <li>CI triggers deployment to dev environment</li>
+            </ol>
+
+            <p><strong>Deployment workflow:</strong></p>
+            <ol>
+                <li>Deployment tool (Ansible, Terraform, Kubernetes) pulls artifact from Nexus</li>
+                <li>Deploys exact version (e.g., <code>1.0</code>) to target environment</li>
+                <li>No building on deployment servers—just download and run</li>
+            </ol>
 
             <p>
-                With Nexus running and artifacts being published, the next phase of the bootcamp is containerization. I'll be 
-                learning Docker, building container images, and eventually deploying these same applications using Docker Compose 
-                on AWS.
+                <strong>Benefits:</strong> Same artifact tested in dev/staging is deployed to prod (reproducibility). No "works on my machine" issues. Rollback is trivial.
             </p>
 
+            <h2>Reflection</h2>
             <p>
-                I'm expecting more version conflicts, more networking issues, and probably some new failure modes I haven't 
-                encountered yet. But that's the whole point—every error teaches you how these systems actually work under the hood.
+                <strong>Time investment:</strong> ~4 hours<br>
+                <strong>Cost:</strong> $48/month for the 8GB droplet (Nexus is hungry).
+            </p>
+            <p>
+                <strong>What I'd do differently:</strong> Verify architecture FIRST. Set up HTTPS from the start. Configure cleanup policies immediately, not as an afterthought.
+            </p>
+
+            <h2>What's Next</h2>
+            <p>
+                With Nexus running and artifacts being published, the next phase is <strong>containerization</strong>. I'll be learning Docker fundamentals, building images for the Java application, and pushing them to AWS ECR.
+            </p>
+            <p>
+                I'm expecting more networking issues and version conflicts, but that's where the real learning happens.
             </p>
 
             <blockquote>
-                If you're working on something similar and run into issues, feel free to reach out. I'm documenting everything 
-                as I go, mistakes and all.
+                If you're working through similar projects or running into Nexus issues, feel free to reach out. I'm documenting everything as I go—mistakes, dead ends, and all.
             </blockquote>
 
         </article>
     </main>
 
-    <!-- Footer Navigation -->
     <footer class="article-footer">
         <a href="../blog.html" class="back-to-blog">
             <i class="fas fa-arrow-left"></i> Back to All Posts
         </a>
     </footer>
 
-    <!-- Related Posts -->
     <section class="related-posts">
-        <h3>Related in the Series</h3>
+        <h3>Up Next in the Series</h3>
         <div class="related-grid">
-            <a href="devops-project-1.html" class="related-card">
-                <h4>Deploying a Java App to DigitalOcean</h4>
-                <p>The first project covering Gradle compatibility, SSH keys, and security best practices...</p>
+            <a href="devops-project-3.html" class="related-card">
+                <h4>Docker Multi-Container Deployment</h4>
+                <p>Moving from localhost to AWS ECR: Building container images and running multi-container applications...</p>
             </a>
-            <!-- <a href="#" class="related-card">
-                <h4>Building My First CI/CD Pipeline with Jenkins</h4>
-                <p>Coming soon: Automating builds and deployments...</p>
-            </a>
-            <a href="#" class="related-card">
-                <h4>Infrastructure as Code with Terraform</h4>
-                <p>Coming soon: Provisioning infrastructure automatically...</p>
-            </a> -->
         </div>
     </section>
 

@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Multi-Container Deployment: From Localhost to AWS ECR | Noah Vastola</title>
+    <meta name="description" content="Learning Docker by containerizing a Node.js application, pushing to AWS ECR, and understanding container networking, image immutability, and the complete CI/CD workflow.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-yellow: #fbbf24;
+            --accent-red: #ef4444;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --code-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        .article-header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-blue);
+        }
+
+        .article-header h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item i {
+            color: var(--accent-cyan);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .article-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .article-body {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+        }
+
+        .article-body h2 {
+            font-size: 2rem;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-cyan);
+        }
+
+        .article-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .article-body h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .article-body h4 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .article-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-body ul, .article-body ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .article-body li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .article-body ul li::marker {
+            color: var(--accent-cyan);
+        }
+
+        .article-body code {
+            background: var(--code-bg);
+            color: var(--accent-green);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .article-body pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .article-body pre code {
+            background: none;
+            padding: 0;
+            color: var(--accent-green);
+        }
+
+        .callout {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .callout-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+            background: rgba(251, 191, 36, 0.05);
+        }
+
+        .callout.warning .callout-title {
+            color: var(--accent-yellow);
+        }
+
+        .callout.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .callout.error .callout-title {
+            color: var(--accent-red);
+        }
+
+        .callout.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .callout.success .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout.info {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .callout.info .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        blockquote {
+            margin: 2rem 0;
+            padding: 1.5rem 2rem;
+            border-left: 4px solid var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .article-footer {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .back-to-blog {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .back-to-blog:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .related-posts {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .related-posts h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .related-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .related-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-4px);
+        }
+
+        .related-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .related-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .article-header h1 {
+                font-size: 2rem;
+            }
+
+            .article-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .article-body h2 {
+                font-size: 1.6rem;
+            }
+
+            .article-body h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="../blog.html" class="nav-link">
+                    <i class="fas fa-blog"></i> Blog
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="article-header">
+        <div class="breadcrumb">
+            <a href="../blog.html">Blog</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Docker Multi-Container Deployment</span>
+        </div>
+
+        <h1>Docker Multi-Container Deployment: From Localhost to AWS ECR</h1>
+
+        <div class="article-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                February 17, 2026
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                14 min read
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                Noah Vastola
+            </div>
+        </div>
+
+        <div class="tags">
+            <span class="tag">Docker</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Amazon ECR</span>
+            <span class="tag">MongoDB</span>
+            <span class="tag">MongoExpress</span>
+            <span class="tag">DigitalOcean</span>
+        </div>
+    </header>
+
+    <main class="article-content">
+        <article class="article-body">
+
+            <p>
+                After deploying a Java application to DigitalOcean (<a href="devops-project-1.html" style="color: var(--accent-cyan); text-decoration: none;">Project 1</a>) and setting up Nexus Repository Manager (<a href="devops-project-2.html" style="color: var(--accent-cyan); text-decoration: none;">Project 2</a>), I moved on to what might be the most fundamental shift in how modern applications are deployed: <strong>containerization</strong>.
+            </p>
+
+            <p>
+                Up until this point, I'd been deploying applications the traditional way—install dependencies on a server, copy files, configure environment variables, hope it works. Docker changes all of that. The promise is simple: if it runs in a container on your laptop, it'll run the same way anywhere. No more "works on my machine" problems.
+            </p>
+
+            <p>This project had me:</p>
+            <ul>
+                <li>Containerizing a Node.js application with MongoDB and MongoExpress</li>
+                <li>Building Docker images from scratch</li>
+                <li>Pushing images to AWS Elastic Container Registry (ECR)</li>
+                <li>Orchestrating multi-container applications with Docker Compose</li>
+                <li>Understanding container networking (the hard way)</li>
+            </ul>
+
+            <p>
+                <strong>It took me an entire day (about 6-8 hours).</strong> And I learned why containers have become the de facto standard for deploying modern applications—not because they're easy, but because they solve real problems.
+            </p>
+
+            <h2>The Plan (and Reality)</h2>
+
+            <p><strong>What I thought I'd do:</strong></p>
+            <ol>
+                <li>Write a Dockerfile (15 minutes)</li>
+                <li>Build an image (5 minutes)</li>
+                <li>Run containers with Docker Compose (10 minutes)</li>
+                <li>Push to AWS ECR (10 minutes)</li>
+            </ol>
+
+            <p><strong>What actually happened:</strong></p>
+            <ol>
+                <li>Installed Docker, hit a heredoc syntax error</li>
+                <li>Built an image, app couldn't connect to MongoDB</li>
+                <li>Spent 2 hours debugging container networking</li>
+                <li>Fixed networking, MongoExpress crashed in a loop</li>
+                <li>Pushed to ECR, hit credential storage errors</li>
+                <li>Finally understood image immutability after rebuilding 5 times</li>
+            </ol>
+
+            <p>But let's start from the beginning.</p>
+
+            <h2>Part 1: Installing Docker (The Heredoc Problem)</h2>
+
+            <p>I was following the Docker installation guide for Ubuntu, which had this command:</p>
+
+            <pre><code>sudo tee /etc/apt/sources.list.d/docker.sources &lt;&lt;EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF</code></pre>
+
+            <p>I carefully typed it out, hit Enter, and... nothing. The terminal just sat there with a <code>&gt;</code> prompt.</p>
+
+            <p>I typed some more, hit Enter again. Still just <code>&gt;</code> prompts.</p>
+
+            <p><strong>What was happening?</strong></p>
+
+            <h3>Understanding Heredocs</h3>
+
+            <p>
+                The <code>&lt;&lt;EOF</code> syntax is called a "heredoc" (here document). It tells the shell: "I'm about to give you multiple lines of input. Keep reading until you see <code>EOF</code> on a line by itself."
+            </p>
+
+            <p>
+                The problem: I had been typing the command piece by piece, pressing Enter after each line, and the shell was waiting for me to finish the heredoc by typing <code>EOF</code>.
+            </p>
+
+            <p>
+                But I didn't know that. I thought the command had hung. So I pressed Ctrl+C to cancel it.
+            </p>
+
+            <p>
+                Then I started over and accidentally typed extra "Types" lines before pasting the real content. The file ended up with garbage in it.
+            </p>
+
+            <div class="callout warning">
+                <div class="callout-title">
+                    <i class="fas fa-exclamation-triangle"></i> The Fix
+                </div>
+                <p>Delete the file and do it right:</p>
+                <pre><code># Remove the malformed file
+sudo rm /etc/apt/sources.list.d/docker.sources
+
+# Paste the ENTIRE heredoc command at once, then press Enter
+sudo tee /etc/apt/sources.list.d/docker.sources &lt;&lt;EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF</code></pre>
+            </div>
+
+            <p><strong>Lesson learned:</strong> When you see <code>&lt;&lt;EOF</code>, paste the entire block including the closing <code>EOF</code>. Don't type it line by line.</p>
+
+            <h3>The docker-compose vs docker compose Issue</h3>
+
+            <p>After installing Docker, I tried to run <code>docker-compose</code>:</p>
+
+            <pre><code>docker-compose version</code></pre>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> Error
+                </div>
+                <pre><code>Traceback (most recent call last):
+  File "/usr/bin/docker-compose", line 33, in &lt;module&gt;
+    ...
+ModuleNotFoundError: No module named 'distutils'</code></pre>
+            </div>
+
+            <p><strong>What was happening:</strong></p>
+
+            <p>
+                I had <code>docker-compose</code> V1 (the old Python-based version) installed, but it was trying to use Python 3.12, which removed the <code>distutils</code> module that V1 depends on.
+            </p>
+
+            <p><strong>The fix:</strong> Use Docker Compose V2 (the modern Go-based version that's built into Docker):</p>
+
+            <pre><code># Old way (broken)
+docker-compose up
+
+# New way (works)
+docker compose up</code></pre>
+
+            <p>
+                Note the <strong>space</strong> instead of a <strong>hyphen</strong>. Docker Compose V2 is a Docker CLI plugin, not a separate Python script.
+            </p>
+
+            <div class="callout info">
+                <div class="callout-title">
+                    <i class="fas fa-info-circle"></i> Why This Matters
+                </div>
+                <p>
+                    If you see tutorials using <code>docker-compose</code> (hyphen), that's the old version. Use <code>docker compose</code> (space) going forward.
+                </p>
+            </div>
+
+            <h2>Part 2: Local Development with Docker</h2>
+
+            <p>
+                The project is a simple Node.js application that connects to MongoDB and provides a web interface via MongoExpress (a MongoDB admin UI).
+            </p>
+
+            <p><strong>The architecture:</strong></p>
+            <pre><code>┌─────────────────────────────────────────┐
+│  Your Browser                           │
+│  localhost:3000 → Node.js app           │
+│  localhost:8081 → MongoExpress          │
+└────────────────┬────────────────────────┘
+                 │
+                 ↓
+┌─────────────────────────────────────────┐
+│  Docker Network                         │
+│                                         │
+│  ┌──────────┐      ┌──────────┐        │
+│  │  my-app  │─────→│ mongodb  │        │
+│  │  :3000   │      │ :27017   │        │
+│  └──────────┘      └──────────┘        │
+│       ↑                   ↑             │
+│       │                   │             │
+│  ┌─────────────┐          │             │
+│  │mongo-express│──────────┘             │
+│  │   :8081     │                        │
+│  └─────────────┘                        │
+└─────────────────────────────────────────┘</code></pre>
+
+            <h3>Writing the Dockerfile</h3>
+
+<p>
+    First, I needed to containerize the Node.js application. A Dockerfile is like a recipe for building an image—it specifies the base operating system, installs dependencies, and copies your application code.
+</p>
+
+<p><strong>Here's what I actually wrote:</strong></p>
+
+<pre><code>FROM node:20-alpine
+
+ENV MONGO_DB_USERNAME=admin \
+    MONGO_DB_PWD=password
+
+RUN mkdir -p /home/app
+
+COPY ./app /home/app
+
+# set default dir so that next commands executes in /home/app dir
+WORKDIR /home/app
+
+# will execute npm install in /home/app because of WORKDIR
+RUN npm install
+
+# no need for /home/app/server.js because of WORKDIR
+CMD ["node", "server.js"]</code></pre>
+
+<p><strong>What this does:</strong></p>
+<ul>
+    <li><code>FROM node:20-alpine</code> - Uses Alpine Linux (a lightweight version, ~5MB vs ~900MB for standard)</li>
+    <li><code>ENV</code> - Sets environment variables for MongoDB credentials (hardcoded for learning; in production these would come from secrets management)</li>
+    <li><code>RUN mkdir -p /home/app</code> - Creates the application directory</li>
+    <li><code>COPY ./app /home/app</code> - Copies the entire app folder into the container</li>
+    <li><code>WORKDIR /home/app</code> - Sets the working directory so subsequent commands run from here</li>
+    <li><code>RUN npm install</code> - Installs dependencies</li>
+    <li><code>CMD ["node", "server.js"]</code> - Starts the application</li>
+</ul>
+
+<p>
+    This worked fine for development, but as I learned more about Docker, I realized there's a more efficient way to structure this for better layer caching.
+</p>
+
+<p><strong>The optimized version would look like this:</strong></p>
+
+<pre><code>FROM node:20-alpine
+
+WORKDIR /home/app
+
+# Copy package files first (for layer caching)
+COPY ./app/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy application code
+COPY ./app .
+
+# The application listens on port 3000
+CMD ["node", "server.js"]</code></pre>
+
+<h3>Why Layer Caching Matters</h3>
+
+<p>
+    Docker builds images in layers. Each instruction in the Dockerfile creates a new layer. If a layer hasn't changed, Docker reuses it from cache.
+</p>
+
+<p>
+    My original Dockerfile copied the entire <code>./app</code> directory first, then ran <code>npm install</code>. This means <strong>every time I changed any file in my application</strong> (even just <code>server.js</code>), Docker saw the <code>COPY ./app /home/app</code> layer as changed, and it would reinstall all npm packages.
+</p>
+
+<p>
+    By copying <code>package*.json</code> first and running <code>npm install</code> before copying the rest of the application code, the dependency installation layer only rebuilds when <code>package.json</code> changes. Code changes don't trigger npm reinstalls.
+</p>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>
+        My Dockerfile worked, but it wasn't optimized. For learning and initial development, that's fine—the rebuild time difference was negligible with only a few dependencies. But in a real project with hundreds of npm packages, the difference between a 2-second code copy and a 3-minute npm install matters.
+    </p>
+    <p>
+        This pattern applies to any language: Python's <code>requirements.txt</code>, Ruby's <code>Gemfile</code>, Java's <code>pom.xml</code>—always copy dependency files first, install them, then copy application code.
+    </p>
+</div>
+
+            <h3>Building the Image</h3>
+
+            <pre><code>docker build -t my-app:1.0 .</code></pre>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Success
+                </div>
+                <pre><code>[+] Building 45.3s (10/10) FINISHED
+ => [1/5] FROM node:20
+ => [2/5] WORKDIR /home/app
+ => [3/5] COPY package*.json ./
+ => [4/5] RUN npm install
+ => [5/5] COPY . .
+ => exporting to image
+Successfully built 8a3f2b1c4d5e
+Successfully tagged my-app:1.0</code></pre>
+            </div>
+
+            <p>Great! I had my first Docker image.</p>
+
+            <h2>Part 3: Running Containers (The Networking Problem)</h2>
+
+            <p>Now I needed to run the containers. I started with just the Node.js app:</p>
+
+            <pre><code>docker run -d -p 3000:3000 my-app:1.0</code></pre>
+
+            <p>I opened my browser: <code>http://localhost:3000</code></p>
+
+            <p><strong>The page loaded!</strong> But it was blank. I refreshed. Error.</p>
+
+            <p>I checked the container logs:</p>
+
+            <pre><code>docker logs &lt;container-id&gt;</code></pre>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> MongoServerSelectionError
+                </div>
+                <pre><code>MongoServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+    at Timeout._onTimeout (...)</code></pre>
+            </div>
+
+            <h3>The Localhost Problem</h3>
+
+            <p>
+                The application was trying to connect to <code>localhost:27017</code> (MongoDB), but there was no MongoDB running at <code>localhost</code> from the container's perspective.
+            </p>
+
+            <p><strong>Here's the critical concept I didn't understand yet:</strong></p>
+
+            <p>
+                When you run a process inside a Docker container, <code>localhost</code> refers to <strong>that container</strong>, not your host machine, and not other containers.
+            </p>
+
+            <p>My Node.js code had:</p>
+
+            <pre><code>let mongoUrlLocal = "mongodb://admin:password@localhost:27017";</code></pre>
+
+            <p>
+                This worked when I ran <code>node server.js</code> directly on my laptop (MongoDB was also running on my laptop). But inside a container, <code>localhost</code> means "this container," and there's no MongoDB in the Node.js container.
+            </p>
+
+            <h3>The Solution: Container Networking</h3>
+
+            <p>
+                Containers on the same Docker network can reach each other using <strong>container names</strong> as hostnames. Docker provides built-in DNS for this.
+            </p>
+
+            <p><strong>The fix in the code:</strong></p>
+
+            <pre><code>// ❌ This doesn't work in Docker
+let mongoUrlLocal = "mongodb://admin:password@localhost:27017";
+
+// ✅ This works - use the container/service name
+let mongoUrlDockerCompose = "mongodb://admin:password@mongodb:27017";</code></pre>
+
+            <p>
+                But wait—I didn't have a container named <code>mongodb</code> running yet. I needed to set up the entire stack.
+            </p>
+
+            <h2>Part 4: Docker Compose (Orchestrating Multiple Containers)</h2>
+
+            <p>
+                Running containers individually with <code>docker run</code> is fine for testing, but real applications have multiple services that need to work together. Docker Compose lets you define an entire multi-container application in a YAML file.
+            </p>
+
+            <p>I created <code>docker-compose.yaml</code>:</p>
+
+            <pre><code>version: '3'
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+  
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+  
+  my-app:
+    image: my-app:1.0
+    ports:
+      - 3000:3000</code></pre>
+
+            <p><strong>What Docker Compose does:</strong></p>
+            <ol>
+                <li>Creates a network called <code>&lt;project&gt;_default</code></li>
+                <li>Connects all services to that network</li>
+                <li>Sets up DNS so services can find each other by name</li>
+                <li>Starts containers in dependency order (though it doesn't wait for them to be <em>ready</em>)</li>
+            </ol>
+
+            <h3>First Attempt</h3>
+
+            <pre><code>docker compose up</code></pre>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Output
+                </div>
+                <pre><code>[+] Running 3/3
+ ✔ Container mongo-express-1  Started
+ ✔ Container mongodb-1        Started
+ ✔ Container my-app-1         Started</code></pre>
+            </div>
+
+            <p>Great! Everything started.</p>
+
+            <p>I checked <code>localhost:3000</code>. Blank page again. Checked logs:</p>
+
+            <pre><code>docker compose logs my-app</code></pre>
+
+            <p>Same error: <code>ECONNREFUSED 127.0.0.1:27017</code></p>
+
+            <p><strong>Why?</strong></p>
+
+            <p>
+                Because my Docker image was built with the old code that still used <code>localhost</code>. I had updated <code>server.js</code> to use <code>mongodb</code>, but the Docker image I built earlier didn't have that change.
+            </p>
+
+            <h3>Understanding Image Immutability</h3>
+
+            <p>This is a fundamental concept that took me a while to grasp:</p>
+
+            <p><strong>Docker images are immutable snapshots.</strong></p>
+
+            <p>
+                When you run <code>docker build</code>, it packages your code <em>as it exists at that moment</em> into an image. If you change your code afterward, the image doesn't magically update. You have to rebuild it.
+            </p>
+
+            <p><strong>The workflow:</strong></p>
+            <ol>
+                <li>Change code</li>
+                <li>Rebuild image: <code>docker build -t my-app:1.0 .</code></li>
+                <li>Restart containers: <code>docker compose down && docker compose up</code></li>
+            </ol>
+
+            <p>I did this. Finally:</p>
+
+            <pre><code>docker compose logs my-app</code></pre>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Success
+                </div>
+                <pre><code>app listening on port 3000!</code></pre>
+            </div>
+
+            <p>No MongoDB connection errors. Success!</p>
+
+            <p>I opened <code>localhost:3000</code> in my browser. <strong>The application loaded.</strong></p>
+
+            <h2>Part 5: MongoExpress Connectivity Issues</h2>
+
+            <p>
+                The Node.js app was working, but when I tried to access MongoExpress at <code>localhost:8081</code>, it wasn't responding.
+            </p>
+
+            <pre><code>docker compose logs mongo-express</code></pre>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> Crash Loop
+                </div>
+                <pre><code>Waiting for mongo:27017...
+/docker-entrypoint.sh: line 15: mongo: Name does not resolve
+/docker-entrypoint.sh: line 15: /dev/tcp/mongo/27017: Invalid argument
+Tue Feb 17 17:59:46 UTC 2026 retrying to connect to mongo:27017 (2/10)
+...
+(repeats 10 times)
+No custom config.js found, loading config.default.js
+Welcome to mongo-express 1.0.2</code></pre>
+            </div>
+
+            <h3>The Healthcheck Script Issue</h3>
+
+            <p>
+                MongoExpress has a startup healthcheck script that's hardcoded to look for a hostname called <code>mongo</code>, but my service is named <code>mongodb</code>.
+            </p>
+
+            <p>
+                The healthcheck fails 10 times (producing scary-looking errors), but then the actual MongoExpress application starts anyway using my <code>ME_CONFIG_MONGODB_SERVER=mongodb</code> environment variable.
+            </p>
+
+            <p><strong>The errors were just noise.</strong> The app was actually working fine.</p>
+
+            <p>I accessed <code>localhost:8081</code> and was greeted with a login prompt.</p>
+
+            <p><strong>Login credentials:</strong></p>
+
+            <p>From the logs, I saw:</p>
+
+            <pre><code>basicAuth credentials are "admin:pass"</code></pre>
+
+            <div class="callout info">
+                <div class="callout-title">
+                    <i class="fas fa-info-circle"></i> Credential Types
+                </div>
+                <p>
+                    These are the <strong>web UI credentials</strong> (for accessing MongoExpress itself), not the MongoDB credentials. This is a common point of confusion.
+                </p>
+                <ul>
+                    <li><code>ME_CONFIG_MONGODB_ADMINUSERNAME/PASSWORD</code> = MongoDB database credentials</li>
+                    <li><code>ME_CONFIG_BASICAUTH_USERNAME/PASSWORD</code> = MongoExpress web UI credentials (defaults to admin/pass)</li>
+                </ul>
+            </div>
+
+            <p>I logged in with <code>admin</code> / <code>pass</code>. MongoExpress loaded. ✅</p>
+
+            <h2>Part 6: Pushing to AWS ECR (The Credential Storage Problem)</h2>
+
+            <p>
+                With everything working locally, the next step was simulating a real deployment workflow. In production, you don't build images on the server—you build them once, store them in a registry, and servers pull from there.
+            </p>
+
+            <p>
+                AWS Elastic Container Registry (ECR) is a private Docker registry. It's like Docker Hub, but:
+            </p>
+            <ul>
+                <li>Private (only authorized users can pull)</li>
+                <li>Integrated with AWS IAM</li>
+                <li>Commonly used in AWS environments</li>
+            </ul>
+
+            <h3>Creating an ECR Repository</h3>
+
+            <p>In the AWS console, I created a repository called <code>my-app</code>.</p>
+
+            <p>This gave me a repository URL: <code>601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app</code></p>
+
+            <h3>Authenticating to ECR</h3>
+
+            <p>Before I could push images, I needed to authenticate:</p>
+
+            <pre><code>aws ecr get-login-password --region us-east-2 | \
+  docker login --username AWS --password-stdin \
+  601970634480.dkr.ecr.us-east-2.amazonaws.com</code></pre>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> Error
+                </div>
+                <pre><code>error saving credentials: error storing credentials - err: exit status 1, 
+out: `pass not initialized: exit status 1: Error: password store is empty. 
+Try "pass init".`</code></pre>
+            </div>
+
+            <h3>The Credential Store Issue</h3>
+
+            <p>
+                Docker Desktop was trying to use <code>pass</code> (a Linux password manager) to securely store credentials, but <code>pass</code> wasn't configured.
+            </p>
+
+            <p><strong>The fix:</strong> Edit <code>~/.docker/config.json</code> and remove the credential store line:</p>
+
+            <p><strong>Before:</strong></p>
+            <pre><code>{
+    "auths": {},
+    "credsStore": "desktop",
+    "currentContext": "desktop-linux"
+}</code></pre>
+
+            <p><strong>After:</strong></p>
+            <pre><code>{
+    "auths": {},
+    "currentContext": "desktop-linux"
+}</code></pre>
+
+            <p>
+                This tells Docker to store credentials in plain JSON instead of using <code>pass</code>. Not ideal for production, but fine for learning.
+            </p>
+
+            <p>I re-ran the login command:</p>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Success
+                </div>
+                <pre><code>Login Succeeded</code></pre>
+            </div>
+
+            <h3>Tagging and Pushing the Image</h3>
+
+            <p>Docker images need to be tagged with the full registry URL to push them to a private registry.</p>
+
+            <pre><code># Tag the image
+docker tag my-app:1.0 601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app:1.0
+
+# Push to ECR
+docker push 601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app:1.0</code></pre>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> Output
+                </div>
+                <pre><code>The push refers to repository [601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app]
+5f70bf18a086: Pushed
+d1fe2eaf6101: Pushed
+...
+1.0: digest: sha256:abc123... size: 2421</code></pre>
+            </div>
+
+            <p>My first image in a private registry. ✅</p>
+
+            <h2>Part 7: Simulating Deployment (Pulling from ECR)</h2>
+
+            <p>
+                Now for the final step: simulating what a real server would do. Instead of building the image locally, I'd pull it from ECR—just like a production deployment.
+            </p>
+
+            <p>I updated <code>docker-compose.yaml</code> to reference the ECR image:</p>
+
+            <pre><code>version: '3'
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+  
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+  
+  my-app:
+    image: 601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app:1.0
+    ports:
+      - 3000:3000</code></pre>
+
+            <p><strong>The key change:</strong> <code>my-app</code> now references the ECR image URL instead of a local image.</p>
+
+            <h3>Running the "Deployed" Application</h3>
+
+            <pre><code># Stop any running containers
+docker compose down
+
+# Pull images and start containers
+docker compose up</code></pre>
+
+            <p><strong>What happened:</strong></p>
+            <ol>
+                <li>Docker Compose saw <code>601970634480.dkr.ecr.us-east-2.amazonaws.com/my-app:1.0</code></li>
+                <li>Since it's not a Docker Hub image, Docker checked if I had it locally</li>
+                <li>I didn't, so it pulled it from ECR (using my authenticated session)</li>
+                <li>MongoDB and MongoExpress pulled from Docker Hub (public, no auth needed)</li>
+                <li>All containers started</li>
+            </ol>
+
+            <p>I accessed <code>localhost:3000</code>. The application worked.</p>
+
+            <div class="callout success">
+                <div class="callout-title">
+                    <i class="fas fa-check-circle"></i> This Simulated a Production Deployment
+                </div>
+                <ul>
+                    <li>The "server" (my laptop, pretending to be a server) didn't build anything</li>
+                    <li>It pulled a pre-built image from a private registry</li>
+                    <li>It started containers using that immutable artifact</li>
+                </ul>
+            </div>
+
+            <h2>Part 8: Understanding Container Networking (The Deep Dive)</h2>
+
+            <p>This project forced me to understand Docker networking in a way that reading documentation never could.</p>
+
+            <h3>Localhost vs Container Names</h3>
+
+            <p><strong>When you run <code>node server.js</code> directly:</strong></p>
+            <ul>
+                <li>Your laptop is "localhost"</li>
+                <li>MongoDB running on your laptop is at <code>localhost:27017</code></li>
+                <li>Everything works</li>
+            </ul>
+
+            <p><strong>When you run in Docker:</strong></p>
+            <ul>
+                <li>Each container is isolated</li>
+                <li><code>localhost</code> inside the Node.js container means "this container"</li>
+                <li>MongoDB is in a different container, so <code>localhost</code> doesn't work</li>
+            </ul>
+
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Docker Compose creates a network</li>
+                <li>Containers on the same network can reach each other by service name</li>
+                <li><code>mongodb</code> (from <code>docker-compose.yaml</code>) becomes a DNS hostname</li>
+            </ul>
+
+            <h3>Port Mapping: Host vs Container</h3>
+
+            <pre><code>my-app:
+  ports:
+    - 3000:3000</code></pre>
+
+            <p><strong>What this means:</strong></p>
+            <ul>
+                <li>Container listens on port 3000 internally</li>
+                <li>Docker maps your laptop's port 3000 to the container's port 3000</li>
+                <li>You access it at <code>localhost:3000</code></li>
+            </ul>
+
+            <p><strong>Container-to-container communication doesn't use these mappings:</strong></p>
+            <ul>
+                <li><code>my-app</code> connects to <code>mongodb:27017</code> directly</li>
+                <li>The port mapping (<code>27017:27017</code>) is only for accessing MongoDB from your laptop</li>
+            </ul>
+
+            <h2>What I Learned (The Real Takeaways)</h2>
+
+            <h3>1. Containers Solve "Works on My Machine"</h3>
+
+            <p>
+                Coming from tier 1 IT support where I've seen countless deployment issues caused by environment differences (wrong Java version, missing library, different OS), containers finally make sense to me.
+            </p>
+
+            <p><strong>The promise:</strong> If it runs in a container on my laptop, it runs the same way on any server.</p>
+
+            <p><strong>Why:</strong> The container includes everything—OS, runtime, dependencies, code. The server doesn't need to install anything except Docker.</p>
+
+            <h3>2. Image Immutability Is Fundamental</h3>
+
+            <p>Code changes don't automatically appear in running containers. You must:</p>
+            <ol>
+                <li>Change code</li>
+                <li>Rebuild image</li>
+                <li>Restart containers (or push new image and pull it)</li>
+            </ol>
+
+            <p>
+                This felt annoying at first, but it's actually a feature: you always know exactly what code is running. No "I thought I deployed that fix" confusion.
+            </p>
+
+            <h3>3. Container Networking Is Different</h3>
+
+            <ul>
+                <li><code>localhost</code> means "this container"</li>
+                <li>Containers on the same network communicate by name</li>
+                <li>Port mappings are for host access, not inter-container communication</li>
+            </ul>
+
+            <p>This is the #1 source of confusion when containerizing apps that previously ran on localhost.</p>
+
+            <h3>4. Private Registries Require Authentication</h3>
+
+            <p>Docker Hub is public—anyone can pull images. ECR is private—you need to authenticate.</p>
+
+            <p><strong>In production:</strong></p>
+            <ul>
+                <li>CI/CD builds images and pushes to ECR</li>
+                <li>Servers authenticate to ECR and pull images</li>
+                <li>Images are immutable artifacts with version tags</li>
+            </ul>
+
+            <h3>5. Docker Compose Is Not Production Orchestration</h3>
+
+            <p>Docker Compose is great for development and simple deployments, but it has limitations:</p>
+            <ul>
+                <li>Single-host only (can't spread containers across multiple servers)</li>
+                <li>No automatic scaling</li>
+                <li>No self-healing (if the server dies, everything dies)</li>
+            </ul>
+
+            <p><strong>Production uses:</strong></p>
+            <ul>
+                <li>Kubernetes (complex, powerful, industry standard)</li>
+                <li>AWS ECS/Fargate (simpler, AWS-native)</li>
+                <li>Docker Swarm (simpler than K8s, less common)</li>
+            </ul>
+
+            <h2>Production Considerations (What This Demo Skipped)</h2>
+
+            <h3>What I Did (Learning)</h3>
+            <ul>
+                <li>HTTP only (no SSL)</li>
+                <li>Hardcoded credentials in docker-compose.yaml</li>
+                <li>No persistent storage (data lost on container restart)</li>
+                <li>Single server simulation</li>
+                <li>Manual image building and pushing</li>
+            </ul>
+
+            <h3>What Production Would Add</h3>
+
+            <p><strong>Security:</strong></p>
+            <ul>
+                <li>HTTPS with SSL certificates</li>
+                <li>Secrets management (AWS Secrets Manager, not environment variables)</li>
+                <li>Network policies (restrict container-to-container communication)</li>
+                <li>Image scanning for vulnerabilities</li>
+            </ul>
+
+            <p><strong>Reliability:</strong></p>
+            <ul>
+                <li>Volume mounts for database persistence</li>
+                <li>Health checks for all containers</li>
+                <li>Automatic restarts on failure</li>
+                <li>Multi-replica deployments</li>
+                <li>Load balancing</li>
+            </ul>
+
+            <p><strong>Operations:</strong></p>
+            <ul>
+                <li>Centralized logging (not <code>docker compose logs</code>)</li>
+                <li>Monitoring and metrics (Prometheus + Grafana)</li>
+                <li>CI/CD pipeline (Jenkins, GitHub Actions)</li>
+                <li>Blue-green or rolling deployments</li>
+                <li>Automated rollback on failure</li>
+            </ul>
+
+            <h2>Reflection: The Learning Process</h2>
+
+            <p><strong>What worked:</strong></p>
+            <ul>
+                <li>Starting simple (single container) before adding complexity</li>
+                <li>Understanding networking by breaking it first</li>
+                <li>Simulating the full workflow (build → registry → deploy)</li>
+            </ul>
+
+            <p><strong>What I'd do differently:</strong></p>
+            <ul>
+                <li>Read about Docker networking BEFORE starting (would have saved hours)</li>
+                <li>Use Docker Compose from the beginning (not standalone containers)</li>
+                <li>Set up logging earlier (debugging would have been easier)</li>
+            </ul>
+
+            <p><strong>Time investment:</strong> 6-8 hours over one day</p>
+            <p><strong>Cost:</strong> $0 (everything ran locally, ECR free tier)</p>
+
+            <p><strong>Breakdown:</strong></p>
+            <ul>
+                <li>1 hour: Docker installation and configuration</li>
+                <li>2 hours: Containerizing the Node.js app</li>
+                <li>2-3 hours: Debugging networking issues</li>
+                <li>1 hour: ECR setup and authentication</li>
+                <li>1 hour: Testing the complete workflow</li>
+            </ul>
+
+            <h2>How This Connects to Real DevOps Workflows</h2>
+
+            <p>Right now, I'm doing everything manually:</p>
+            <ol>
+                <li>I change code</li>
+                <li>I run <code>docker build</code></li>
+                <li>I run <code>docker push</code></li>
+                <li>I update docker-compose.yaml</li>
+                <li>I run <code>docker compose up</code></li>
+            </ol>
+
+            <p><strong>In production with CI/CD:</strong></p>
+            <ol>
+                <li>Developer pushes code to Git</li>
+                <li>CI detects push, runs <code>docker build</code> automatically</li>
+                <li>CI pushes image to ECR with version tag</li>
+                <li>CD updates Kubernetes manifests or ECS task definitions</li>
+                <li>Orchestrator pulls new image and rolls out deployment</li>
+                <li>Orchestrator monitors health, rolls back if failures detected</li>
+            </ol>
+
+            <p>
+                <strong>Everything I did manually gets automated.</strong> But you can't automate what you don't understand, and that's why working through it manually first was valuable.
+            </p>
+
+            <h2>What's Next</h2>
+
+            <p>With containers and registries working, the next phase is <strong>CI/CD automation</strong>. I'll be:</p>
+            <ul>
+                <li>Setting up Jenkins to automatically build and push images</li>
+                <li>Implementing automated testing before deployment</li>
+                <li>Learning pipeline-as-code (Jenkinsfile)</li>
+                <li>Eventually deploying to Kubernetes (AWS EKS)</li>
+            </ul>
+
+            <p>I'm expecting:</p>
+            <ul>
+                <li>Jenkins configuration headaches (plugins, credentials)</li>
+                <li>Pipeline syntax errors</li>
+                <li>Integration issues between GitHub, Jenkins, and AWS</li>
+                <li>Some new failure modes I haven't encountered</li>
+            </ul>
+
+            <p>
+                But I'm also starting to see how all these pieces fit together: containers provide portability, registries provide storage, orchestrators provide scaling, and CI/CD ties it all together into an automated deployment pipeline.
+            </p>
+
+            <p>
+                Every project builds on the last. And every error teaches me something that documentation alone never could.
+            </p>
+
+        </article>
+    </main>
+
+    <footer class="article-footer">
+        <a href="../blog.html" class="back-to-blog">
+            <i class="fas fa-arrow-left"></i> Back to All Posts
+        </a>
+    </footer>
+
+    <section class="related-posts">
+        <h3>Continue the Series</h3>
+        <div class="related-grid">
+            <a href="devops-project-1.html" class="related-card">
+                <h4>Deploying a Java Application to Production Linux Server</h4>
+                <p>My first cloud deployment: Gradle compatibility, Java versions, SSH configuration, and security best practices...</p>
+            </a>
+            <a href="devops-project-2.html" class="related-card">
+                <h4>Setting Up Nexus Repository Manager</h4>
+                <p>Architecture mismatches, silent failures, and centralized artifact management...</p>
+            </a>
+        </div>
+    </section>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 100) {
+                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

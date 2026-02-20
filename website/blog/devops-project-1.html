@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deploying a Java App and Setting Up Nexus on DigitalOcean | Noah Vastola</title>
-    <meta name="description" content="What I learned the hard way about Gradle compatibility, architecture mismatches, and blob store cleanup when deploying my first cloud server and artifact repository">
+    <title>Deploying a Java Application to a Production Linux Server | Noah Vastola</title>
+    <meta name="description" content="From tier 1 IT support to cloud engineering: my first production deployment tackling Gradle compatibility, Java versions, SSH configuration, and security best practices.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -232,99 +232,81 @@
             background: none;
             padding: 0;
             color: var(--accent-green);
-            font-size: 0.9rem;
-            line-height: 1.6;
         }
 
-        /* Blockquotes */
-        .article-body blockquote {
-            border-left: 4px solid var(--accent-cyan);
-            padding-left: 1.5rem;
-            margin: 1.5rem 0;
-            font-style: italic;
-            color: var(--text-secondary);
-        }
-
-        /* Images */
-        .article-body img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 2rem 0;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Callout Boxes */
+        /* Callouts */
         .callout {
-            background: rgba(59, 130, 246, 0.05);
-            border-left: 4px solid var(--accent-blue);
-            padding: 1.5rem;
             margin: 2rem 0;
+            padding: 1.5rem;
+            border-left: 4px solid;
             border-radius: 8px;
-        }
-
-        .callout.success {
-            background: rgba(16, 185, 129, 0.05);
-            border-left-color: var(--accent-green);
-        }
-
-        .callout.warning {
-            background: rgba(251, 191, 36, 0.05);
-            border-left-color: var(--accent-yellow);
-        }
-
-        .callout.error {
-            background: rgba(239, 68, 68, 0.05);
-            border-left-color: var(--accent-red);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .callout-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .callout.success .callout-title { color: var(--accent-green); }
-        .callout.warning .callout-title { color: var(--accent-yellow); }
-        .callout.error .callout-title { color: var(--accent-red); }
-        .callout .callout-title { color: var(--accent-blue); }
-
-        /* Table */
-        .article-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .article-body th {
-            background: var(--bg-secondary);
-            padding: 1rem;
-            text-align: left;
             font-weight: 600;
-            color: var(--accent-cyan);
-            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
         }
 
-        .article-body td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-secondary);
+        .callout.warning {
+            border-color: var(--accent-yellow);
+            background: rgba(251, 191, 36, 0.05);
         }
 
-        .article-body tr:last-child td {
-            border-bottom: none;
+        .callout.warning .callout-title {
+            color: var(--accent-yellow);
         }
 
-        /* Footer Navigation */
+        .callout.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .callout.error .callout-title {
+            color: var(--accent-red);
+        }
+
+        .callout.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .callout.success .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout.info {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .callout.info .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Blockquotes */
+        blockquote {
+            margin: 2rem 0;
+            padding: 1.5rem 2rem;
+            border-left: 4px solid var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
         .article-footer {
             max-width: 900px;
-            margin: 3rem auto 0;
-            padding: 2rem;
+            margin: 3rem auto;
+            padding: 0 2rem;
         }
 
         .back-to-blog {
@@ -332,36 +314,36 @@
             align-items: center;
             gap: 0.5rem;
             padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
-            text-decoration: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
             transition: all 0.3s;
         }
 
         .back-to-blog:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
         }
 
         /* Related Posts */
         .related-posts {
             max-width: 900px;
-            margin: 4rem auto 0;
+            margin: 3rem auto;
             padding: 0 2rem 4rem;
         }
 
         .related-posts h3 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
             color: var(--text-primary);
         }
 
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
@@ -370,26 +352,25 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 1.5rem;
-            transition: all 0.3s;
             text-decoration: none;
-            display: block;
+            transition: all 0.3s;
         }
 
         .related-card:hover {
-            transform: translateY(-5px);
             border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+            transform: translateY(-4px);
         }
 
         .related-card h4 {
             color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             font-size: 1.2rem;
         }
 
         .related-card p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         /* Responsive */
@@ -399,16 +380,19 @@
             }
 
             .article-body {
-                padding: 2rem;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
+                padding: 2rem 1.5rem;
             }
 
             .article-body h2 {
                 font-size: 1.6rem;
+            }
+
+            .article-body h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
             }
         }
     </style>
@@ -418,11 +402,11 @@
     <nav>
         <div class="nav-container">
             <div class="nav-links">
-                <a href="../blog.html" class="nav-link">
-                    <i class="fas fa-arrow-left"></i> All Posts
-                </a>
                 <a href="../index.html" class="nav-link">
-                    <i class="fas fa-home"></i> Portfolio
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="../blog.html" class="nav-link">
+                    <i class="fas fa-blog"></i> Blog
                 </a>
             </div>
         </div>
@@ -431,26 +415,25 @@
     <!-- Article Header -->
     <header class="article-header">
         <div class="breadcrumb">
-            <a href="../index.html">Home</a>
-            <i class="fas fa-chevron-right"></i>
             <a href="../blog.html">Blog</a>
             <i class="fas fa-chevron-right"></i>
+            <span>Deploying a Java Application</span>
         </div>
 
-        <h1>Deploying a Java App and Setting Up Nexus on DigitalOcean</h1>
+        <h1>Deploying a Java Application to a Production Linux Server: Lessons from My First Cloud Deployment</h1>
 
         <div class="article-meta">
             <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <span>February 10, 2026</span>
+                <i class="fas fa-calendar-alt"></i>
+                February 10, 2026
             </div>
             <div class="meta-item">
                 <i class="fas fa-clock"></i>
-                <span>8 min read</span>
+                12 min read
             </div>
             <div class="meta-item">
                 <i class="fas fa-user"></i>
-                <span>Noah Vastola</span>
+                Noah Vastola
             </div>
         </div>
 
@@ -466,278 +449,612 @@
     <main class="article-content">
         <article class="article-body">
 
-            <!-- PROJECT 1 -->
-            <h2>Deploy a Java Application to DigitalOcean</h2>
+            <p>
+                I'm Noah, currently Technology Director at LAPA and finishing my B.S. in Information Systems & Analytics at LSU. I've spent the past few years in tier 1 IT support at the LSU AgCenter—creating and managing service tickets, troubleshooting desktop issues, basic user support—but I've realized that's not where I want to end up. I'm aiming for cloud engineering and DevOps roles, and I've decided not to wait until after graduation to start building those skills. I've been building my technical foundation through my home lab (Active Directory, network configurations, virtualization) and certifications (CompTIA Network+ and Security+).
+            </p>
 
-            <h3>The Goal</h3>
+            <p>
+                Rather than enrolling in an expensive bootcamp, I'm following TechWorld with Nana's free DevOps roadmap. She provides project descriptions and high-level guidance on her website, and her YouTube channel has been invaluable—I've learned more from her free videos about Docker, Kubernetes, and CI/CD than from entire college courses. I'm using her roadmap as a structured learning path while building everything from scratch myself. I'm documenting the entire process—mistakes, dead ends, and all—because I believe the struggles are where the real learning happens.
+            </p>
+
+            <p>
+                This is <strong>Project 1</strong>: Deploying a Java Gradle application to a cloud server. On the surface, this sounds simple: spin up a server, copy a JAR file, run it. But as I quickly discovered, there's a massive gap between "works on my laptop" and "runs in production."
+            </p>
+
+            <h2>The Goal (and What I Thought Would Happen)</h2>
+
+            <p><strong>The objective:</strong></p>
             <ul>
-                <li>Set up a cloud server from scratch</li>
+                <li>Provision a cloud server from scratch</li>
                 <li>Deploy a Java application</li>
-                <li>Configure security properly (least privilege principle)</li>
+                <li>Implement proper security (least privilege principle)</li>
+                <li>Make it accessible via the internet</li>
             </ul>
 
-            <p>Sounds straightforward, right? Well...</p>
-
-            <h3>Spinning Up My First Cloud Server</h3>
-
             <p>
-                I started by creating a Droplet on DigitalOcean with the bare minimum specs since I'm paying out of pocket 
-                for this learning journey: Ubuntu with 512 MB RAM, 10 GB storage, 1 CPU, and the region closest to me for 
-                lower latency.
+                Coming from tier 1 IT support where most software is pre-packaged and "just works" after installation, I expected this to be straightforward. Download Java, copy the file, run it. Maybe an hour, tops.
             </p>
 
             <p>
-                For authentication, I pasted my SSH public key (from <code>~/.ssh/id_rsa.pub</code>) into DigitalOcean during 
-                setup. This is way more secure than password authentication and it means I don't have to type a password every 
-                time I connect.
+                It took me an entire afternoon, and I learned more about build tools, dependency management, and Linux security than I did in my last semester of classes.
             </p>
 
+            <h2>Part 1: Provisioning the Server</h2>
+
             <p>
-                I configured the firewall to only allow SSH (port 22) from my computer's public IP. Then I connected:
+                I chose DigitalOcean because Nana's roadmap starts there before gradually transitioning to AWS. The interface is simpler and more straightforward for learning the fundamentals, and the $6/month droplet fit my student budget perfectly.
             </p>
 
-            <pre><code>ssh root@&lt;server-ip&gt;</code></pre>
+            <p><strong>Server specs:</strong></p>
+            <ul>
+                <li>Ubuntu 22.04 LTS</li>
+                <li>512 MB RAM</li>
+                <li>10 GB SSD</li>
+                <li>1 vCPU</li>
+                <li>Region: San Francisco 3</li>
+            </ul>
 
-            <p>And boom—I was in. First cloud server: check.</p>
+            <h3>SSH Key Setup (The Right Way)</h3>
 
-            <h3>The First Reality Check: Building the Application</h3>
+            <p>Before even creating the server, I generated an SSH key pair on my laptop:</p>
+
+            <pre><code>ssh-keygen -t rsa -b 4096 -C "noah@laptop"</code></pre>
+
+            <p>This created two files in <code>~/.ssh/</code>:</p>
+            <ul>
+                <li><code>id_rsa</code> - Private key (stays on my laptop, NEVER share this)</li>
+                <li><code>id_rsa.pub</code> - Public key (goes on the server)</li>
+            </ul>
 
             <p>
-                This is where things got interesting. The project uses a Java Gradle application from Nana's GitLab repository. 
-                I opened it in IntelliJ, hit build, and... nothing. The Gradle build failed immediately.
+                I copied the contents of <code>id_rsa.pub</code> and pasted it into DigitalOcean's SSH key configuration during server creation. This is <strong>infinitely</strong> more secure than password authentication because:
+            </p>
+
+            <ul>
+                <li><strong>Passwords can be brute-forced</strong> - SSH keys can't (4096-bit RSA is computationally infeasible to crack)</li>
+                <li><strong>Passwords are typed</strong> - They can be keylogged or shoulder-surfed</li>
+                <li><strong>Passwords are reused</strong> - People use the same password everywhere (I know I used to)</li>
+            </ul>
+
+            <p>Once the droplet was created, I got its public IP and connected:</p>
+
+            <pre><code>ssh root@143.198.XXX.XXX</code></pre>
+
+            <p>No password prompt. Just straight in. First cloud server: ✅</p>
+
+            <h3>Firewall Configuration (First Security Layer)</h3>
+
+            <p>DigitalOcean has a built-in cloud firewall that sits outside the server itself. I configured it to only allow:</p>
+
+            <p><strong>Inbound:</strong></p>
+            <ul>
+                <li>SSH (port 22) from my home IP only</li>
+            </ul>
+
+            <p><strong>Outbound:</strong></p>
+            <ul>
+                <li>All traffic allowed (so the server can download packages)</li>
+            </ul>
+
+            <p>This is defense in depth. Even if someone compromises my SSH key, they can't connect unless they're coming from my IP address.</p>
+
+            <div class="callout info">
+                <div class="callout-title">
+                    <i class="fas fa-shield-alt"></i> Why This Matters in Production
+                </div>
+                <p>
+                    Through my Security+ studies and cyber risk management coursework at LSU, I've learned about how quickly exposed servers get compromised. SSH brute-force attacks are constant—I've read case studies of servers being breached within hours of being exposed to the internet. Rate limiting by IP is the first line of defense.
+                </p>
+            </div>
+
+            <h2>Part 2: Building the Application (Where Everything Broke)</h2>
+
+            <p>
+                The project uses a Java Gradle application from Nana's GitLab repository. I cloned it to my laptop, opened it in IntelliJ IDEA, and hit the build button.
             </p>
 
             <div class="callout error">
                 <div class="callout-title">
-                    <i class="fas fa-times-circle"></i> First Error: Gradle 8 Compatibility
+                    <i class="fas fa-times-circle"></i> Error
                 </div>
-                <p>
-                    The error message was cryptic at first, but after some digging, I figured out the problem: Gradle 8 doesn't 
-                    support the version of Spring Boot the project was using (2.7.x). Apparently, Gradle 8 removed something 
-                    called JavaPluginConvention that older Spring Boot versions relied on.
-                </p>
+                <pre><code>FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred evaluating root project.
+> org/gradle/api/plugins/JavaPluginConvention</code></pre>
             </div>
 
+            <h3>The Gradle 8 Compatibility Issue</h3>
+
             <p>
-                I'd never heard of SDKMAN before this, but after some Googling, I learned it's a tool for managing different 
-                versions of Java development tools. I installed it and downgraded to Gradle 7.6.4:
+                I stared at this error for a solid 10 minutes. <code>JavaPluginConvention</code>? I'd never heard of it. I started Googling.
             </p>
 
-            <pre><code>sdk install gradle 7.6.4
+            <p><strong>What I learned:</strong></p>
+            <p>
+                Gradle 8 removed an internal API called <code>JavaPluginConvention</code> that older versions of the Spring Boot Gradle plugin relied on. The application was using Spring Boot 2.7.11, which was built before Gradle 8 existed. The plugin expected this API to be there, and when Gradle 8 removed it, the build broke.
+            </p>
+
+            <p><strong>The fix:</strong> Downgrade to Gradle 7.6.4.</p>
+
+            <p>But here's the thing—I didn't know how to manage multiple Gradle versions. IntelliJ comes bundled with Gradle, but that's not what gets used when you run Gradle from the terminal.</p>
+
+            <p>Enter <strong>SDKMAN</strong>.</p>
+
+            <h3>SDKMAN: The Tool I Didn't Know I Needed</h3>
+
+            <p>
+                SDKMAN is a version manager for Java development tools—Gradle, Maven, Java itself, even Kotlin and Scala. It lets you install multiple versions and switch between them on the fly.
+            </p>
+
+            <pre><code># Install SDKMAN
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Install Gradle 7.6.4
+sdk install gradle 7.6.4
+
+# Use it for this session
 sdk use gradle 7.6.4</code></pre>
 
-            <p>Problem solved, right? Nope.</p>
+            <div class="callout info">
+                <div class="callout-title">
+                    <i class="fas fa-info-circle"></i> Why This Is Valuable
+                </div>
+                <p>
+                    Different projects require different tool versions. In production, you might maintain legacy applications on Gradle 6, new microservices on Gradle 8, and third-party integrations on Gradle 7. SDKMAN lets you context-switch without constantly reinstalling tools.
+                </p>
+            </div>
+
+            <p>I ran the build again.</p>
 
             <div class="callout error">
                 <div class="callout-title">
-                    <i class="fas fa-times-circle"></i> Second Error: Java Version Mismatch
+                    <i class="fas fa-times-circle"></i> New Error
                 </div>
-                <p>
-                    Now Gradle was complaining about my Java version. I was running Java 21, but Gradle 7.6.4 doesn't support 
-                    anything past Java 19. The error was something about "class file major version 65" which I later learned 
-                    meant Java 21.
-                </p>
+                <pre><code>Unsupported class file major version 65</code></pre>
             </div>
 
-            <p>So I had to install Java 17:</p>
-
-            <pre><code>sudo apt update
-sudo apt install openjdk-17-jdk</code></pre>
-
-            <div class="callout warning">
-                <div class="callout-title">
-                    <i class="fas fa-exclamation-triangle"></i> Important Lesson About Java Versions
-                </div>
-                <p>
-                    Here's where I learned something really important about how Java versions work on Linux: having multiple 
-                    Java versions installed doesn't automatically mean Gradle will use the right one.
-                </p>
-                <p style="margin-bottom: 0;">
-                    I had to manually tell the system which Java version to use with update-alternatives:
-                </p>
-            </div>
-
-            <pre><code>sudo update-alternatives --config java</code></pre>
+            <h3>The Java Version Rabbit Hole</h3>
 
             <p>
-                This showed me a list of installed Java versions, and I selected Java 17.
-            </p>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <i class="fas fa-info-circle"></i> IntelliJ vs System Java
-                </div>
-                <p>
-                    Here's the kicker: I initially thought that setting the JDK in IntelliJ's project structure would fix this. 
-                    It didn't. <strong>IntelliJ's JVM settings only affect IntelliJ itself.</strong> When you run Gradle from 
-                    the terminal, it uses whatever <code>java</code> command points to in your system PATH. Those are completely 
-                    separate things.
-                </p>
-            </div>
-
-            <p>
-                Finally, the build worked. I got my <code>.jar</code> file in the <code>build/libs/</code> folder, and I was 
-                ready to deploy.
-            </p>
-
-            <h3>Getting the Application onto the Server</h3>
-
-            <p>
-                With the JAR file built, I used <code>scp</code> (secure copy) to transfer it to my DigitalOcean server:
-            </p>
-
-            <pre><code>scp build/libs/myapp.jar root@&lt;server-ip&gt;:~/</code></pre>
-
-            <p>Then I SSH'd back into the server and ran the application:</p>
-
-            <pre><code>java -jar myapp.jar</code></pre>
-
-            <p>
-                The app started up and told me it was running on port 7071. Great!
+                This error message is cryptic if you've never seen it before. "Class file major version 65" is Java's way of saying "this bytecode was compiled with Java 21, but you're trying to run it with an older JVM that doesn't understand Java 21 bytecode."
             </p>
 
             <p>
-                I opened my browser and tried to access <code>http://&lt;server-ip&gt;:7071</code> and... nothing. Connection timeout.
+                But wait—I wasn't trying to run anything yet. I was just building the project. Why would the build process care about my Java version?
+            </p>
+
+            <p><strong>What I learned:</strong></p>
+            <p>
+                Gradle itself is a Java application. When you run <code>gradle build</code>, you're running Gradle with whatever Java version your system has. Gradle 7.6.4 doesn't support Java 21 because Java 21 introduced bytecode changes that Gradle 7 doesn't understand.
             </p>
 
             <p>
-                Oh right. The firewall. I had only opened port 22 for SSH. I needed to add a rule for port 7071.
+                The project was configured for Java 17 (the LTS version), but I had Java 21 installed on my laptop—that was the latest version I had installed, and I didn't realize it would cause compatibility issues.
             </p>
 
+            <p><strong>The fix:</strong> Install Java 17.</p>
+
+            <pre><code>sdk install java 17.0.10-tem
+sdk use java 17.0.10-tem</code></pre>
+
+            <h3>IntelliJ vs. System Java: A Critical Distinction</h3>
+
+            <p>Here's where I made a mistake that wasted 20 minutes of my life.</p>
+
             <p>
-                Back in the DigitalOcean dashboard, I added a custom inbound rule to allow traffic on port 7071 from all IPs. 
-                Refreshed the browser, and there it was—my application running on a cloud server for the first time.
+                I went into IntelliJ's project structure settings and changed the JDK to Java 17. Then I ran <code>gradle build</code> from my terminal.
             </p>
+
+            <p>Same error.</p>
+
+            <p><strong>Why?</strong></p>
+            <p>
+                IntelliJ's JDK setting only affects IntelliJ itself—the IDE uses that JDK for code analysis, autocomplete, and running code within the IDE. When you run Gradle from the terminal, it uses whatever <code>java</code> command exists in your system PATH.
+            </p>
+
+            <p>These are <strong>completely separate</strong>.</p>
+
+            <p>To verify which Java version the terminal sees:</p>
+
+            <pre><code>java -version</code></pre>
+
+            <p>It was still showing Java 21. SDKMAN's <code>sdk use</code> command only affects the current terminal session, and I had opened a new terminal window.</p>
+
+            <p><strong>Permanent fix:</strong></p>
+
+            <pre><code>sdk default java 17.0.10-tem</code></pre>
+
+            <p>This sets Java 17 as the system default.</p>
 
             <div class="callout success">
                 <div class="callout-title">
-                    <i class="fas fa-check-circle"></i> First Success
+                    <i class="fas fa-check-circle"></i> Finally
                 </div>
-                <p>
-                    That feeling when you see your app running on someone else's computer halfway across the world never gets old.
-                </p>
+                <pre><code>BUILD SUCCESSFUL in 12s</code></pre>
             </div>
 
-            <h3>Security: Don't Run Apps as Root</h3>
+            <p>The JAR file appeared in <code>build/libs/my-app-1.0.jar</code>.</p>
+
+            <h3>Why This Matters Beyond This Project</h3>
 
             <p>
-                This is where the project taught me about the <strong>principle of least privilege</strong>. Running applications 
-                as the root user is a terrible security practice. If your application gets compromised, an attacker has full 
-                control of the entire server.
+                Version compatibility issues like this are <strong>everywhere</strong> in software development. Coming from IT support where most software has a "recommended system requirements" list and that's it, I didn't appreciate how fragile build ecosystems are.
             </p>
 
-            <p>The solution: create a dedicated user for each application.</p>
-
-            <pre><code>adduser appuser</code></pre>
+            <p>The code you write today might not build tomorrow if:</p>
+            <ul>
+                <li>A dependency updates and breaks backward compatibility</li>
+                <li>A build tool removes an internal API</li>
+                <li>A language version introduces breaking changes</li>
+            </ul>
 
             <p>
-                I set a password, entered a full name, and skipped through the other prompts (room number, work phone, etc.—who 
-                fills those out?).
+                This is why production Dockerfiles specify exact versions (<code>FROM openjdk:17.0.10-jdk</code>), why package managers use lock files (<code>package-lock.json</code>, <code>Gemfile.lock</code>), and why some companies maintain internal mirrors of package repositories.
             </p>
+
+            <p><strong>In DevOps, version management isn't a nice-to-have—it's the job.</strong></p>
+
+            <h2>Part 3: Deploying to the Server</h2>
+
+            <p>With the JAR built, I needed to get it onto the server. I used <code>scp</code> (secure copy over SSH):</p>
+
+            <pre><code>scp build/libs/my-app-1.0.jar root@143.198.XXX.XXX:~/</code></pre>
+
+            <p>This copied the file to the root user's home directory on the server.</p>
+
+            <p>Then I SSH'd into the server and tried to run it:</p>
+
+            <pre><code>java -jar my-app-1.0.jar</code></pre>
+
+            <div class="callout error">
+                <div class="callout-title">
+                    <i class="fas fa-times-circle"></i> Error
+                </div>
+                <pre><code>bash: java: command not found</code></pre>
+            </div>
+
+            <p>Right. The server doesn't have Java installed.</p>
+
+            <h3>Installing Java on the Server</h3>
+
+            <pre><code># Update package lists
+sudo apt update
+
+# Install OpenJDK 17
+sudo apt install openjdk-17-jdk -y
+
+# Verify
+java -version</code></pre>
+
+            <p>Output:</p>
+
+            <pre><code>openjdk version "17.0.10"</code></pre>
+
+            <p>Perfect.</p>
+
+            <pre><code>java -jar my-app-1.0.jar</code></pre>
+
+            <p>The application started:</p>
+
+            <pre><code>  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+2026-02-10 14:23:15.441  INFO --- [main] Application started on port 7071</code></pre>
+
+            <p>Success! The app was running.</p>
+
+            <p>I opened my browser: <code>http://143.198.XXX.XXX:7071</code></p>
+
+            <p><strong>Connection timed out.</strong></p>
+
+            <h3>The Firewall (Again)</h3>
+
+            <p>I had forgotten to open port 7071 in the DigitalOcean firewall. I went back to the dashboard and added an inbound rule:</p>
+
+            <p><strong>Allow TCP port 7071 from all IPv4 and IPv6</strong></p>
+
+            <p>Refreshed the browser.</p>
+
+            <p><strong>It worked.</strong> The application's web interface loaded.</p>
+
+            <h3>Security Problem: Why "All IPs" Is Bad</h3>
 
             <p>
-                Then I added the new user to the sudo group so they could perform administrative tasks when needed:
+                In my excitement to see it working, I opened port 7071 to the entire internet. In production, this would be a mistake.
             </p>
 
-            <pre><code>usermod -aG sudo appuser</code></pre>
+            <p><strong>Better approach:</strong></p>
+            <ol>
+                <li>Use a <strong>reverse proxy</strong> (nginx) on ports 80/443</li>
+                <li>Keep the application on localhost only (not exposed)</li>
+                <li>Use HTTPS with a real SSL certificate</li>
+                <li>Implement rate limiting and authentication</li>
+            </ol>
 
-            <p>I switched to the new user to test it:</p>
+            <p>But for a learning environment with a throwaway app, it was fine.</p>
 
-            <pre><code>su - appuser</code></pre>
+            <h2>Part 4: The Principle of Least Privilege</h2>
 
-            <p>And tried to SSH into the server as this user:</p>
+            <p>At this point, I had a working deployment. But I was running everything as the <code>root</code> user, which is <strong>terrible security practice</strong>.</p>
 
-            <pre><code>ssh appuser@&lt;server-ip&gt;</code></pre>
+            <p><strong>Why running apps as root is dangerous:</strong></p>
 
-            <p>Permission denied.</p>
+            <p>
+                If your application gets compromised—a SQL injection, a remote code execution vulnerability, a misconfigured file upload—an attacker would have <strong>full root access</strong> to the entire server. They could:
+            </p>
+
+            <ul>
+                <li>Install backdoors</li>
+                <li>Steal SSH keys</li>
+                <li>Pivot to other systems on your network</li>
+                <li>Use your server for crypto mining</li>
+                <li>Delete everything</li>
+            </ul>
+
+            <p>
+                The principle of least privilege says: <strong>Every process should have the minimum permissions required to do its job, and no more.</strong>
+            </p>
+
+            <h3>Creating a Dedicated Application User</h3>
+
+            <pre><code># Create new user
+adduser appuser
+
+# Add to sudo group (so they can perform admin tasks when needed)
+usermod -aG sudo appuser</code></pre>
+
+            <p>I set a strong password and filled in the account details.</p>
+
+            <h3>Testing the New User</h3>
+
+            <pre><code># Switch to the new user
+su - appuser
+
+# Try to run something that requires root
+systemctl restart nginx</code></pre>
+
+            <p>It prompted for the password (because <code>appuser</code> is in the sudo group), but it worked. Good.</p>
+
+            <p>Now I tried to SSH as this user:</p>
+
+            <pre><code>ssh appuser@143.198.XXX.XXX</code></pre>
+
+            <p><strong>Permission denied (publickey).</strong></p>
 
             <h3>The SSH Key Problem</h3>
 
             <p>
-                Right. I had set up SSH key authentication for the root user, but not for my new user. The SSH key was sitting 
-                in <code>/root/.ssh/authorized_keys</code>, which the new user didn't have access to.
+                Right—SSH keys are per-user, not system-wide. The public key I added during server creation was placed in <code>/root/.ssh/authorized_keys</code>. The <code>appuser</code> account has no SSH keys configured.
             </p>
 
-            <p>I had to manually create the SSH directory structure for the new user:</p>
+            <p><strong>Solution:</strong> Create the SSH directory for the new user and add my public key.</p>
 
-            <pre><code>sudo mkdir -p /home/appuser/.ssh
-sudo nano /home/appuser/.ssh/authorized_keys</code></pre>
+            <pre><code># As root, create the .ssh directory
+sudo mkdir -p /home/appuser/.ssh
 
-            <p>I pasted my public key in there, saved the file, and set the proper permissions:</p>
+# Create the authorized_keys file
+sudo vim /home/appuser/.ssh/authorized_keys</code></pre>
 
-            <pre><code>sudo chmod 700 /home/appuser/.ssh
+            <p>I pasted my public key (same one from my laptop), saved it, and set the proper permissions:</p>
+
+            <pre><code># Directory: Only owner can read, write, execute
+sudo chmod 700 /home/appuser/.ssh
+
+# File: Only owner can read and write
 sudo chmod 600 /home/appuser/.ssh/authorized_keys
+
+# Make sure appuser owns these files
 sudo chown -R appuser:appuser /home/appuser/.ssh</code></pre>
 
             <div class="callout warning">
                 <div class="callout-title">
-                    <i class="fas fa-exclamation-triangle"></i> SSH Permissions Matter
+                    <i class="fas fa-exclamation-triangle"></i> Why These Permissions Matter
                 </div>
                 <p>
-                    Those permissions are important. SSH won't accept the key if the <code>.ssh</code> directory or the 
-                    <code>authorized_keys</code> file are too permissive.
+                    SSH is <strong>extremely</strong> strict about file permissions for security reasons. If <code>.ssh/</code> or <code>authorized_keys</code> are too permissive (e.g., world-writable), SSH will refuse to use them because it assumes they've been tampered with.
                 </p>
+                <p>The permissions must be:</p>
+                <ul>
+                    <li><code>700</code> (drwx------) for <code>.ssh/</code> directory</li>
+                    <li><code>600</code> (-rw-------) for <code>authorized_keys</code> file</li>
+                </ul>
             </div>
 
             <p>I exited the server completely and tried again:</p>
 
-            <pre><code>ssh appuser@&lt;server-ip&gt;</code></pre>
+            <pre><code>ssh appuser@143.198.XXX.XXX</code></pre>
 
             <p>No password prompt. Success.</p>
 
+            <p>Now I could copy the JAR to the new user's directory and run it without root privileges:</p>
+
+            <pre><code># As appuser
+cd ~
+# (copy JAR here)
+java -jar my-app-1.0.jar</code></pre>
+
             <p>
-                Now I could run the application as this non-root user, and if something went wrong with the app, the damage 
-                would be contained.
+                The application ran, but now with restricted permissions. If it gets compromised, the attacker is limited to what <code>appuser</code> can do—which is significantly less than root.
             </p>
 
-            <h2>What I Learned</h2>
+            <h3>What's Still Missing (Production Considerations)</h3>
 
-            <p>
-                This project taught me several things that aren't obvious from just reading documentation:
-            </p>
+            <p>In a real production environment, I wouldn't just run <code>java -jar</code> manually. I would:</p>
 
+            <p><strong>Set up a systemd service:</strong></p>
+
+            <pre><code>[Unit]
+Description=My Java Application
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/home/appuser
+ExecStart=/usr/bin/java -jar /home/appuser/my-app-1.0.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+            <p>This would:</p>
             <ul>
-                <li>
-                    <strong>Version compatibility matters more than you think.</strong> Gradle, Java, and Spring Boot all have 
-                    to play nice together. Upgrading one without checking the others can break everything.
-                </li>
-                <li>
-                    <strong>IntelliJ's JDK settings ≠ your terminal's Java version.</strong> They're completely separate. 
-                    IntelliJ uses its configured JDK for its own processes, but when you run Gradle from the terminal, it 
-                    uses whatever the system PATH points to.
-                </li>
-                <li>
-                    <strong>Firewalls exist in cloud environments.</strong> Coming from a local development background, I 
-                    wasn't used to thinking about firewall rules. In the cloud, you have to explicitly allow traffic on every 
-                    port you want to use.
-                </li>
-                <li>
-                    <strong>SSH key authentication is per-user.</strong> You can't just set up SSH keys for root and expect 
-                    them to work for other users. Each user needs their own <code>authorized_keys</code> file.
-                </li>
-                <li>
-                    <strong>Security isn't just a checkbox at the end.</strong> Creating separate users for applications, 
-                    using SSH keys instead of passwords, limiting firewall rules—these should be part of the initial setup, 
-                    not an afterthought.
-                </li>
+                <li>Start the app automatically on server boot</li>
+                <li>Restart it if it crashes</li>
+                <li>Log output to journald (viewable with <code>journalctl</code>)</li>
             </ul>
+
+            <p><strong>Add monitoring:</strong></p>
+            <ul>
+                <li>Prometheus + Grafana for metrics</li>
+                <li>Application-level logging (not just console output)</li>
+                <li>Alerts for high CPU, memory, or error rates</li>
+            </ul>
+
+            <p><strong>Implement proper networking:</strong></p>
+            <ul>
+                <li>Nginx reverse proxy on port 80/443</li>
+                <li>SSL certificate from Let's Encrypt</li>
+                <li>Application running on localhost only (not exposed)</li>
+            </ul>
+
+            <p><strong>Cost-benefit analysis:</strong></p>
+            <p>
+                For this learning project, none of that was necessary. But understanding the gap between "works" and "production-ready" is part of the learning process.
+            </p>
+
+            <h2>What I Learned (The Real Takeaways)</h2>
+
+            <h3>1. Build Tool Ecosystems Are Fragile</h3>
+
+            <p>
+                Coming from tier 1 IT support, I was used to software that "just works." You install it, you run it. Build tools don't work that way.
+            </p>
+
+            <p>
+                Gradle, Java, and Spring Boot all have to be compatible with each other. Upgrading one without checking the others breaks everything. This isn't a bug—it's the nature of software that's constantly evolving.
+            </p>
+
+            <p><strong>Production implication:</strong> Lock down versions in Docker, use dependency managers, maintain internal package mirrors.</p>
+
+            <h3>2. IntelliJ ≠ Terminal</h3>
+
+            <p>
+                IDEs like IntelliJ have their own JDK configurations that are separate from your system PATH. When you run Gradle from the IDE, it uses IntelliJ's JDK. When you run it from the terminal, it uses your system's default Java.
+            </p>
+
+            <p>
+                This is a source of "works on my machine" problems. Your teammate's IDE might use Java 17, but their system Java might be 11, and builds will behave differently.
+            </p>
+
+            <p><strong>Solution:</strong> Use SDKMAN or similar tools to manage versions explicitly.</p>
+
+            <h3>3. Firewalls Exist (And They Matter)</h3>
+
+            <p>
+                In local development, everything runs on <code>localhost</code> and firewalls don't matter. In the cloud, you have to explicitly allow traffic on every port you want to expose.
+            </p>
+
+            <p>
+                This is a <strong>good thing</strong>. It forces you to think about what should be accessible from the internet.
+            </p>
+
+            <p><strong>In production:</strong> Use multiple firewall layers (cloud firewall + OS firewall + application-level access control).</p>
+
+            <h3>4. SSH Key Authentication Is Non-Negotiable</h3>
+
+            <p>
+                Password authentication for SSH is disabled by default on most cloud providers for a reason: it's too easy to brute-force.
+            </p>
+
+            <p>SSH keys are:</p>
+            <ul>
+                <li>Impossible to brute-force (4096-bit RSA)</li>
+                <li>Never transmitted over the network</li>
+                <li>Easy to revoke (just remove from <code>authorized_keys</code>)</li>
+            </ul>
+
+            <p><strong>Lesson:</strong> Never enable password auth for SSH in production. Ever.</p>
+
+            <h3>5. Per-User Permissions Are More Work, But Necessary</h3>
+
+            <p>
+                Creating dedicated users for each application is annoying. You have to set up SSH keys, copy files, manage permissions. But it's the right way to do it.
+            </p>
+
+            <p>
+                If your app gets hacked and it's running as <code>root</code>, your entire server is compromised. If it's running as <code>appuser</code>, the damage is contained.
+            </p>
+
+            <p><strong>Real-world parallel:</strong> In my IT support job at LSU AgCenter, we never give users local admin rights on their workstations for exactly this reason. Same principle applies to servers.</p>
+
+            <h2>Reflection: What I'd Do Differently</h2>
+
+            <p>If I were doing this for a real company, not a learning project:</p>
+
+            <p><strong>What I did (sufficient for learning):</strong></p>
+            <ul>
+                <li>✅ SSH key authentication</li>
+                <li>✅ Dedicated application user</li>
+                <li>✅ Cloud firewall rules</li>
+            </ul>
+
+            <p><strong>What I'd add (for production):</strong></p>
+            <ul>
+                <li>❌ systemd service for automatic restart</li>
+                <li>❌ Nginx reverse proxy with HTTPS</li>
+                <li>❌ Centralized logging (not just console output)</li>
+                <li>❌ Monitoring and alerting</li>
+                <li>❌ Automated backups</li>
+                <li>❌ Configuration management (Ansible/Terraform)</li>
+            </ul>
+
+            <p>
+                The difference between "working" and "production-ready" is substantial, and I'm okay with that. The goal here is to learn the fundamentals, not build a bulletproof system.
+            </p>
+
+            <h2>Time and Cost Investment</h2>
+
+            <p><strong>Time spent:</strong> ~4 hours (including troubleshooting)</p>
+            <p><strong>Cost:</strong> $6/month for the DigitalOcean droplet</p>
+
+            <p><strong>Breakdown:</strong></p>
+            <ul>
+                <li>30 min: Server provisioning and SSH setup</li>
+                <li>90 min: Build tool debugging (Gradle, Java versions)</li>
+                <li>45 min: Deployment and firewall configuration</li>
+                <li>45 min: User setup and SSH key management</li>
+            </ul>
+
+            <p>
+                <strong>Was it worth it?</strong> Absolutely. I learned more about build tools, Linux security, and version management in one afternoon than I did in an entire semester of coursework.
+            </p>
 
             <h2>What's Next</h2>
 
             <p>
-                This was just the first project. Next up, I'm setting up Nexus Repository Manager on the same DigitalOcean 
-                server and learning how to publish artifacts to it. I'm expecting more version conflicts, more firewall headaches, 
-                and probably some new surprises I haven't thought of yet.
+                This was just the foundation. Next, I'm setting up <strong>Nexus Repository Manager</strong> on another server to centrally manage build artifacts. Instead of copying JAR files manually with <code>scp</code>, I'll be publishing them to Nexus and pulling them from there—simulating how a real CI/CD pipeline would work.
             </p>
 
+            <p>I'm expecting:</p>
+            <ul>
+                <li>More version conflicts</li>
+                <li>More firewall issues</li>
+                <li>Some new authentication problems I haven't encountered yet</li>
+            </ul>
+
             <p>
-                But that's the whole point of this journey. Every time something breaks, I learn something new about how these 
-                systems actually work.
+                But that's the point. Every time something breaks, I learn how these systems actually work under the hood. And every time I fix it myself, I get a little closer to being the kind of engineer who can walk into a production environment and actually solve problems instead of escalating them.
             </p>
 
             <blockquote>
-                If you're following along or doing something similar, feel free to reach out. I'd love to hear about your own 
-                "wait, why isn't this working?" moments.
+                If you're on a similar journey—whether through Nana's roadmap or somewhere else—feel free to reach out. I'd love to hear about your "wait, why isn't this working?" moments. That's where the real learning happens.
             </blockquote>
 
         </article>
@@ -756,16 +1073,8 @@ sudo chown -R appuser:appuser /home/appuser/.ssh</code></pre>
         <div class="related-grid">
             <a href="devops-project-2.html" class="related-card">
                 <h4>Setting Up Nexus Repository Manager</h4>
-                <p>Installing Nexus from scratch, configuring blob stores, and publishing artifacts...</p>
+                <p>Architecture mismatches, silent failures, and blob store cleanup when setting up centralized artifact management...</p>
             </a>
-            <!-- <a href="#" class="related-card">
-                <h4>Building My First CI/CD Pipeline with Jenkins</h4>
-                <p>Coming soon: From pipeline syntax errors to webhook configurations...</p>
-            </a>
-            <a href="#" class="related-card">
-                <h4>Infrastructure as Code with Terraform</h4>
-                <p>Coming soon: Automating infrastructure provisioning and learning why state files matter...</p>
-            </a> -->
         </div>
     </section>
 
