@@ -735,7 +735,7 @@
             <div class="skill-category">
                 <h3><i class="fas fa-cloud"></i> Cloud Platforms</h3>
                 <div class="skill-tags">
-                    <!-- <span class="skill-tag">AWS (EC2, S3, VPC, EKS, ECR)</span> -->
+                    <span class="skill-tag">AWS (EC2, VPC, ECR)</span>
                     <span class="skill-tag">Azure</span>
                     <span class="skill-tag">DigitalOcean</span>
                 </div>
@@ -769,8 +769,6 @@
                     <span class="skill-tag">Python</span>
                     <span class="skill-tag">Bash</span>
                     <span class="skill-tag">PowerShell</span>
-                    <!-- <span class="skill-tag">Java</span> -->
-                    <!-- <span class="skill-tag">JavaScript</span> -->
                 </div>
             </div>
 
@@ -932,6 +930,114 @@
             <p>Production-focused cloud infrastructure, automation, and container orchestration projects.</p>
         </div>
 
+        <!-- AWS CI/CD Pipeline -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Complete CI/CD Pipeline: Git Commit to AWS Deployment</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Built a complete end-to-end CI/CD pipeline automating the entire workflow from Git commit to AWS EC2 deployment. Implemented dynamic versioning, remote deployment via SSH, and Docker Compose orchestration—achieving zero-touch deployments.
+            </p>
+            <ul class="project-highlights">
+                <li>Automated version incrementing in pom.xml and tagging Docker images with version + build number</li>
+                <li>Built Jenkins pipeline integrating shared library functions for JAR builds, image creation, and Docker Hub pushes</li>
+                <li>Configured remote SSH deployment from Jenkins (DigitalOcean) to EC2 instance with converted SSH keys</li>
+                <li>Deployed multi-container stack (app + PostgreSQL) using Docker Compose with environment variable injection</li>
+                <li>Implemented Git integration to commit version bumps back to repository for continuous version tracking</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Jenkins</span>
+                <span class="tech-badge">AWS</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Git</span>
+                <span class="tech-badge">Linux</span>
+                <span class="tech-badge">Maven</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Docker Hub</span>
+            </div>
+
+            <div class="project-links">
+                <a href="blog/devops-project-5.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+                <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" class="project-link"><i class="fab fa-gitlab"></i>Gitlab Repository</a>
+            </div>
+
+        </div>
+
+        <!-- Jenkins Shared Library -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Jenkins Shared Library: Scaling Pipeline Automation</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Built a Jenkins Shared Library to eliminate duplicate pipeline code and enable reusable CI/CD automation. Learned Groovy scripting, the script object pattern, and how to structure shared libraries for enterprise-scale Jenkins environments.
+            </p>
+            <ul class="project-highlights">
+                <li>Created reusable Groovy functions for common pipeline tasks (build, Docker operations, deployment)</li>
+                <li>Implemented the script object pattern to pass Jenkins context into shared library functions</li>
+                <li>Configured both global and project-specific library usage in Jenkinsfiles</li>
+                <li>Debugged credential handling, password escaping, and Git authentication in shared library context</li>
+                <li>Versioned shared library using Git tags for controlled rollout of pipeline changes</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Jenkins</span>
+                <span class="tech-badge">Groovy</span>
+                <span class="tech-badge">Java</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Maven</span>
+                <span class="tech-badge">Git</span>
+            </div>
+
+            <div class="project-links">
+                <a href="blog/devops-project-4.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+                <a href="https://gitlab.com/nvastola/jenkins-shared-library" class="project-link"><i class="fab fa-gitlab"></i>Gitlab Repository</a>
+            </div>
+
+        </div>
+
+        <!-- Docker Multi-Container Deployment -->
+        <div class="project-card">
+            <div class="project-header">
+                <div>
+                    <h3>Docker Multi-Container Deployment: From Localhost to AWS ECR</h3>
+                </div>
+                <span class="project-status">Completed</span>
+            </div>
+            <p>
+                Containerized a Node.js application with MongoDB, orchestrated multi-container deployment with Docker Compose, and pushed images to AWS ECR. Learned container networking, image immutability, and why localhost behaves differently in containers.
+            </p>
+            <ul class="project-highlights">
+                <li>Containerized Node.js application and MongoDB with Docker Compose for local development</li>
+                <li>Configured container networking and environment variables for multi-container communication</li>
+                <li>Built and tagged Docker images following immutability and versioning best practices</li>
+                <li>Authenticated with AWS ECR and pushed production images to private registry</li>
+                <li>Deployed multi-container application stack on DigitalOcean droplet</li>
+            </ul>
+            <div class="tech-stack">
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Amazon ECR</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">MongoDB</span>
+                <span class="tech-badge">MongoExpress</span>
+            </div>
+
+            <div class="project-links">
+                <a href="blog/devops-project-3.html" class="project-link">
+                    <i class="fas fa-blog"></i> Read the full story
+                </a>
+            </div>
+
+        </div>
+
         <!-- Cloud Resume Challenge -->
         <div class="project-card">
             <div class="project-header">
@@ -953,121 +1059,8 @@
                 <span class="tech-badge">Azure</span>
                 <span class="tech-badge">Terraform</span>
                 <span class="tech-badge">GitHub Actions</span>
-                <span class="tech-badge">Python</span>
-                <span class="tech-badge">JavaScript</span>
-            </div>
-        </div>
-
-        <!-- Java Application Deployment -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Deploy Java Application to Production Linux Server</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Provisioned and hardened a DigitalOcean droplet, then deployed a Java application following security and operations best practices. Configured the server for production workloads with proper user access controls and automated application startup.
-            </p>
-            <ul class="project-highlights">
-                <li>Provisioned Ubuntu droplet and configured SSH key-based authentication</li>
-                <li>Created non-root user with sudo privileges following least-privilege principle</li>
-                <li>Deployed Java Gradle application with automated startup using systemd service</li>
-                <li>Configured firewall rules and disabled root login for production security hardening</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">DigitalOcean</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Gradle</span>
-            </div>
-
-            <div class="project-links">
-                <a href="blog/devops-project-1.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-            </div>
-
-        </div>
-
-        <!-- Run Nexus and Publish Artifact -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Deploy Nexus Repository Manager for Centralized Artifact Management</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Deployed and configured Nexus Repository Manager on DigitalOcean to serve as a centralized artifact repository for Java applications. Implemented role-based access control and integrated with multiple build tools for automated artifact publishing.
-            </p>
-            <ul class="project-highlights">
-                <li>Deployed Nexus Repository Manager on Ubuntu droplet with persistent storage configuration</li>
-                <li>Configured Maven and Gradle hosted repositories for snapshot and release artifacts</li>
-                <li>Implemented RBAC with custom user roles and repository-level permissions</li>
-                <li>Integrated Gradle and Maven build pipelines to automatically publish artifacts to Nexus</li>
-                <li>Configured repository cleanup policies and storage quota management</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Nexus</span>
-                <span class="tech-badge">DigitalOcean</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Gradle</span>
-                <span class="tech-badge">Maven</span>
-            </div>
-
-            <div class="project-links">
-                <a href="blog/devops-project-2.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-            </div>
-
-        </div>
-
-        <!-- Enterprise Windows Domain Lab -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Enterprise Windows Domain Lab</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Built and administered a Windows domain environment with enterprise-grade security and automation.
-            </p>
-            <ul class="project-highlights">
-                <li>Deployed Windows Server 2022 environment with redundant DCs, 5 OUs, and 10+ GPOs enforcing security policies (password complexity, LAPS, audit logging)</li>
-                <li>Automated user provisioning and AD management using PowerShell scripts reducing admin time by 75%</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Active Directory</span>
-                <span class="tech-badge">Group Policy</span>
                 <span class="tech-badge">PowerShell</span>
-                <span class="tech-badge">Windows Server</span>
-            </div>
-        </div>
-
-        <!-- Security & SIEM -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Security, Automation & Systems</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Hardened enterprise systems using industry security benchmarks and real-time monitoring tools.
-            </p>
-            <ul class="project-highlights">
-                <li>Deployed Wazuh SIEM aggregating logs from 10+ endpoints with custom detection rules for privilege escalation, failed logins, and malware indicators</li>
-                <li>Applied CIS benchmark hardening to Windows/Linux systems implementing 50+ security controls</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">SIEM</span>
-                <span class="tech-badge">Security Hardening</span>
-                <span class="tech-badge">CIS Benchmarks</span>
-                <span class="tech-badge">Log Analysis</span>
+                <span class="tech-badge">JavaScript</span>
             </div>
         </div>
 
@@ -1093,30 +1086,30 @@
                     <i class="fas fa-star"></i> Latest Post
                 </span>
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <i class="fas fa-calendar"></i> February 27, 2026
+                    <i class="fas fa-calendar"></i> March 7, 2026
                 </span>
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <i class="fas fa-clock"></i> 18 min read
+                    <i class="fas fa-clock"></i> 20 min read
                 </span>
             </div>
             
-            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h3>
+            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h3>
             
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.05rem;">
-                From Freestyle jobs to pipeline-as-code to shared libraries—learning how to scale Jenkins automation across 10 microservices. Includes the 7-commit debugging story, the credential UUID hunt, password escaping issues, and why the script object pattern is both confusing and essential. Plus the Nexus rebuild lesson that taught me infrastructure-as-code matters.
+                Building end-to-end automation with Jenkins, AWS EC2, Docker Compose, and dynamic versioning. Includes the OpenSSL key format battle that worked locally but failed in Jenkins, the Git config hunt across three different locations, and achieving zero-touch deployments from commit to production—automatically incrementing versions, building images, and deploying both app and database containers.
             </p>
             
             <div class="tech-stack" style="margin-bottom: 1.5rem;">
                 <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">Groovy</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Git</span>
-                <span class="tech-badge">Java</span>
+                <span class="tech-badge">AWS EC2</span>
+                <span class="tech-badge">Docker Compose</span>
+                <span class="tech-badge">CI/CD</span>
+                <span class="tech-badge">SSH</span>
                 <span class="tech-badge">Maven</span>
             </div>
             
             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                <a href="blog/devops-project-4.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                <a href="blog/devops-project-5.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
                     <i class="fas fa-book-open"></i> Read Full Story
                 </a>
                 <a href="blog.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-cyan); text-decoration: none; font-weight: 600; transition: color 0.3s;">
@@ -1131,8 +1124,8 @@
                 <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
                     <i class="fas fa-graduation-cap"></i> Currently Learning
                 </h3>
-                <img src="assets/img/aws.png" alt="AWS" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
-                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">AWS Services</p>
+                <img src="assets/img/kub.png" alt="Kubernetes" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
+                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Kubernetes</p>
             </div>
             
             <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">

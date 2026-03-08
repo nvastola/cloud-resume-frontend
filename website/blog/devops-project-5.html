@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click | Noah Vastola</title>
+    <meta name="description" content="Building a full CI/CD pipeline that automatically versions, builds, and deploys a Java app with PostgreSQL to AWS EC2 using Jenkins, Docker Compose, and SSH automation.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-yellow: #fbbf24;
+            --accent-red: #ef4444;
+            --border-color: #2d3748;
+            --card-bg: #1e293b;
+            --code-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(26, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-cyan);
+        }
+
+        .article-header {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-blue);
+        }
+
+        .article-header h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item i {
+            color: var(--accent-cyan);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .article-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .article-body {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+        }
+
+        .article-body h2 {
+            font-size: 2rem;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-cyan);
+        }
+
+        .article-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .article-body h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .article-body h4 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .article-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .article-body ul, .article-body ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .article-body li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .article-body ul li::marker {
+            color: var(--accent-cyan);
+        }
+
+        .article-body code {
+            background: var(--code-bg);
+            color: var(--accent-green);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .article-body pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .article-body pre code {
+            background: none;
+            padding: 0;
+            color: var(--accent-green);
+        }
+
+        .callout {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .callout-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+            background: rgba(251, 191, 36, 0.05);
+        }
+
+        .callout.warning .callout-title {
+            color: var(--accent-yellow);
+        }
+
+        .callout.error {
+            border-color: var(--accent-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .callout.error .callout-title {
+            color: var(--accent-red);
+        }
+
+        .callout.success {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .callout.success .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout.info {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .callout.info .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        blockquote {
+            margin: 2rem 0;
+            padding: 1.5rem 2rem;
+            border-left: 4px solid var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .article-footer {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .back-to-blog {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .back-to-blog:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .related-posts {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .related-posts h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .related-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .related-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-4px);
+        }
+
+        .related-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .related-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .article-header h1 {
+                font-size: 2rem;
+            }
+
+            .article-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .article-body h2 {
+                font-size: 1.6rem;
+            }
+
+            .article-body h3 {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="../blog.html" class="nav-link">
+                    <i class="fas fa-blog"></i> Blog
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="article-header">
+        <div class="breadcrumb">
+            <a href="../blog.html">Blog</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Complete CI/CD Pipeline</span>
+        </div>
+
+        <h1>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h1>
+
+        <div class="article-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                March 7, 2026
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                20 min read
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                Noah Vastola
+            </div>
+        </div>
+
+        <div class="tags">
+            <span class="tag">Jenkins</span>
+            <span class="tag">AWS</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Git</span>
+            <span class="tag">Maven</span>
+            <span class="tag">Java</span>
+            <span class="tag">Docker Hub</span>
+        </div>
+    </header>
+
+    <main class="article-content">
+        <article class="article-body">
+
+<p>I committed a code change. Thirty seconds later, Jenkins detected it. Two minutes after that, the application was running on AWS EC2 with a new version number—both the app and database containers live, accessible to users.</p>
+
+<p><strong>Zero manual steps.</strong></p>
+
+<p>Getting to this point meant fighting OpenSSL key formats that worked on my machine but failed in Jenkins, hunting through three different Git configs before finding the right user context, debugging authentication failures caused by a single misplaced quote, and learning that "works on my machine" isn't good enough when your build server runs different software versions.</p>
+
+<p>But now: <code>git push</code> → automated build → versioned deployment → running application. The complete CI/CD workflow. Here's how I built it.</p>
+
+<h2>The Goal</h2>
+
+<p>Build a pipeline that automatically:</p>
+
+<ol>
+    <li>Increments version in <code>pom.xml</code></li>
+    <li>Builds the JAR with Maven</li>
+    <li>Builds a Docker image with the new version</li>
+    <li>Pushes versioned artifact to Docker Hub</li>
+    <li>Deploys to EC2 using Docker Compose</li>
+    <li>Commits version bump back to Git</li>
+</ol>
+
+<p><strong>All from one commit. No manual intervention.</strong></p>
+
+<p>This is how modern software gets deployed. Not manual SSH, not clicking through UIs, not copying files with <code>scp</code>. Code gets committed → Jenkins automates everything → application runs on infrastructure where users can access it.</p>
+
+<p><strong>What I had before this project:</strong> Docker fundamentals, Jenkins configuration, shared library pattern, reusable pipeline functions. What was missing: the deployment piece—actually getting code onto servers and automating the complete flow.</p>
+
+<h2>Part 1: AWS Infrastructure Setup</h2>
+
+<p>I already had an AWS account from the Docker/ECR project. This time I set it up properly.</p>
+
+<h3>IAM Best Practice: Admin User Instead of Root</h3>
+
+<p>Created an IAM admin user instead of using root for everything. This is the first project where I actually followed that security practice instead of just knowing I should.</p>
+
+<p><strong>Why this matters:</strong> If the admin account gets compromised, I can delete it and create a new one. Can't do that with root—root account compromise means unrestricted access to everything, including billing.</p>
+
+<p><strong>Setup:</strong></p>
+<ul>
+    <li>Created IAM user: <code>admin</code></li>
+    <li>Attached <code>AdministratorAccess</code> policy</li>
+    <li>Enabled console + CLI access</li>
+    <li>Created access key</li>
+    <li>Never touched root again</li>
+</ul>
+
+<h3>EC2 Instance Creation</h3>
+
+<p><strong>Instance config:</strong></p>
+<ul>
+    <li>Amazon Linux 2, t3.micro (free tier)</li>
+    <li>Default VPC, 8 GB storage</li>
+    <li>Key pair: <code>docker-server.pem</code> (downloaded to <code>~/.ssh/</code>)</li>
+</ul>
+
+<p><strong>Security group:</strong> <code>security-group-docker-server</code></p>
+
+<p><strong>Inbound rules:</strong></p>
+<ul>
+    <li>Port 22 (SSH): My IP only</li>
+    <li>Port 8080 (App): All IPs for testing</li>
+</ul>
+
+<pre><code>chmod 400 ~/.ssh/docker-server.pem
+ssh -i ~/.ssh/docker-server.pem ec2-user@&lt;public-ip&gt;</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-info-circle"></i> Why ec2-user, not root?
+    </div>
+    <p>Amazon Linux 2's default — a user with sudo access but no direct root login. Logging in as root directly is disabled by default, which is a security best practice.</p>
+</div>
+
+<h3>Docker Installation and Configuration</h3>
+
+<pre><code>sudo yum update -y
+sudo yum install docker -y
+sudo service docker start
+
+# Add ec2-user to docker group (avoid needing sudo for every command)
+sudo usermod -aG docker $USER
+
+# Log out/in for group change to apply
+exit
+ssh -i ~/.ssh/docker-server.pem ec2-user@&lt;public-ip&gt;
+
+# Verify
+docker run hello-world</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-info-circle"></i> Docker Group Grants Root-Equivalent Access
+    </div>
+    <p>Adding a user to the <code>docker</code> group means they can run privileged containers — effectively root-level access to the host. This is acceptable in a learning environment but is carefully controlled in production.</p>
+</div>
+
+<h2>Part 2: Manual Deployment Baseline</h2>
+
+<p>Before automating, I deployed manually to understand what Jenkins would need to replicate.</p>
+
+<pre><code># Authenticate to Docker Hub
+docker login
+# Creates /home/ec2-user/.docker/config.json
+# Keeps ec2-user logged in for future pulls
+
+# Pull and run
+docker pull nvastola/demo-app:1.0
+docker run -d -p 8080:8080 nvastola/demo-app:1.0
+
+# Verify
+docker ps</code></pre>
+
+<p>Opened browser: <code>http://&lt;ec2-ip&gt;:8080</code></p>
+
+<p><strong>Application loaded.</strong> Manual deployment successful.</p>
+
+<p>This process — authenticate, pull, run, verify — is exactly what the pipeline will automate.</p>
+
+<h2>Part 3: The Architecture Decision That Taught Me Production Thinking</h2>
+
+<p>My initial thought: "Run Jenkins on the same EC2 instance as the app. No need for a separate server."</p>
+
+<p>I actually set this up. Jenkins on EC2, application on EC2, everything worked.</p>
+
+<p>Then I stopped and asked: <strong>What am I actually learning here?</strong></p>
+
+<p>If Jenkins and the app run on the same instance, Jenkins either SSHs into itself (circular and pointless) or skips SSH entirely and runs Docker commands locally (not remote deployment). Either way, I'm missing the learning objective.</p>
+
+<h3>Why Separation Matters</h3>
+
+<p>The curriculum separates Jenkins (DigitalOcean) from the app (EC2) deliberately. This teaches the production pattern: <strong>build infrastructure separate from runtime infrastructure.</strong></p>
+
+<ul>
+    <li><strong>Resource isolation:</strong> Jenkins builds spike CPU/memory (compiling, testing, building images). Production apps need consistent performance. They shouldn't compete.</li>
+    <li><strong>Security isolation:</strong> Jenkins has high privileges — Git credentials, Docker Hub access, AWS keys, SSH keys to every deployment target. If compromised, an attacker has everything. You don't want that on the same box as customer-facing apps.</li>
+    <li><strong>Failure isolation:</strong> Jenkins crashes? Out of memory? Production apps keep running because they're elsewhere.</li>
+    <li><strong>Different scaling:</strong> Apps scale horizontally (more instances behind a load balancer). Jenkins scales vertically (bigger instance). Different strategies require different infrastructure.</li>
+</ul>
+
+<p>I deleted the EC2 Jenkins setup. Created a DigitalOcean droplet instead. The "simpler" approach would have worked functionally — but it would have skipped understanding why production systems are architected with separation.</p>
+
+<blockquote>Sometimes the harder path teaches you the principles behind the patterns.</blockquote>
+
+<h2>Part 4: The OpenSSL Key Format Battle</h2>
+
+<p>With Jenkins on DigitalOcean, I needed SSH access to EC2 for deployment. This is where I hit an environment-specific issue that took 30 minutes to debug.</p>
+
+<h3>Jenkins Setup on DigitalOcean</h3>
+
+<p>Created Ubuntu droplet, installed Docker, and ran Jenkins as a container:</p>
+
+<pre><code>docker run -d \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name jenkins \
+  jenkins/jenkins:lts</code></pre>
+
+<p>Mounting <code>/var/run/docker.sock</code> gives access to the Docker daemon but doesn't install the <code>docker</code> CLI inside the container.</p>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>docker: not found</code></pre>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Install the Docker CLI inside the Jenkins container:</p>
+    <pre><code>docker exec -it -u 0 jenkins bash
+apt-get update && apt-get install -y docker.io</code></pre>
+    <p>Now Jenkins can execute Docker commands against the host daemon.</p>
+</div>
+
+<p>After that: installed SSH Agent plugin, configured Maven, added GitLab/Docker Hub credentials, created a multibranch pipeline.</p>
+
+<h3>SSH Credentials for EC2</h3>
+
+<p>Created an SSH credential in Jenkins:</p>
+<ul>
+    <li>Type: SSH Username with private key</li>
+    <li>Username: <code>ec2-user</code></li>
+    <li>Private key: Paste contents of <code>docker-server.pem</code></li>
+    <li>ID: <code>ec2-server-key</code></li>
+    <li>Scope: Project</li>
+</ul>
+
+<p>Updated EC2 security group to allow port 22 from the DigitalOcean droplet IP only. Then added the first deploy stage:</p>
+
+<pre><code>stage("deploy") {
+    steps {
+        script {
+            def dockerCmd = 'docker run -p 8080:8080 -d nvastola/demo-app:1.0'
+            sshagent(['ec2-server-key']) {
+                sh "ssh -o StrictHostKeyChecking=no ec2-user@18.221.211.198 ${dockerCmd}"
+            }
+        }
+    }
+}</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-info-circle"></i> Why StrictHostKeyChecking=no?
+    </div>
+    <p>Without this, SSH prompts "Are you sure you want to continue connecting?" Jenkins can't answer interactive prompts — the build would hang forever. This flag tells SSH to trust the host without asking, which is required for automation.</p>
+</div>
+
+<p>Committed, pushed, ran the build.</p>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>Running ssh-add
+Error loading key: error in libcrypto</code></pre>
+</div>
+
+<h3>The Investigation</h3>
+
+<p>Could I SSH from my local machine? Yes. Worked perfectly. Was the key correct in Jenkins? Re-copied it multiple times, deleted and recreated the credential. Same error. Was the username right? Yes.</p>
+
+<p>I was stuck. Same key works locally, fails in Jenkins. Both using identical <code>.pem</code> file contents.</p>
+
+<h3>The Root Cause</h3>
+
+<p>Checked OpenSSL versions:</p>
+
+<pre><code># Inside Jenkins container
+docker exec -it jenkins bash
+openssl version
+# OpenSSL 3.5.4
+
+# Local machine
+openssl version
+# OpenSSL 1.1.1</code></pre>
+
+<p><strong>Different versions handle key formats differently.</strong></p>
+
+<p>AWS EC2 <code>.pem</code> files use <strong>PKCS#1 format</strong> (older):</p>
+<pre><code>-----BEGIN RSA PRIVATE KEY-----</code></pre>
+
+<p>OpenSSL 3.x prefers <strong>PKCS#8 format</strong> (newer):</p>
+<pre><code>-----BEGIN PRIVATE KEY-----</code></pre>
+
+<p>My local OpenSSL 1.1.1 tolerated both. Jenkins container's OpenSSL 3.5.4 was strict.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Convert PKCS#1 to PKCS#8:</p>
+    <pre><code>openssl rsa -in ~/.ssh/docker-server.pem -out ~/.ssh/docker-server-converted.pem</code></pre>
+    <p>Updated the Jenkins credential with the converted key content. Deploy stage succeeded.</p>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>30 minutes of debugging to learn: "works on my machine" isn't enough. Software versions matter. The same key file behaved differently depending on the OpenSSL version reading it. Always test SSH credentials inside the actual build environment, not just locally.</p>
+</div>
+
+<h2>Part 5: Building the Complete Pipeline</h2>
+
+<p>With SSH working, I built the pipeline incrementally, adding complexity step by step.</p>
+
+<h3>Docker Compose for Multi-Container Deployment</h3>
+
+<p>The initial deploy stage used <code>docker run</code> for a single container. Real applications need databases and supporting services alongside them.</p>
+
+<p>Installed Docker Compose on EC2:</p>
+
+<pre><code>sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose</code></pre>
+
+<p>Created <code>docker-compose.yaml</code> in the repository:</p>
+
+<pre><code>version: '3.8'
+services:
+  java-maven-app:
+    image: nvastola/demo-app:java-maven-1.0
+    ports:
+      - 8080:8080
+  postgres:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=my-pwd</code></pre>
+
+<p>Updated the deploy stage to copy the file and run Docker Compose over SSH:</p>
+
+<pre><code>sshagent(['ec2-server-key']) {
+    sh "scp docker-compose.yaml ec2-user@18.221.211.198:/home/ec2-user"
+    sh "ssh -o StrictHostKeyChecking=no ec2-user@18.221.211.198 'docker-compose -f docker-compose.yaml up --detach'"
+}</code></pre>
+
+<h3>Shell Script Extraction</h3>
+
+<p>The deploy stage was getting complex. What if we need to stop old containers, clean up images, verify health? Five commands? Ten? The Jenkinsfile would become unreadable.</p>
+
+<p><strong>Created <code>server-cmds.sh</code>:</strong></p>
+
+<pre><code>#!/usr/bin/env bash
+
+export IMAGE=$1
+docker-compose -f docker-compose.yaml up --detach
+echo "Success"</code></pre>
+
+<p><strong>Updated <code>docker-compose.yaml</code> to use a variable:</strong></p>
+
+<pre><code>services:
+  java-maven-app:
+    image: ${IMAGE}  # Now dynamic</code></pre>
+
+<p><strong>Updated deploy stage:</strong></p>
+
+<pre><code>def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+def ec2Instance = "ec2-user@18.221.211.198"
+
+sshagent(['ec2-server-key']) {
+    sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
+    sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+    sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+}</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Why This Is Better
+    </div>
+    <p>Deployment logic is version-controlled, testable independently, and doesn't clutter the pipeline definition. <strong>Jenkinsfile orchestrates — scripts contain business logic.</strong> Adding complexity later doesn't touch the pipeline structure.</p>
+</div>
+
+<h3>Dynamic Versioning</h3>
+
+<p>Still hardcoding <code>nvastola/demo-app:java-maven-1.0</code>. Every build overwrites the previous version. No traceability.</p>
+
+<p><strong>Added increment version stage:</strong></p>
+
+<pre><code>stage('increment version') {
+    steps {
+        script {
+            sh 'mvn build-helper:parse-version versions:set \
+                -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
+                versions:commit'
+            def matcher = readFile('pom.xml') =~ '&lt;version&gt;(.+)&lt;/version&gt;'
+            def version = matcher[0][1]
+            env.IMAGE_NAME = "nvastola/demo-app:$version-$BUILD_NUMBER"
+        }
+    }
+}</code></pre>
+
+<p><strong>How it works:</strong></p>
+<ul>
+    <li><strong>First build:</strong> <code>pom.xml</code> says 1.1.0 → increments to 1.1.1 → build #13 → image: <code>nvastola/demo-app:1.1.1-13</code></li>
+    <li><strong>Second build:</strong> <code>pom.xml</code> now says 1.1.1 → increments to 1.1.2 → build #14 → image: <code>nvastola/demo-app:1.1.2-14</code></li>
+</ul>
+
+<p>Every push creates a unique, traceable version. If users report a bug in <code>1.1.2-14</code>, I can trace back to that exact build and code state.</p>
+
+<h3>Committing Version Bumps</h3>
+
+<p>The version increments in the workspace, but that change isn't persisted. The next build would start from <code>1.1.0</code> again. Added a commit stage:</p>
+
+<pre><code>stage("commit version update") {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: 'gitlab-creds',
+                                              passwordVariable: 'PASS',
+                                              usernameVariable: 'USER')]) {
+                sh 'git remote set-url origin https://$USER:$PASS@gitlab.com/nvastola/java-maven-app-aws.git'
+                sh 'git add .'
+                sh 'git commit -m "ci: version bump"'
+                sh 'git push origin HEAD:jenkins-jobs'
+            }
+        }
+    }
+}</code></pre>
+
+<p>Now the incremented version commits back to Git. Continuous progression: 1.1.1 → 1.1.2 → 1.1.3 → ...</p>
+
+<h2>Part 6: The Debugging Marathon</h2>
+
+<p>With the structure complete, I hit five different failure types. The Jenkins Stage View tells the story: builds #7–#20, multiple red builds before finally hitting green. Each failure revealed a specific knowledge gap about how Jenkins, Docker, and Git interact.</p>
+
+<h3>Issue 1: Missing Repository Name</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>docker build -t 1.1.1-13 .
+docker push 1.1.1-13
+denied: requested access to the resource is denied</code></pre>
+</div>
+
+<p><strong>What happened:</strong> Image name was <code>1.1.1-13</code> instead of <code>nvastola/demo-app:1.1.1-13</code>. I set <code>IMAGE_NAME</code> to <code>$version-$BUILD_NUMBER</code>, forgetting the repository prefix. Docker tried pushing to <code>docker.io/library/1.1.1-13</code> (the default public namespace), which I don't have access to.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <pre><code>env.IMAGE_NAME = "nvastola/demo-app:$version-$BUILD_NUMBER"</code></pre>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Docker image format is <code>registry/repository:tag</code>. Missing any part causes unexpected routing failures — Docker silently assumes defaults that may not be what you intended.</p>
+</div>
+
+<h3>Issue 2: Misplaced Quotes in dockerLogin()</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>denied: requested access to the resource is denied</code></pre>
+</div>
+
+<p>Credentials were correct — I tested them manually. The problem was in my shared library:</p>
+
+<pre><code>sh "echo '${script.PASS} | docker login -u '${script.USER} --password-stdin"</code></pre>
+
+<p>The closing single quote comes <strong>after</strong> the pipe. Bash sees:</p>
+
+<pre><code>echo 'mypassword | docker login -u 'nvastola --password-stdin</code></pre>
+
+<p>The pipe is inside quotes — treated as literal text, not a shell operator. Docker login receives nothing through stdin.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <pre><code>sh "echo '${script.PASS}' | docker login -u '${script.USER}' --password-stdin"</code></pre>
+    <p>Pipe is now outside quotes. Authentication works.</p>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>I spent 10 minutes checking credentials, the Jenkinsfile, the Git branch — everything except the shared library code. Quote placement matters: one character can break an entire authentication flow without giving you a useful error message.</p>
+</div>
+
+<h3>Issue 3: The Typo (usernamePassword vs usernameVariable)</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>groovy.lang.MissingPropertyException: No such property: usernamePassword</code></pre>
+</div>
+
+<p>The code:</p>
+
+<pre><code>withCredentials([usernamePassword(credentialsId: 'gitlab-creds',
+                                  passwordVariable: 'PASS',
+                                  usernamePassword: 'USER')]) {  // ← wrong</code></pre>
+
+<p>I typed <code>usernamePassword</code> twice. The third parameter should be <code>usernameVariable</code>.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <pre><code>withCredentials([usernamePassword(credentialsId: 'gitlab-creds',
+                                  passwordVariable: 'PASS',
+                                  usernameVariable: 'USER')]) {</code></pre>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Took 15 minutes to find. I checked the credential ID, repository URL, and Git commands — everything except the actual parameter name. When the logic is right but it's failing with a missing property error, check for typos in method calls and named parameters first.</p>
+</div>
+
+<h3>Issue 4: The Git Config Hunt (Three Tries)</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>*** Please tell me who you are.
+Run
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"</code></pre>
+</div>
+
+<p>Git needs to know who's committing. But where exactly do you set that when Jenkins is running as a container on a droplet?</p>
+
+<p><strong>Attempt 1:</strong> DigitalOcean droplet</p>
+<pre><code>git config --global user.email "nvastola@thelapa.org"
+git config --global user.name "Noah Vastola"</code></pre>
+<p>Ran build. <strong>Same error.</strong></p>
+
+<p><strong>Attempt 2:</strong> Jenkins container as root</p>
+<pre><code>docker exec -it -u 0 jenkins bash
+git config --global user.email "nvastola@thelapa.org"
+git config --global user.name "Noah Vastola"</code></pre>
+<p>Ran build. <strong>Same error.</strong></p>
+
+<p><strong>Attempt 3:</strong> Jenkins container as jenkins user</p>
+<pre><code>docker exec -it jenkins bash
+git config --global user.email "nvastola@thelapa.org"
+git config --global user.name "Noah Vastola"</code></pre>
+<p>Ran build. <strong>Success.</strong></p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Set the Git config as the <code>jenkins</code> user inside the container — not the droplet's root, not the container's root, but the actual <code>jenkins</code> user that runs the pipeline workspace.</p>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Jenkins pipeline steps run as the <code>jenkins</code> user inside the container. That's the user whose config matters. When debugging environment or config issues in Jenkins, always think about which user context is actually executing the command.</p>
+</div>
+
+<h3>Issue 5: postgres:lts Doesn't Exist</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <pre><code>manifest for postgres:lts not found: manifest unknown</code></pre>
+</div>
+
+<p>I assumed PostgreSQL used <code>lts</code> for latest stable, like some other images do.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <pre><code>image: postgres:15</code></pre>
+    <p>PostgreSQL uses numbered versions (<code>postgres:15</code>, <code>postgres:16</code>). There is no <code>lts</code> tag.</p>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Don't assume Docker tag naming conventions carry over between images. Every image maintainer chooses their own tags. Verify the tag exists on Docker Hub before using it.</p>
+</div>
+
+<h3>The Pattern</h3>
+
+<p>Looking at builds #7–#20, every failure fits a category:</p>
+
+<ul>
+    <li><strong>Naming failures</strong> — wrong image format, missing repository prefix</li>
+    <li><strong>Authentication failures</strong> — quote placement, credential syntax</li>
+    <li><strong>Configuration failures</strong> — Git config in wrong user context</li>
+    <li><strong>Assumption failures</strong> — <code>postgres:lts</code> doesn't exist</li>
+    <li><strong>Typo failures</strong> — <code>usernamePassword</code> vs <code>usernameVariable</code></li>
+</ul>
+
+<p>Each failure revealed a specific knowledge gap about how Jenkins, Docker, Git, and bash interact. Not "debugging is hard" — each taught something concrete about system integration.</p>
+
+<h2>Part 7: The Complete Pipeline</h2>
+
+<p>With all five failure types resolved, the pipeline ran clean.</p>
+
+<p><strong>Final <code>Jenkinsfile</code>:</strong></p>
+
+<pre><code>#!/usr/bin/env groovy
+
+library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
+    [$class: 'GitSCMSource',
+    remote: 'https://gitlab.com/nvastola/jenkins-shared-library.git',
+    credentialsID: 'gitlab-creds']
+)
+
+pipeline {
+    agent any
+    tools {
+        maven 'Maven'
+    }
+    stages {
+        stage('increment version') {
+            steps {
+                script {
+                    sh 'mvn build-helper:parse-version versions:set \
+                        -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
+                        versions:commit'
+                    def matcher = readFile('pom.xml') =~ '&lt;version&gt;(.+)&lt;/version&gt;'
+                    def version = matcher[0][1]
+                    env.IMAGE_NAME = "nvastola/demo-app:$version-$BUILD_NUMBER"
+                }
+            }
+        }
+        stage('build app') {
+            steps {
+                buildJar()
+            }
+        }
+        stage('build image') {
+            steps {
+                script {
+                    buildImage(env.IMAGE_NAME)
+                    dockerLogin()
+                    dockerPush(env.IMAGE_NAME)
+                }
+            }
+        }
+        stage("deploy") {
+            steps {
+                script {
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                    def ec2Instance = "ec2-user@18.221.211.198"
+
+                    sshagent(['ec2-server-key']) {
+                        sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                        sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+                    }
+                }
+            }
+        }
+        stage("commit version update") {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'gitlab-creds',
+                                                      passwordVariable: 'PASS',
+                                                      usernameVariable: 'USER')]) {
+                        sh 'git remote set-url origin https://$USER:$PASS@gitlab.com/nvastola/java-maven-app-aws.git'
+                        sh 'git add .'
+                        sh 'git commit -m "ci: version bump"'
+                        sh 'git push origin HEAD:jenkins-jobs'
+                    }
+                }
+            }
+        }
+    }
+}</code></pre>
+
+<p><strong><code>server-cmds.sh</code>:</strong></p>
+<pre><code>#!/usr/bin/env bash
+export IMAGE=$1
+docker-compose -f docker-compose.yaml up --detach
+echo "Success"</code></pre>
+
+<p><strong><code>docker-compose.yaml</code>:</strong></p>
+<pre><code>version: '3.8'
+services:
+  java-maven-app:
+    image: ${IMAGE}
+    ports:
+      - 8080:8080
+  postgres:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=my-pwd</code></pre>
+
+<h3>The Moment Everything Worked</h3>
+
+<p>I committed a small code change and pushed to GitLab. Jenkins detected it. The Stage View updated in real time:</p>
+
+<pre><code>Stage: increment version     - 4s  ✓
+Stage: build app             - 7s  ✓
+Stage: build image           - 5s  ✓
+Stage: deploy                - 6s  ✓
+Stage: commit version update - 2s  ✓
+
+Finished: SUCCESS</code></pre>
+
+<p>All green. After twenty failed builds, three environment investigations, five different debugging issues, and six hours of work.</p>
+
+<p>I SSH'd into EC2:</p>
+
+<pre><code>docker ps</code></pre>
+
+<pre><code>CONTAINER ID   IMAGE                           STATUS         PORTS
+a3f2c1b4d5e6   nvastola/demo-app:1.1.1-20     Up 2 minutes   0.0.0.0:8080->8080/tcp
+7d8e9f0a1b2c   postgres:15                     Up 2 minutes   0.0.0.0:5432->5432/tcp</code></pre>
+
+<p>Both containers running. Version <code>1.1.1-20</code> matched the Jenkins build number exactly.</p>
+
+<p>Opened browser: <code>http://18.221.211.198:8080</code></p>
+
+<p><strong>The page loaded.</strong> Not localhost. Not manually deployed. Automatically built, versioned, pushed, and deployed — all from one commit. I checked Docker Hub: image <code>nvastola/demo-app:1.1.1-20</code> present with fresh timestamp. Checked GitLab: new commit visible — <code>ci: version bump</code>. The <code>pom.xml</code> showed version <code>1.1.2</code>, ready for the next build.</p>
+
+<div class="callout success">
+    <div class="callout-title">
+        <i class="fas fa-check-circle"></i> The Complete Flow
+    </div>
+    <p>Code commit → Jenkins detects → Version increments → JAR builds → Image builds and pushes → Deploys both containers to EC2 → Version bump commits → Application accessible to users. <strong>One commit. Zero manual steps.</strong></p>
+</div>
+
+<h2>What I Learned</h2>
+
+<h3>1. Environment-Specific Issues Are Real Production Concerns</h3>
+
+<p>The OpenSSL key format issue demonstrates this perfectly. Same key file, different behavior based on environment.</p>
+<ul>
+    <li><strong>Local machine:</strong> OpenSSL 1.1.1, accepts PKCS#1 format</li>
+    <li><strong>Jenkins container:</strong> OpenSSL 3.5.4, requires PKCS#8 format</li>
+</ul>
+
+<p>"Works on my machine" isn't good enough. You have to test in actual deployment environments. This is exactly why containerization matters — it ensures environment consistency.</p>
+
+<h3>2. Architecture Decisions Teach Production Thinking</h3>
+
+<p>Running Jenkins on the same EC2 as the app would have worked. But it would have skipped the fundamental lesson about separating build and runtime infrastructure. Understanding <em>why</em> systems are architectured with separation matters more than just making code work.</p>
+
+<h3>3. Failures Fall Into Patterns</h3>
+
+<p>Every build failure across this project fit a category: naming, authentication, configuration, assumptions, or typos. Recognizing which category you're in narrows the debug surface immediately. When credentials are failing, check quote placement before re-entering passwords.</p>
+
+<h3>4. Small Scripts Beat Large Pipeline Files</h3>
+
+<p>Extracting deployment logic to <code>server-cmds.sh</code> means the logic is version-controlled, testable independently, and easy to extend without touching the pipeline definition. Jenkinsfile orchestrates. Scripts contain business logic. This separation scales.</p>
+
+<h3>5. Dynamic Versioning Enables Real Traceability</h3>
+
+<p><code>nvastola/demo-app:1.1.1-20</code> tells me the application version from <code>pom.xml</code> and the Jenkins build number. If users report a bug, I can trace to the exact build and code state that deployed it. Static tags like <code>:latest</code> don't provide this. In production incident response, that traceability matters.</p>
+
+<h2>Production Considerations</h2>
+
+<p>This works for learning. Production deployment needs more.</p>
+
+<h3>Secrets Management</h3>
+
+<p>That <code>POSTGRES_PASSWORD=my-pwd</code> hardcoded in <code>docker-compose.yaml</code> is in Git. Anyone with repository access sees it. <strong>Production approach:</strong> AWS Secrets Manager or HashiCorp Vault — inject secrets at runtime, never commit them.</p>
+
+<h3>Rollback Strategy</h3>
+
+<p>If this deployment breaks production, I'd need to find the previous working build, manually revert <code>pom.xml</code>, and retrigger. <strong>Better:</strong> keep previous containers running until the new version passes health checks (blue/green deployment), or implement automatic rollback on health check failure.</p>
+
+<h3>Health Checks and Verification</h3>
+
+<p>The pipeline succeeds if <code>docker-compose</code> starts containers — it doesn't verify the application actually responds. Production needs: HTTP health endpoint, database connectivity checks, automated smoke tests post-deployment, and automatic rollback if checks fail.</p>
+
+<h3>Multi-Environment Pipeline</h3>
+
+<p>This deploys to one EC2 instance. Real pipelines have dev (auto-deploy on every commit), staging (manual approval, production-like environment), and production (manual approval + passing smoke tests). Each environment has separate infrastructure, and promotion requires human sign-off.</p>
+
+<h2>Reflection</h2>
+
+<p>This project connects everything from projects 1–4:</p>
+<ul>
+    <li><strong>Project 1:</strong> SSH, Linux user permissions, security practices</li>
+    <li><strong>Project 2:</strong> Artifact management (now Docker Hub instead of Nexus)</li>
+    <li><strong>Project 3:</strong> Containerization, Docker Compose, multi-container apps</li>
+    <li><strong>Project 4:</strong> Reusable pipeline code, Groovy, shared libraries</li>
+</ul>
+
+<p><strong>This project adds:</strong> AWS infrastructure, remote deployment automation, dynamic versioning, the complete CI/CD workflow end to end.</p>
+
+<h2>What's Next</h2>
+
+<p>Container orchestration. Instead of running containers directly on EC2, I'll deploy to Kubernetes (AWS EKS).</p>
+
+<p>Kubernetes handles things that become painful at scale: auto-scaling based on load, self-healing (restart failed containers automatically), load balancing across instances, rolling updates for zero-downtime deployments, and declarative configuration where you define the desired state and Kubernetes figures out how to get there.</p>
+
+<p>I'm expecting networking complexity, YAML overload, storage challenges, and a steep learning curve. But I'm also seeing how all these pieces connect: Docker packages the apps, Jenkins builds and deploys them, Shared Libraries keep the automation DRY, and Kubernetes will handle the orchestration at scale.</p>
+
+<hr style="border: none; border-top: 1px solid var(--border-color); margin: 2.5rem 0;">
+
+<a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" style="color: var(--accent-cyan); text-decoration: none;">Gitlab Repository</a>
+
+
+        </article>
+    </main>
+
+    <footer class="article-footer">
+        <a href="../blog.html" class="back-to-blog">
+            <i class="fas fa-arrow-left"></i> Back to All Posts
+        </a>
+    </footer>
+
+    <section class="related-posts">
+        <h3>Continue the Series</h3>
+        <div class="related-grid">
+            <a href="devops-project-2.html" class="related-card">
+                <h4>Setting Up Nexus Repository Manager</h4>
+                <p>Architecture mismatches, silent failures, and centralized artifact management...</p>
+            </a>
+            <a href="devops-project-3.html" class="related-card">
+                <h4>Docker Multi-Container Deployment: From Localhost to AWS ECR</h4>
+                <p>Containerizing a Node.js app, container networking, image immutability, and pushing to AWS ECR...</p>
+            </a>
+            <a href="devops-project-4.html" class="related-card">
+                <h4>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h4>
+                <p>Building reusable Groovy pipeline code, the script object pattern, and how enterprises scale CI/CD...</p>
+            </a>
+        </div>
+    </section>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(26, 35, 50, 0.98)';
+            } else {
+                nav.style.background = 'rgba(26, 35, 50, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>

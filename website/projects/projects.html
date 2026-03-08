@@ -371,15 +371,15 @@
         <p class="description">Comprehensive collection of DevOps projects demonstrating hands-on experience with cloud platforms, infrastructure automation, containerization, and production deployment practices.</p>
         <div class="stats-bar">
             <div class="stat-card">
-                <div class="stat-number">4</div>
+                <div class="stat-number">7</div>
                 <div class="stat-label">Projects Completed</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">8</div>
+                <div class="stat-number">7</div>
                 <div class="stat-label">In Progress</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">15+</div>
+                <div class="stat-number">20+</div>
                 <div class="stat-label">Technologies</div>
             </div>
         </div>
@@ -413,8 +413,6 @@
                     <span class="tech-badge">Linux</span>
                     <span class="tech-badge">Java</span>
                     <span class="tech-badge">Gradle</span>
-                    <span class="tech-badge">systemd</span>
-                    <span class="tech-badge">SSH</span>
                 </div>
                 <div class="project-links">
                     <a href="../blog/devops-project-1.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
@@ -436,7 +434,6 @@
                     <span class="tech-badge">Java</span>
                     <span class="tech-badge">Gradle</span>
                     <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">RBAC</span>
                 </div>
                 <div class="project-links">
                     <a href="../blog/devops-project-2.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
@@ -454,14 +451,11 @@
                 <div class="tech-stack">
                     <span class="tech-badge">Docker</span>
                     <span class="tech-badge">Node.js</span>
-                    <span class="tech-badge">Linux</span>
                     <span class="tech-badge">Amazon ECR</span>
                     <span class="tech-badge">MongoDB</span>
-                    <span class="tech-badge">Mongo Express</span>
-                    <span class="tech-badge">DigitalOcean</span>
+                    <span class="tech-badge">MongoExpress</span>
                 </div>
                 <div class="project-links">
-                    <!-- <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub Repository</a> -->
                     <a href="../blog/devops-project-3.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
                 </div>
             </div>
@@ -483,7 +477,7 @@
                     <span class="tech-badge">Java</span>
                 </div>
                 <div class="project-links">
-                     <a href="https://gitlab.com/nvastola/jenkins-shared-library" class="project-link"><i class="fab fa-github"></i> Gitlab Repository</a>
+                    <a href="https://gitlab.com/nvastola/jenkins-shared-library" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
                     <a href="../blog/devops-project-4.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
                 </div>
             </div>
@@ -492,23 +486,63 @@
             <div class="project-card topic-cicd" data-topic="cicd">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-code-branch"></i> CI/CD with Jenkins</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
+                    <span class="status-badge status-completed">✓ Completed</span>
                 </div>
                 <h3 class="card-title">End-to-End CI/CD Pipeline with Automated Versioning</h3>
                 <p class="card-description">Build a complete CI/CD pipeline automating the entire software delivery lifecycle from code commit to production deployment. Implement automatic semantic versioning, Docker image builds, and zero-downtime deployments using Jenkins and Docker Compose.</p>
                 <div class="tech-stack">
                     <span class="tech-badge">Jenkins</span>
                     <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Docker Compose</span>
-                    <span class="tech-badge">AWS EC2</span>
+                    <span class="tech-badge">Docker Hub</span>
+                    <span class="tech-badge">AWS</span>
                     <span class="tech-badge">Git</span>
                     <span class="tech-badge">Java</span>
                     <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">Docker Hub</span>
+                    <span class="tech-badge">Linux</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
+                    <a href="../blog/devops-project-5.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
                 </div>
             </div>
 
-            <!-- 06: Kubernetes Microservices -->
+            <!-- 06: Windows Domain Lab -->
+            <div class="project-card topic-linux" data-topic="linux">
+                <div class="card-meta">
+                    <span class="module-label"><i class="fas fa-server"></i> Linux &amp; Servers</span>
+                    <span class="status-badge status-completed">✓ Completed</span>
+                </div>
+                <h3 class="card-title">Enterprise Windows Domain Lab</h3>
+                <p class="card-description">Built and administered a Windows domain environment with enterprise-grade security and automation. Deployed Windows Server 2022 with redundant domain controllers, 5 organizational units, and 10+ Group Policy Objects enforcing security policies. Automated user provisioning using PowerShell scripts, reducing admin time by 75%.</p>
+                <div class="tech-stack">
+                    <span class="tech-badge">Active Directory</span>
+                    <span class="tech-badge">Group Policy</span>
+                    <span class="tech-badge">PowerShell</span>
+                    <span class="tech-badge">Windows Server</span>
+                    <span class="tech-badge">LAPS</span>
+                </div>
+            </div>
+
+            <!-- 07: Security & SIEM -->
+            <div class="project-card topic-monitoring" data-topic="monitoring">
+                <div class="card-meta">
+                    <span class="module-label"><i class="fas fa-chart-line"></i> Monitoring &amp; Observability</span>
+                    <span class="status-badge status-completed">✓ Completed</span>
+                </div>
+                <h3 class="card-title">Security Monitoring with Wazuh SIEM</h3>
+                <p class="card-description">Deployed Wazuh SIEM for centralized security monitoring and log aggregation across 10+ endpoints. Configured custom detection rules for privilege escalation, failed logins, and malware indicators. Applied CIS benchmark hardening to Windows and Linux systems, implementing 50+ security controls for production-grade system hardening.</p>
+                <div class="tech-stack">
+                    <span class="tech-badge">Wazuh</span>
+                    <span class="tech-badge">SIEM</span>
+                    <span class="tech-badge">Security Hardening</span>
+                    <span class="tech-badge">CIS Benchmarks</span>
+                    <span class="tech-badge">Log Analysis</span>
+                    <span class="tech-badge">Linux</span>
+                    <span class="tech-badge">Windows</span>
+                </div>
+            </div>
+
+            <!-- 08: Kubernetes Microservices -->
             <div class="project-card topic-kubernetes" data-topic="kubernetes">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-dharmachakra"></i> Kubernetes</span>
@@ -524,7 +558,7 @@
                 </div>
             </div>
 
-            <!-- 07: EKS CI/CD -->
+            <!-- 09: EKS CI/CD -->
             <div class="project-card topic-cicd" data-topic="cicd">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-code-branch"></i> CI/CD with Jenkins</span>
@@ -545,7 +579,7 @@
                 </div>
             </div>
 
-            <!-- 08: Terraform CI/CD -->
+            <!-- 10: Terraform CI/CD -->
             <div class="project-card topic-iac" data-topic="iac">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-layer-group"></i> Infrastructure as Code</span>
@@ -566,7 +600,7 @@
                 </div>
             </div>
 
-            <!-- 09: Python Utilities -->
+            <!-- 11: Python Utilities -->
             <div class="project-card topic-automation" data-topic="automation">
                 <div class="card-meta">
                     <span class="module-label"><i class="fab fa-python"></i> Cloud Automation</span>
@@ -582,7 +616,7 @@
                 </div>
             </div>
 
-            <!-- 10: Python Automation -->
+            <!-- 12: Python Automation -->
             <div class="project-card topic-automation" data-topic="automation">
                 <div class="card-meta">
                     <span class="module-label"><i class="fab fa-python"></i> Cloud Automation</span>
@@ -599,7 +633,7 @@
                 </div>
             </div>
 
-            <!-- 11: Ansible -->
+            <!-- 13: Ansible -->
             <div class="project-card topic-iac" data-topic="iac">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-layer-group"></i> Infrastructure as Code</span>
@@ -616,7 +650,7 @@
                 </div>
             </div>
 
-            <!-- 12: Prometheus -->
+            <!-- 14: Prometheus -->
             <div class="project-card topic-monitoring" data-topic="monitoring">
                 <div class="card-meta">
                     <span class="module-label"><i class="fas fa-chart-line"></i> Monitoring &amp; Observability</span>
@@ -653,26 +687,54 @@
 
         // Topic filter — click to highlight, click again to clear
         let activeFilter = null;
+        const cardGrid = document.querySelector('.card-grid');
+        let originalOrder = [];
+
+        // Store original order on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            originalOrder = Array.from(cardGrid.children);
+        });
 
         function filterTopic(legendItem) {
             const topic = legendItem.dataset.topic;
-            const allCards = document.querySelectorAll('.project-card');
+            const allCards = Array.from(document.querySelectorAll('.project-card'));
             const allLegendItems = document.querySelectorAll('.legend-item');
 
             if (activeFilter === topic) {
-                // Clear filter
+                // Clear filter - restore original order
                 activeFilter = null;
                 allCards.forEach(c => c.classList.remove('dimmed'));
                 allLegendItems.forEach(l => l.classList.remove('dimmed'));
+                
+                // Restore original order
+                cardGrid.innerHTML = '';
+                originalOrder.forEach(card => cardGrid.appendChild(card));
             } else {
                 // Apply filter
                 activeFilter = topic;
-                allCards.forEach(c => {
-                    c.classList.toggle('dimmed', c.dataset.topic !== topic);
+                
+                // Separate matching and non-matching cards
+                const matchingCards = allCards.filter(c => c.dataset.topic === topic);
+                const nonMatchingCards = allCards.filter(c => c.dataset.topic !== topic);
+                
+                // Clear grid and reorder: matching first, then non-matching
+                cardGrid.innerHTML = '';
+                matchingCards.forEach(card => {
+                    card.classList.remove('dimmed');
+                    cardGrid.appendChild(card);
                 });
+                nonMatchingCards.forEach(card => {
+                    card.classList.add('dimmed');
+                    cardGrid.appendChild(card);
+                });
+                
+                // Update legend
                 allLegendItems.forEach(l => {
                     l.classList.toggle('dimmed', l.dataset.topic !== topic);
                 });
+                
+                // Scroll to top of grid
+                cardGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     </script>
