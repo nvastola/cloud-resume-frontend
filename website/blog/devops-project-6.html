@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy Microservices on Kubernetes with Production & Security Best Practices | Noah Vastola</title>
+    <meta name="description" content="Deploying Google's 11-service microservices demo on a real Kubernetes cluster, then hardening it with 9 production and security best practices: liveness probes, resource limits, replicas, and more.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0e1a; --bg-secondary: #111827; --bg-tertiary: #1a2332;
+            --text-primary: #e5e7eb; --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6; --accent-cyan: #06b6d4; --accent-green: #10b981;
+            --accent-yellow: #fbbf24; --accent-red: #ef4444;
+            --border-color: #2d3748; --card-bg: #1e293b; --code-bg: #1a1a1a;
+        }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,var(--bg-primary) 0%,var(--bg-secondary) 100%); color:var(--text-primary); line-height:1.8; min-height:100vh; }
+        nav { background:rgba(26,35,50,0.95); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-color); padding:1rem 0; position:sticky; top:0; z-index:1000; }
+        .nav-container { max-width:900px; margin:0 auto; padding:0 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .nav-links { display:flex; gap:2rem; }
+        .nav-link { color:var(--text-secondary); text-decoration:none; display:flex; align-items:center; gap:0.5rem; transition:color 0.3s; font-weight:500; }
+        .nav-link:hover { color:var(--accent-cyan); }
+        .article-header { max-width:900px; margin:0 auto; padding:4rem 2rem 2rem; }
+        .breadcrumb { display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary); font-size:0.9rem; margin-bottom:2rem; }
+        .breadcrumb a { color:var(--accent-cyan); text-decoration:none; transition:color 0.3s; }
+        .breadcrumb a:hover { color:var(--accent-blue); }
+        .article-header h1 { font-size:2.8rem; line-height:1.2; margin-bottom:1.5rem; color:var(--text-primary); }
+        .article-meta { display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:2rem; padding-bottom:2rem; border-bottom:1px solid var(--border-color); }
+        .meta-item { display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary); }
+        .meta-item i { color:var(--accent-cyan); }
+        .tags { display:flex; flex-wrap:wrap; gap:0.5rem; }
+        .tag { background:rgba(59,130,246,0.1); color:var(--accent-blue); padding:0.4rem 0.9rem; border-radius:6px; font-size:0.85rem; font-weight:600; border:1px solid rgba(59,130,246,0.2); }
+        .article-content { max-width:900px; margin:0 auto; padding:2rem; }
+        .article-body { background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:3rem; }
+        .article-body h2 { font-size:2rem; margin:2.5rem 0 1.5rem; color:var(--text-primary); padding-bottom:0.5rem; border-bottom:2px solid var(--accent-cyan); }
+        .article-body h2:first-child { margin-top:0; }
+        .article-body h3 { font-size:1.5rem; margin:2rem 0 1rem; color:var(--accent-cyan); }
+        .article-body h4 { font-size:1.15rem; margin:1.5rem 0 0.75rem; color:var(--text-primary); font-weight:600; }
+        .article-body p { margin-bottom:1.5rem; line-height:1.9; color:var(--text-secondary); }
+        .article-body strong { color:var(--text-primary); font-weight:600; }
+        .article-body ul,.article-body ol { margin-bottom:1.5rem; padding-left:2rem; }
+        .article-body li { margin-bottom:0.75rem; color:var(--text-secondary); line-height:1.8; }
+        .article-body ul li::marker { color:var(--accent-cyan); }
+        .article-body code { background:var(--code-bg); color:var(--accent-green); padding:0.2rem 0.5rem; border-radius:4px; font-family:'Courier New',monospace; font-size:0.9em; }
+        .article-body pre { background:var(--code-bg); border:1px solid var(--border-color); border-radius:8px; padding:1.5rem; margin:1.5rem 0; overflow-x:auto; }
+        .article-body pre code { background:none; padding:0; color:var(--accent-green); }
+        .callout { margin:2rem 0; padding:1.5rem; border-left:4px solid; border-radius:8px; background:rgba(255,255,255,0.03); }
+        .callout-title { display:flex; align-items:center; gap:0.5rem; font-weight:600; margin-bottom:0.75rem; font-size:1.1rem; }
+        .callout.warning { border-color:var(--accent-yellow); background:rgba(251,191,36,0.05); }
+        .callout.warning .callout-title { color:var(--accent-yellow); }
+        .callout.error { border-color:var(--accent-red); background:rgba(239,68,68,0.05); }
+        .callout.error .callout-title { color:var(--accent-red); }
+        .callout.success { border-color:var(--accent-green); background:rgba(16,185,129,0.05); }
+        .callout.success .callout-title { color:var(--accent-green); }
+        .callout.info { border-color:var(--accent-blue); background:rgba(59,130,246,0.05); }
+        .callout.info .callout-title { color:var(--accent-blue); }
+        .callout p:last-child { margin-bottom:0; }
+        blockquote { margin:2rem 0; padding:1.5rem 2rem; border-left:4px solid var(--accent-cyan); background:rgba(6,182,212,0.05); font-style:italic; color:var(--text-primary); }
+        .post-image { margin:2rem 0; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); }
+        .post-image img { width:100%; display:block; }
+        .post-image .image-caption { background:var(--bg-tertiary); padding:0.75rem 1rem; font-size:0.9rem; color:var(--text-secondary); font-style:italic; }
+        .image-placeholder { margin:2rem 0; border-radius:12px; border:2px dashed var(--accent-cyan); background:rgba(6,182,212,0.05); padding:2.5rem 2rem; text-align:center; }
+        .image-placeholder .placeholder-label { color:var(--accent-cyan); font-weight:700; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem; }
+        .image-placeholder .placeholder-desc { color:var(--text-secondary); font-size:0.95rem; }
+        hr.section-divider { border:none; border-top:1px solid var(--border-color); margin:2.5rem 0; }
+        .article-footer { max-width:900px; margin:3rem auto; padding:0 2rem; }
+        .back-to-blog { display:inline-flex; align-items:center; gap:0.5rem; padding:1rem 2rem; background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); text-decoration:none; transition:all 0.3s; }
+        .back-to-blog:hover { background:var(--bg-tertiary); color:var(--accent-cyan); border-color:var(--accent-cyan); }
+        .related-posts { max-width:900px; margin:3rem auto; padding:0 2rem 4rem; }
+        .related-posts h3 { font-size:1.8rem; margin-bottom:1.5rem; color:var(--text-primary); }
+        .related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; }
+        .related-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:1.5rem; text-decoration:none; transition:all 0.3s; }
+        .related-card:hover { border-color:var(--accent-cyan); transform:translateY(-4px); }
+        .related-card h4 { color:var(--text-primary); margin-bottom:0.75rem; font-size:1.1rem; }
+        .related-card p { color:var(--text-secondary); font-size:0.95rem; line-height:1.6; margin:0; }
+        @media(max-width:768px){.article-header h1{font-size:2rem;}.article-body{padding:2rem 1.5rem;}.article-body h2{font-size:1.6rem;}.article-body h3{font-size:1.3rem;}.nav-links{gap:1rem;}}
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="../blog.html" class="nav-link"><i class="fas fa-blog"></i> Blog</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="article-header">
+        <div class="breadcrumb">
+            <a href="../blog.html">Blog</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Kubernetes Microservices</span>
+        </div>
+        <h1>Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h1>
+        <div class="article-meta">
+            <div class="meta-item"><i class="fas fa-calendar-alt"></i> March 19, 2026</div>
+            <div class="meta-item"><i class="fas fa-clock"></i> 20 min read</div>
+            <div class="meta-item"><i class="fas fa-user"></i> Noah Vastola</div>
+        </div>
+        <div class="tags">
+            <span class="tag">Kubernetes</span>
+            <span class="tag">Redis</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Linode LKE</span>
+        </div>
+    </header>
+
+    <main class="article-content">
+        <article class="article-body">
+
+
+<p>This module has been the toughest yet for me conceptually. I'm still digesting how all the components of Kubernetes fit together and how they interact. Writing YAML is its own adjustment — by the time this project was done I had written the same Deployment/Service skeleton eleven times, each one slightly different from the last.</p>
+
+<p>Before getting to the main project, I worked through four demos that built up the baseline:</p>
+
+<ul>
+    <li>Deploy MongoDB and MongoExpress into a local K8s cluster</li>
+    <li>Deploy a Mosquitto message broker with ConfigMap and Secret volume types</li>
+    <li>Install a stateful MongoDB service on Kubernetes using Helm</li>
+    <li>Deploy a web application from a private Docker registry</li>
+</ul>
+
+<p>By the end of those I had a working mental model of Pods, Deployments, Services, and namespaces. Then came the big project: deploy Google's microservices demo on a real cluster, then harden it with production and security best practices. This is what most of the module was building toward.</p>
+
+<p><strong>What I had going in:</strong> Kubernetes fundamentals, some Helm experience, persistent volume concepts. <strong>What this project added:</strong> multi-service dependency management, YAML debugging on a real cluster, and a working understanding of why Kubernetes best practices exist — not just what they are.</p>
+
+<h2>Understanding What I Was Deploying</h2>
+
+<p>Before writing a single line of YAML, I needed to understand the application. The demo is Google's Online Boutique — a realistic e-commerce microservices app written in multiple languages (Go, Python, Java, Node.js, C#). Eleven services, each responsible for exactly one thing.</p>
+
+<p>In a real environment, developers give you this information. For a public demo, it's in the documentation. Either way, there are four questions you need answered before writing config for a microservices application:</p>
+
+<ol>
+    <li><strong>What services are being deployed?</strong></li>
+    <li><strong>How do they connect to each other?</strong></li>
+    <li><strong>Are there any third-party services or databases?</strong> (Redis, in this case)</li>
+    <li><strong>Which service is accessible from outside the cluster?</strong> (The frontend)</li>
+</ol>
+
+<p>The architecture diagram answered all four at once:</p>
+
+<div class="post-image"><img src="../assets/img/mcmap.png" alt="Microservices architecture diagram"><div class="image-caption">The dependency map. Every arrow becomes an environment variable in the config.</div></div>
+
+<p>Every arrow in that diagram is an environment variable. The frontend has seven arrows pointing out — seven env vars to configure. The checkout service has six. Miss one and the application crashes at runtime, not at deploy time. I'd find this out the hard way.</p>
+
+<p>You also need to know the image name and port for each service. These come from the developers or the docs. Frontend runs on 8080, product catalog on 3550, payment and shipping on 50051. A port mismatch between the Deployment and Service won't cause an immediate error — it'll just silently fail to route traffic.</p>
+
+<h2>Part 1: Building the Configuration</h2>
+
+<p>The skeleton for every service is the same: a Deployment and a Service. The Deployment manages the Pod. The Service gives it a stable network address inside the cluster.</p>
+
+<pre><code>---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xxxx
+spec:
+  selector:
+    matchLabels:
+      app: xxxx
+  template:
+    metadata:
+      labels:
+        app: xxxx
+    spec:
+      containers:
+      - name: xxxx
+        image: xxxx
+        ports:
+        - containerPort: xxxx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xxxx
+spec:
+  type: ClusterIP
+  selector:
+    app: xxxx
+  ports:
+  - protocol: TCP
+    port: xxxx
+    targetPort: xxxx</code></pre>
+
+<p>This repeated eleven times in a single <code>config.yaml</code>, separated by <code>---</code>. The challenge wasn't the structure — it was filling in the right values and getting service dependencies in the right order.</p>
+
+<h3>The Dependency-First Approach</h3>
+
+<p>Some services need to know the address of others. The recommendation service needs to reach the product catalog. That address is just the service name and port: <code>productcatalogservice:3550</code>. But I couldn't set that value until I knew the product catalog's service name — which I hadn't written yet.</p>
+
+<p>The approach: write the dependency first, then fill in the placeholder.</p>
+
+<p>So I'd write the recommendation service with a temporary value:</p>
+
+<pre><code>env:
+- name: PORT
+  value: "8080"
+- name: PRODUCT_CATALOG_SERVICE_ADDR
+  value: "xxxx"   # fill in after writing productcatalogservice</code></pre>
+
+<p>Write the product catalog service. Now the name and port are defined, so I go back and fill in the placeholder:</p>
+
+<pre><code>- name: PRODUCT_CATALOG_SERVICE_ADDR
+  value: "productcatalogservice:3550"</code></pre>
+
+<p>The cart service did the same with Redis — write Redis first, then come back and fill in <code>REDIS_ADDR: "redis-cart:6379"</code>. Checkout needed six other services wired up. Working dependency-first kept the whole thing from becoming a wall of unknowns.</p>
+
+<h3>Redis and the emptyDir Volume</h3>
+
+<p>Redis needed a volume for cart data. I'd already worked through persistent volumes in the earlier demos, but this project used something simpler: <code>emptyDir</code>. It's temporary — data exists as long as the Pod runs on a node, survives container crashes (the Pod stays on the node), disappears if the Pod is deleted or rescheduled. Good enough for a demo.</p>
+
+<pre><code>containers:
+- name: redis
+  image: redis:alpine
+  ports:
+  - containerPort: 6379
+  volumeMounts:
+  - name: redis-data
+    mountPath: /data
+volumes:
+- name: redis-data
+  emptyDir: {}</code></pre>
+
+<p><code>volumeMounts</code> goes inside the container spec — it defines where the volume appears inside that specific container. <code>volumes</code> goes at the Pod spec level, one indentation level up. That distinction caused the first error.</p>
+
+<h3>The Checkout Service and DISABLE_PROFILER</h3>
+
+<p>Checkout had the most environment variables — six services to wire up. But the docs mentioned something else: the payment service and currency service both try to start a profiler on startup. We don't have a profiler running in the cluster. Without telling them to skip it, they'd fail trying to connect to a service that doesn't exist. One env var each:</p>
+
+<pre><code>- name: DISABLE_PROFILER
+  value: "1"</code></pre>
+
+<p>The kind of detail you only catch by reading the documentation carefully before deploying. Worth it.</p>
+
+<h3>The Frontend</h3>
+
+<p>Frontend was last — it depends on everything else, so all other services needed to be defined first. Seven environment variables, and unlike every other service, it needed to be reachable from a browser. That meant switching from <code>ClusterIP</code> to <code>NodePort</code> for the Service:</p>
+
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30007</code></pre>
+
+<p>NodePort exposes the service on port 30007 on every worker node. Not production-ready — opens a port on all nodes, increases the attack surface — but functional for verifying the deployment before hardening it.</p>
+
+<h2>Part 2: Deploying to Linode and Debugging</h2>
+
+<p>With the config written, I spun up a Linode Kubernetes cluster: 3 nodes, Linode 2GB, Atlanta region. Downloaded the kubeconfig and locked down permissions:</p>
+
+<pre><code>chmod 400 ~/Documents/k8s-microservices-demo/online-shop-microservices-kubeconfig.yaml
+export KUBECONFIG=~/Documents/k8s-microservices-demo/online-shop-microservices-kubeconfig.yaml</code></pre>
+
+<pre><code>kubectl get node
+NAME                            STATUS   ROLES    AGE   VERSION
+lke581753-850795-1d8e95250000   Ready    &lt;none&gt;   55m   v1.35.1
+lke581753-850795-2f664bf70000   Ready    &lt;none&gt;   55m   v1.35.1
+lke581753-850795-5f319fdb0000   Ready    &lt;none&gt;   55m   v1.35.1</code></pre>
+
+<p>Three nodes, all ready. Created the namespace and applied:</p>
+
+<pre><code>kubectl create ns microservices
+kubectl apply -f config.yaml -n microservices</code></pre>
+
+<p>Watched ten services create successfully, then:</p>
+
+<pre><code>Error from server (BadRequest): error when creating "config.yaml": Deployment in version "v1" cannot be
+handled as a Deployment: strict decoding error: unknown field "spec.template.spec.containers[0].volumes"</code></pre>
+
+<p>The Redis Deployment was rejected. Everything else created; Redis didn't.</p>
+
+<h3>Error 1: YAML Indentation</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <p><code>unknown field "spec.template.spec.containers[0].volumes"</code> — Kubernetes rejected the Redis Deployment because <code>volumes</code> was indented under the container definition instead of at the Pod spec level.</p>
+</div>
+
+<p>The broken version had <code>volumes</code> indented too deep, making it look like a property of the container:</p>
+
+<pre><code>containers:
+- name: redis
+  image: redis:alpine
+  volumeMounts:
+  - name: redis-data
+    mountPath: /data
+  volumes:              # wrong — four spaces too deep
+  - name: redis-data
+    emptyDir: {}</code></pre>
+
+<p>Containers have <code>volumeMounts</code>. Pods have <code>volumes</code>. They're different concepts at different levels of the hierarchy, and in YAML indentation is the only thing distinguishing them. Kubernetes doesn't guess — it saw an unknown field on the container and rejected the entire Deployment.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Move <code>volumes</code> up one level to align with <code>containers</code>, not inside it:</p>
+    <pre><code>containers:
+- name: redis
+  image: redis:alpine
+  volumeMounts:
+  - name: redis-data
+    mountPath: /data
+volumes:                # Pod level — correct
+- name: redis-data
+  emptyDir: {}</code></pre>
+</div>
+
+<p>Deleted everything with <code>kubectl delete -f config.yaml -n microservices</code> and reapplied. All eleven created this time. This isn't the first time wrong indentation caught me in this module — YAML is unforgiving and there's nothing like a closing bracket to tell you where one block ends and another begins.</p>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Run <code>kubectl apply --dry-run=client -f config.yaml</code> before deploying. It validates the structure and catches unknown fields without creating anything in the cluster — two minutes of checking saves a full delete-and-reapply cycle.</p>
+</div>
+
+<h3>Error 2: Image Tags That Didn't Exist</h3>
+
+<pre><code>kubectl get pod -n microservices
+NAME                                     READY   STATUS             RESTARTS   AGE
+adservice-5c744897c8-cf2nn               0/1     ErrImagePull       0          65s
+cartservice-68ddd588f9-4glwp             0/1     ErrImagePull       0          65s
+checkoutservice-5887566c8-4zq5r          0/1     ErrImagePull       0          64s
+currencyservice-668dd6b888-9xd4j         0/1     ImagePullBackOff   0          65s
+emailservice-56884cd8-gcrr7              0/1     ErrImagePull       0          66s
+frontend-984ccffc6-z7zfk                 0/1     ErrImagePull       0          64s
+paymentservice-bc8f5b844-sdkj7           0/1     ErrImagePull       0          66s
+productcatalogservice-67794cd564-vm2zf   0/1     ImagePullBackOff   0          66s
+recommendationservice-6869c466cf-dqhbj   0/1     ImagePullBackOff   0          66s
+redis-cart-9d9b58b5f-6f7vh               1/1     Running            0          64s
+shippingservice-67769ddb45-k69hc         0/1     ErrImagePull       0          65s</code></pre>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <p>Ten Pods stuck in <code>ErrImagePull</code> / <code>ImagePullBackOff</code>. Only Redis running — because it pulls <code>redis:alpine</code> from Docker Hub, not Google Container Registry.</p>
+</div>
+
+<p>Redis being fine ruled out a network problem — the cluster could reach external registries. So it was the GCR images specifically. I went back to the config and found some syntax errors first; fixed those and reapplied. Still the same result. Then the pattern clicked: the only thing running was the one service not pulling from GCR. I'd used version tag <code>v0.10.5</code> for all the microservices because that's what I saw in Google's GitHub repo. But checking the container registry directly — <code>v0.8.0</code> existed, <code>v0.10.5</code> didn't. The code had been tagged but the images hadn't been published yet.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Change all microservice image tags from <code>v0.10.5</code> to <code>v0.8.0</code>. Deleted the deployments, updated the config, reapplied.</p>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p>Git tags and container image tags are separate versioning systems maintained independently. Code tagged in GitHub doesn't guarantee a matching image was published to the registry. Always verify the tag exists in the actual registry. <code>kubectl describe pod &lt;name&gt; -n microservices</code> shows the exact pull error in the Events section — that's your first stop when pods won't start.</p>
+</div>
+
+<pre><code>NAME                                     READY   STATUS    RESTARTS      AGE
+adservice-89c7f5774-259rz                1/1     Running   0             2m17s
+cartservice-fd7f76d8c-zzml7              1/1     Running   0             2m16s
+checkoutservice-c775cbdfd-7cj6s          1/1     Running   0             2m16s
+currencyservice-655c76664d-67qkz         1/1     Running   0             2m17s
+emailservice-6bc597f8c6-6crfm            1/1     Running   0             2m18s
+frontend-5d74f94bb4-85jk9                0/1     Error     4 (72s ago)   2m15s
+paymentservice-d8f99d556-pjb8x           1/1     Running   0             2m18s
+productcatalogservice-867b8c8548-4dk9s   1/1     Running   0             2m18s
+recommendationservice-64565b6fd-ln57b    1/1     Running   0             2m18s
+redis-cart-9d9b58b5f-qsqd4               1/1     Running   0             2m16s
+shippingservice-f69f5b9c4-mt6zr          1/1     Running   0             2m17s</code></pre>
+
+<p>Ten running. Frontend crashing.</p>
+
+<h3>Error 3: Missing Environment Variable</h3>
+
+<div class="callout error">
+    <div class="callout-title">
+        <i class="fas fa-times-circle"></i> Error
+    </div>
+    <p>Frontend in crash loop — <code>Error</code> status with increasing restarts, despite the image pulling fine and the container creating successfully.</p>
+</div>
+
+<p><code>kubectl describe pod</code> showed the image pulled and the container created. The failure was happening inside the application — after Kubernetes had done its part. Logs:</p>
+
+<pre><code>kubectl logs frontend-5d74f94bb4-85jk9 -n microservices</code></pre>
+
+<pre><code>panic: Get "http://recommendationservice:8080": dial tcp: lookup recommendationservice on 10.128.0.10:53: no such host</code></pre>
+
+<p>DNS failure for <code>recommendationservice</code>. But I could see the recommendation service running in <code>kubectl get pod</code>. The Service existed. Why couldn't the frontend find it?</p>
+
+<p>I counted my frontend environment variables. Six. The frontend needed seven. <code>RECOMMENDATION_SERVICE_ADDR</code> was missing entirely. The service existed in the cluster and Kubernetes DNS would have resolved it — but the application never received the address to look up. It panicked the moment it tried to initialize the recommendation client, before it could serve any requests.</p>
+
+<p>This is the failure mode that YAML validation and image pull checks can't catch. The Pod creates, the image pulls, the container starts — everything Kubernetes is responsible for succeeded. Then the application discovers missing configuration. <code>kubectl describe</code> tells you the container exited. <code>kubectl logs</code> tells you why.</p>
+
+<div class="callout warning">
+    <div class="callout-title">
+        <i class="fas fa-exclamation-triangle"></i> The Fix
+    </div>
+    <p>Add the missing variable to the frontend Deployment and reapply:</p>
+    <pre><code>- name: RECOMMENDATION_SERVICE_ADDR
+  value: "recommendationservice:8080"</code></pre>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-lightbulb"></i> Lesson Learned
+    </div>
+    <p><code>kubectl describe</code> and <code>kubectl logs</code> surface different layers of failure. Describe shows Kubernetes-level events: image pulls, container creation, exit codes. Logs show application-level failures: what went wrong inside the container after it started. For crash loops, go to logs first.</p>
+</div>
+
+<p>Applied the fix. All eleven pods running:</p>
+
+<pre><code>kubectl get pod -n microservices
+NAME                                     READY   STATUS    RESTARTS   AGE
+adservice-89c7f5774-9jlq8                1/1     Running   0          28s
+cartservice-fd7f76d8c-9m298              1/1     Running   0          28s
+checkoutservice-c775cbdfd-8255s          1/1     Running   0          27s
+currencyservice-655c76664d-9zstb         1/1     Running   0          29s
+emailservice-6bc597f8c6-mhjml            1/1     Running   0          30s
+frontend-57689df686-j87q2                1/1     Running   0          27s
+paymentservice-d8f99d556-ffxdv           1/1     Running   0          29s
+productcatalogservice-867b8c8548-jmpng   1/1     Running   0          30s
+recommendationservice-64565b6fd-nk4ps    1/1     Running   0          30s
+redis-cart-9d9b58b5f-bq4pm               1/1     Running   0          28s
+shippingservice-f69f5b9c4-zq4pf          1/1     Running   0          29s</code></pre>
+
+<p>Grabbed a node IP from Linode and opened <code>http://45.56.116.201:30007</code>:</p>
+
+<div class="post-image"><img src="../assets/img/k8smc.png" alt="Online Boutique shop running in browser"><div class="image-caption">The Online Boutique running on a real Kubernetes cluster on Linode — after three debugging cycles.</div></div>
+
+<p>Product catalog loaded. Add to cart worked. Checkout functional. Recommendations appeared. All eleven services talking to each other across a real cluster. This was extremely satisfying after three debugging cycles and a lot of YAML.</p>
+
+<p>But "running" and "production-ready" are two different things. The rest of the project was closing that gap.</p>
+
+<h2>Part 3: Production &amp; Security Best Practices</h2>
+
+<p>Nine best practices. Some are one-liners. Some change how the cluster behaves fundamentally. Working through them one by one made each one concrete in a way that reading a list never does.</p>
+
+<h3>Best Practice 1: Pinned Image Versions</h3>
+
+<p>When you don't specify an image tag, Kubernetes pulls <code>:latest</code> automatically. When a Pod restarts, it might pull a newer image — one that breaks something, one you didn't test, one you can't trace back to a specific build. You lose visibility into what's actually running.</p>
+
+<p>We already had this covered because the microservices required a specific tag to work. But in many projects it's easy to skip. Every image should have an explicit version pinned, and it should come from the developers who know which version the application was built and tested against.</p>
+
+<h3>Best Practice 2 &amp; 3: Liveness and Readiness Probes</h3>
+
+<p>Kubernetes knows whether a Pod is running. It doesn't know whether the application inside is healthy or ready to accept traffic. That gap matters.</p>
+
+<p>A <strong>liveness probe</strong> tells Kubernetes when to restart a container that's running but broken — deadlocked, hung, in a bad state. Without it, a failed application sits there consuming resources and returning errors while Kubernetes sees a healthy Pod and does nothing.</p>
+
+<p>A <strong>readiness probe</strong> tells Kubernetes when a container is ready to receive traffic. Some applications take time to start — loading configs, establishing database connections, warming caches. Without a readiness probe, Kubernetes routes requests to the container the moment it starts, before the application can handle them.</p>
+
+<p>The sequence matters: the readiness probe runs during startup. Once the application is ready, the liveness probe takes over to monitor it while it's running.</p>
+
+<p>These microservices use gRPC, so most services get the gRPC probe type:</p>
+
+<pre><code>livenessProbe:
+  grpc:
+    port: 8080
+  periodSeconds: 5
+readinessProbe:
+  grpc:
+    port: 8080
+  periodSeconds: 5</code></pre>
+
+<p>Every 5 seconds, Kubernetes checks whether the gRPC health endpoint is responding. Redis doesn't speak gRPC — it gets a TCP socket probe instead:</p>
+
+<pre><code>livenessProbe:
+  initialDelaySeconds: 5
+  tcpSocket:
+    port: 6379
+  periodSeconds: 5
+readinessProbe:
+  initialDelaySeconds: 5
+  tcpSocket:
+    port: 6379
+  periodSeconds: 5</code></pre>
+
+<p>The kubelet tries to open a TCP connection on port 6379. Succeeds — healthy. Fails — probe fails, Kubernetes acts. Both the liveness and readiness probes on Redis get <code>initialDelaySeconds: 5</code> to give it a moment before the first probe fires.</p>
+
+<p>The frontend used the third option: HTTP, hitting a health endpoint built into the application:</p>
+
+<pre><code>livenessProbe:
+  httpGet:
+    path: "/_healthz"
+    port: 8080
+  periodSeconds: 5
+readinessProbe:
+  httpGet:
+    path: "/_healthz"
+    port: 8080
+  periodSeconds: 5</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-info-circle"></i> Three Probe Protocols, Three Reasons
+    </div>
+    <ul>
+        <li><strong>gRPC</strong> — for services using gRPC communication (most of these microservices)</li>
+        <li><strong>TCP socket</strong> — for services where a successful connection means healthy (Redis)</li>
+        <li><strong>HTTP GET</strong> — for services with a dedicated health endpoint (frontend's <code>/_healthz</code>)</li>
+    </ul>
+    <p style="margin-top:0.75rem;margin-bottom:0;">Which one you use depends on what the application actually exposes. The right answer comes from the developers — they know what their service supports.</p>
+</div>
+
+<h3>Best Practice 4 &amp; 5: Resource Requests and Limits</h3>
+
+<p>Without resource declarations, any container can consume all available CPU and memory on its node. One misbehaving service could starve everything else. The scheduler also has no information for making placement decisions.</p>
+
+<p><strong>Requests</strong> tell the scheduler what the container normally needs — it uses this to decide which node to place the Pod on. <strong>Limits</strong> are the hard ceiling — the container cannot exceed them. Exceed CPU: get throttled. Exceed memory: get killed and restarted.</p>
+
+<pre><code>resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi</code></pre>
+
+<p>CPU is in millicores (100m = 0.1 of a core). Memory in mebibytes. These were the standard values for most services. The developers flagged two exceptions:</p>
+
+<p>The ad service is more CPU and memory intensive — higher values:</p>
+
+<pre><code>resources:
+  requests:
+    cpu: 200m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 300Mi</code></pre>
+
+<p>Redis needs more memory and less CPU — it's a memory database:</p>
+
+<pre><code>resources:
+  requests:
+    cpu: 70m
+    memory: 200Mi
+  limits:
+    cpu: 125m
+    memory: 300Mi</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">
+        <i class="fas fa-info-circle"></i> Size Limits to Your Node
+    </div>
+    <p>If your limit values exceed the capacity of your largest node, the Pod will never be scheduled — no node can satisfy the request. Always size relative to your actual node capacity. For a 2GB Linode node, 300Mi per container is reasonable. Ask the developers for services with special requirements; they know the application's actual resource behavior.</p>
+</div>
+
+<h3>Best Practice 6: Don't Expose NodePort</h3>
+
+<p>NodePort opens a port on every worker node in the cluster — multiple direct entry points into the cluster accessible from the internet. The better approach: a <strong>LoadBalancer</strong> service, which uses the cloud platform's load balancer as a single external entry point. All traffic comes in through one point and routes to the internal service. Linode provisions this automatically when you specify the type:</p>
+
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080</code></pre>
+
+<p>The frontend stays internal. The load balancer is the only externally-facing resource. One entry point, smaller attack surface. An Ingress controller would give even more control — TLS termination, routing rules, multiple services behind one endpoint — but LoadBalancer is the correct step up from NodePort for this demo.</p>
+
+<h3>Best Practice 7: More Than One Replica</h3>
+
+<p>Every Deployment defaulted to one Pod. One Pod means one point of failure — if it crashes, the service is down until Kubernetes restarts it. Two replicas means one can fail while the other keeps serving traffic.</p>
+
+<pre><code>spec:
+  replicas: 2</code></pre>
+
+<p>One line added to every Deployment. Combined with three worker nodes, the cluster can now survive a node going down without losing a service.</p>
+
+<h3>Best Practice 8: Labels on Everything</h3>
+
+<p>Labels were already in use here — the <code>app: emailservice</code> label is how Services find their Pods. But labels should be applied more broadly and consistently across all resources. They're how you query, filter, organize, and apply policies across a cluster. A large cluster without consistent labels becomes unmanageable fast.</p>
+
+<h3>Best Practice 9: Use Namespaces</h3>
+
+<p>Already done — the <code>microservices</code> namespace isolated all these resources from anything else in the cluster. Namespaces are the boundary for access control, resource quotas, and network policies. Whether the whole application lives in one namespace or each service gets its own is a team decision, but using namespaces at all is non-negotiable at scale.</p>
+
+<hr class="section-divider">
+
+<h3>Three Security Practices Beyond the Config</h3>
+
+<p><strong>Scan images for vulnerabilities.</strong> Third-party libraries and base images carry known CVEs. Manual scans work for small projects; production pipelines should automate this — tools like Trivy or Snyk integrated into CI/CD so vulnerable images never reach the cluster.</p>
+
+<p><strong>Don't run containers as root.</strong> A container with root access has access to host-level resources. If it's compromised, the blast radius is much larger. Most official Docker images don't use root, but always verify. Kubernetes security contexts can enforce unprivileged users even if the image doesn't.</p>
+
+<p><strong>Keep Kubernetes up to date.</strong> Every release includes security patches. Updating requires going node by node to avoid downtime — which is exactly why multiple nodes and replicas on different nodes matter. A cluster you can't update safely is a cluster you won't update often enough.</p>
+
+<h2>The Final Config</h2>
+
+<p>With all nine best practices applied, the final <code>config.yaml</code> had the same eleven services — each Deployment now included a pinned image version, liveness and readiness probes with the appropriate protocol, and <code>replicas: 2</code> (except emailservice which stayed at the default). Resource requests and limits were added to the services that needed them: emailservice, adservice, and redis-cart. The frontend Service switched from NodePort to LoadBalancer, exposed on port 80.</p>
+
+<p>The email service as a representative example of what every service looked like in the final version:</p>
+
+<pre><code>---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emailservice
+spec:
+  selector:
+    matchLabels:
+      app: emailservice
+  template:
+    metadata:
+      labels:
+        app: emailservice
+    spec:
+      containers:
+      - name: service
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.8.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        livenessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        readinessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emailservice
+spec:
+  type: ClusterIP
+  selector:
+    app: emailservice
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 8080</code></pre>
+
+<p>More verbose than the starting skeleton, but every addition is answering a real question: Is the application healthy? Does it have enough resources? Will it stay available if a Pod dies? Can traffic reach it safely?</p>
+
+<h2>What I Learned</h2>
+
+<h3>1. Best Practices Exist Because Something Broke Without Them</h3>
+
+<p>Reading a list of best practices in documentation feels abstract. Working through them one by one — writing the probe, understanding what it checks, knowing what fails without it — made each one concrete. Liveness probes exist because applications deadlock. Resource limits exist because one bad container can starve a whole node. Replicas exist because Pods die. Every best practice is the distilled lesson from someone's production incident.</p>
+
+<h3>2. Kubernetes Surfaces Errors at Three Different Layers</h3>
+
+<p>This project had three errors, caught at three different stages:</p>
+<ul>
+    <li><strong>YAML structure</strong> — caught at <code>kubectl apply</code> time, before anything deploys</li>
+    <li><strong>Image version</strong> — caught at pull time; Pod stays in <code>ErrImagePull</code></li>
+    <li><strong>Missing env var</strong> — passes every Kubernetes check; only fails when the application itself runs</li>
+</ul>
+<p>Knowing which layer an error is at tells you which tool to reach for. They're not interchangeable.</p>
+
+<h3>3. Three Probe Types for a Reason</h3>
+
+<p>gRPC, TCP socket, HTTP — not arbitrary. Each probe type matches what the application actually exposes. The right answer comes from understanding the application, which means talking to the people who built it. Kubernetes configuration doesn't exist in isolation from the applications being deployed.</p>
+
+<h3>4. Work Dependency-First</h3>
+
+<p>Before writing a line of YAML, mapping which service talks to which — and in what order to define them — saved a lot of confusion. Every wrong or missing service address shows up as a runtime crash. The architecture diagram should be open before the config file is.</p>
+
+<h2>Reflection</h2>
+
+<p><strong>What this module was:</strong> The hardest one conceptually. Kubernetes has a lot of moving pieces — control plane, worker nodes, scheduler, kubelet, etcd, Services, DNS, Labels, Namespaces — and understanding how they fit together takes time. The four preliminary demos helped. By the time I started this project, I wasn't learning six new things at once.</p>
+
+<p><strong>What worked:</strong> The dependency-first approach to building the config, and mapping the architecture before writing anything. And Helm for the earlier demos — getting a feel for what Kubernetes manages helped before writing the raw YAML myself.</p>
+
+<p><strong>What I'd do differently:</strong> Read the application documentation fully before starting. The <code>DISABLE_PROFILER</code> detail would have been obvious earlier. The missing <code>RECOMMENDATION_SERVICE_ADDR</code> was a counting error I could have caught by cross-referencing the architecture diagram against my env block before deploying rather than after.</p>
+
+<p><strong>Time investment:</strong> Several hours across the full module including the four preliminary demos. The main project itself was a few hours — mostly the three debugging cycles and working through each best practice carefully.</p>
+
+<p><strong>Cost:</strong> Linode LKE cluster (~$0.09/hour &times; 3 nodes). Deleted after completing the project.</p>
+
+<h2>What's Next</h2>
+
+<p>With container orchestration covered on Linode, the next step is running Kubernetes on AWS — specifically EKS, Amazon's managed Kubernetes service. The concepts are the same: Pods, Deployments, Services, namespaces. What changes is the infrastructure layer underneath and how AWS-specific tools like IAM, ECR, and the AWS Load Balancer Controller plug into the cluster.</p>
+
+<p>I'm expecting the AWS integration to add complexity that Linode didn't have — IAM roles for service accounts, VPC networking, managed node groups. But the Kubernetes fundamentals from this module carry directly over. The same config patterns, the same debugging tools, the same best practices. Just running on different infrastructure.</p>
+
+    <a href="https://gitlab.com/nvastola/k8s-microservices-demo" style="color: var(--accent-cyan); text-decoration: none;">Gitlab Repository</a>
+
+        </article>
+    </main>
+
+    <footer class="article-footer">
+        <a href="../blog.html" class="back-to-blog">
+            <i class="fas fa-arrow-left"></i> Back to All Posts
+        </a>
+    </footer>
+
+    <section class="related-posts">
+        <h3>Continue the Series</h3>
+        <div class="related-grid">
+            <a href="devops-project-3.html" class="related-card">
+                <h4>Docker Multi-Container Deployment: From Localhost to AWS ECR</h4>
+                <p>Containerizing a Node.js app, container networking, image immutability, and pushing to AWS ECR...</p>
+            </a>
+            <a href="devops-project-4.html" class="related-card">
+                <h4>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h4>
+                <p>Building reusable Groovy pipeline code, the script object pattern, and how enterprises scale CI/CD...</p>
+            </a>
+            <a href="devops-project-5.html" class="related-card">
+                <h4>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h4>
+                <p>OpenSSL key formats, Git user context, dynamic versioning, and the moment everything ran green...</p>
+            </a>
+        </div>
+    </section>
+
+    <script>
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            nav.style.background = window.scrollY > 50
+                ? 'rgba(26, 35, 50, 0.98)'
+                : 'rgba(26, 35, 50, 0.95)';
+        });
+    </script>
+</body>
+</html>

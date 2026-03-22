@@ -757,9 +757,9 @@
                 <div class="skill-tags">
                     <span class="skill-tag">Docker</span>
                     <span class="skill-tag">Docker Compose</span>
-               <!-- <span class="skill-tag">Kubernetes</span>
+                    <span class="skill-tag">Kubernetes</span>
                     <span class="skill-tag">Helm</span>
-                    <span class="skill-tag">AWS EKS</span> -->
+                <!-- <span class="skill-tag">AWS EKS</span> -->
                 </div>
             </div>
             
@@ -812,117 +812,6 @@
         </div>
     </section>
 
-    <!--
-    <section class="projects-section" id="devops-projects">
-        <h2 class="section-title">DevOps Bootcamp Projects</h2>
-        <div class="section-intro">
-            <p>Hands-on projects from TechWorld with Nana's DevOps Bootcamp covering cloud infrastructure, CI/CD pipelines, container orchestration, and infrastructure automation.</p>
-        </div>
-
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Complete CI/CD Pipeline with EKS and AWS ECR</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Built an end-to-end CI/CD pipeline integrating Kubernetes deployment on AWS EKS with automated image builds pushed to AWS ECR. Implemented version incrementing, automated testing, and deployment workflows using Jenkins.
-            </p>
-            <ul class="project-highlights">
-                <li>Created private AWS ECR Docker repository for secure image storage</li>
-                <li>Built Kubernetes manifests for Deployment and Service configurations</li>
-                <li>Integrated Jenkins pipeline to automatically deploy newly built images to EKS cluster</li>
-                <li>Implemented automatic version commit back to Git repository</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Kubernetes</span>
-                <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">AWS EKS</span>
-                <span class="tech-badge">AWS ECR</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Maven</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Git</span>
-            </div>
-            <div class="project-links">
-                <a href="blog/devops-projects-1.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-            </div>
-        </div>
-
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Deploy Microservices application in Kubernetes with Production & Security Best Practices</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Deployed a multi-tier online shop application to a production Kubernetes cluster following enterprise security and scalability patterns. Configured persistent storage, service mesh networking, and high-availability Redis caching.
-            </p>
-            <ul class="project-highlights">
-                <li>Created Kubernetes manifests for Deployments and Services for all microservices of an online shop application</li>
-                <li>Deployed microservices to Linode's managed Kubernetes cluster (LKE) with production-grade configurations</li>
-                <li>Implemented Redis StatefulSet with persistent volumes for session management and caching</li>
-                <li>Configured service-to-service communication and ingress routing for external access</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Kubernetes</span>
-                <span class="tech-badge">Redis</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Linode LKE</span>
-            </div>
-            <div class="project-links">
-                <a href="blog/devops-projects-1.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-            </div>
-        </div>
-
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Complete CI/CD with Terraform</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Automated AWS infrastructure provisioning and integrated it into a complete CI/CD pipeline. The pipeline provisions EC2 instances on-demand and deploys applications using Docker Compose, eliminating manual server configuration.
-            </p>
-            <ul class="project-highlights">
-                <li>Created Terraform modules to provision VPC, Subnet, Route Table, Internet Gateway, EC2, and Security Groups</li>
-                <li>Configured Terraform to automatically deploy Docker containers to provisioned EC2 instances</li>
-                <li>Integrated Terraform provisioning into Jenkins CI/CD pipeline for automated infrastructure deployment</li>
-                <li>Configured S3 as remote backend for Terraform state management</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Terraform</span>
-                <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">AWS</span>
-                <span class="tech-badge">Git</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Maven</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Docker Hub</span>
-            </div>
-            <div class="project-links">
-                <a href="blog/devops-projects-1.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 3rem;">
-            <a href="projects/bootcamp.html" class="view-more-link">
-                <i class="fas fa-folder-open"></i> View All Projects
-            </a>
-        </div>
-    </section> 
--->
     <!-- Projects Section -->
     <section class="projects-section" id="projects">
         <h2 class="section-title">Projects</h2>
@@ -1004,36 +893,36 @@
 
         </div>
 
-        <!-- Docker Multi-Container Deployment -->
+        <!-- Kubernetes Microservices -->
         <div class="project-card">
             <div class="project-header">
                 <div>
-                    <h3>Docker Multi-Container Deployment: From Localhost to AWS ECR</h3>
+                    <h3>Deploy Microservices on Kubernetes with Production & Security Best Practices</h3>
                 </div>
                 <span class="project-status">Completed</span>
             </div>
             <p>
-                Containerized a Node.js application with MongoDB, orchestrated multi-container deployment with Docker Compose, and pushed images to AWS ECR. Learned container networking, image immutability, and why localhost behaves differently in containers.
+                Deployed Google's 11-service Online Boutique microservices demo on a real Linode Kubernetes cluster, then hardened the deployment with nine production and security best practices across configuration and security.
             </p>
             <ul class="project-highlights">
-                <li>Containerized Node.js application and MongoDB with Docker Compose for local development</li>
-                <li>Configured container networking and environment variables for multi-container communication</li>
-                <li>Built and tagged Docker images following immutability and versioning best practices</li>
-                <li>Authenticated with AWS ECR and pushed production images to private registry</li>
-                <li>Deployed multi-container application stack on DigitalOcean droplet</li>
+                <li>Configured Deployments and Services for 11 microservices with correct inter-service environment variable wiring</li>
+                <li>Added liveness and readiness probes using three protocols: gRPC (most services), TCP socket (Redis), and HTTP (frontend)</li>
+                <li>Defined resource requests and limits per container, with custom values for memory-intensive services</li>
+                <li>Replaced NodePort with LoadBalancer service for a single, secure external entry point</li>
+                <li>Debugged three real errors: YAML indentation rejecting a Deployment, non-existent image tags, and a frontend crash loop from a missing environment variable</li>
             </ul>
             <div class="tech-stack">
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Amazon ECR</span>
-                <span class="tech-badge">Node.js</span>
-                <span class="tech-badge">MongoDB</span>
-                <span class="tech-badge">MongoExpress</span>
+                <span class="tech-badge">Kubernetes</span>
+                <span class="tech-badge">Redis</span>
+                <span class="tech-badge">Linode LKE</span>
+                <span class="tech-badge">Linux</span>
             </div>
 
             <div class="project-links">
-                <a href="blog/devops-project-3.html" class="project-link">
+                <a href="blog/devops-project-6.html" class="project-link">
                     <i class="fas fa-blog"></i> Read the full story
                 </a>
+                <a href="https://gitlab.com/nvastola/k8s-microservices-demo" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
             </div>
 
         </div>
@@ -1086,30 +975,30 @@
                     <i class="fas fa-star"></i> Latest Post
                 </span>
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <i class="fas fa-calendar"></i> March 7, 2026
+                    <i class="fas fa-calendar"></i> March 19, 2026
                 </span>
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">
                     <i class="fas fa-clock"></i> 20 min read
                 </span>
             </div>
             
-            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h3>
+            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h3>
             
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.05rem;">
-                Building end-to-end automation with Jenkins, AWS EC2, Docker Compose, and dynamic versioning. Includes the OpenSSL key format battle that worked locally but failed in Jenkins, the Git config hunt across three different locations, and achieving zero-touch deployments from commit to production—automatically incrementing versions, building images, and deploying both app and database containers.
+                Deploying Google's 11-service Online Boutique on a real Linode Kubernetes cluster, then hardening it with nine production and security best practices — liveness and readiness probes across three protocols, resource requests and limits, multiple replicas, and swapping NodePort for a LoadBalancer. Three debugging cycles included: a YAML indentation error, image tags that didn't exist in the registry, and a frontend crash loop from one missing environment variable.
             </p>
             
             <div class="tech-stack" style="margin-bottom: 1.5rem;">
-                <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">AWS EC2</span>
-                <span class="tech-badge">Docker Compose</span>
-                <span class="tech-badge">CI/CD</span>
-                <span class="tech-badge">SSH</span>
-                <span class="tech-badge">Maven</span>
+                <span class="tech-badge">Kubernetes</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Linode LKE</span>
+                <span class="tech-badge">Microservices</span>
+                <span class="tech-badge">YAML</span>
+                <span class="tech-badge">Security</span>
             </div>
             
             <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                <a href="blog/devops-project-5.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                <a href="blog/devops-project-6.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
                     <i class="fas fa-book-open"></i> Read Full Story
                 </a>
                 <a href="blog.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-cyan); text-decoration: none; font-weight: 600; transition: color 0.3s;">
@@ -1124,8 +1013,8 @@
                 <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
                     <i class="fas fa-graduation-cap"></i> Currently Learning
                 </h3>
-                <img src="assets/img/kub.png" alt="Kubernetes" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
-                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Kubernetes</p>
+                <img src="assets/img/eks.png" alt="AWS EKS" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
+                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">AWS EKS</p>
             </div>
             
             <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">
