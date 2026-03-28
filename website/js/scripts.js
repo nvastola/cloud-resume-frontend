@@ -1,41 +1,185 @@
-/*!
-* Start Bootstrap - Resume v7.0.6 (https://startbootstrap.com/theme/resume)
-* Copyright 2013-2023 Start Bootstrap
-* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-resume/blob/master/LICENSE)
-*/
-//
-// Scripts
-// 
+// Theme Toggle
+const html = document.documentElement;
+function syncTheme(){
+  const d = html.classList.contains('dark');
+  const cls = d ? 'fa-moon' : 'fa-sun';
+  ['themeIcon','themeIconMob'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.className = 'fa-solid ' + cls;
+  });
+}
+syncTheme();
 
-window.addEventListener('DOMContentLoaded', event => {
-
-    // Activate Bootstrap scrollspy on the main nav element
-    const sideNav = document.body.querySelector('#sideNav');
-    if (sideNav) {
-        new bootstrap.ScrollSpy(document.body, {
-            target: '#sideNav',
-            rootMargin: '0px 0px -40%',
-        });
-    };
-
-    // Collapse responsive navbar when toggler is visible
-    const navbarToggler = document.body.querySelector('.navbar-toggler');
-    const responsiveNavItems = [].slice.call(
-        document.querySelectorAll('#navbarResponsive .nav-link')
-    );
-    responsiveNavItems.map(function (responsiveNavItem) {
-        responsiveNavItem.addEventListener('click', () => {
-            if (window.getComputedStyle(navbarToggler).display !== 'none') {
-                navbarToggler.click();
-            }
-        });
-    });
-
+['themeBtn','themeBtnMob'].forEach(id => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('click', () => {
+    html.classList.toggle('dark');
+    localStorage.setItem('nv-theme', html.classList.contains('dark') ? 'dark' : 'light');
+    syncTheme();
+  });
 });
 
-// Visitor Counter - Fetches and displays visitor count from Azure Function
+// Nav Scroll
+const navbar = document.getElementById('navbar');
+if(navbar) {
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, {passive:true});
+}
 
+// Mobile Menu
+const hamburger = document.getElementById('hamburger');
+const mobMenu = document.getElementById('mobMenu');
+if(hamburger && mobMenu) {
+  hamburger.addEventListener('click', () => {
+    mobMenu.classList.toggle('open');
+  });
+  document.querySelectorAll('.mob-link').forEach(l => {
+    l.addEventListener('click', () => {
+      mobMenu.classList.remove('open');
+    });
+  });
+}
+
+// Custom Cursor
+const dot = document.getElementById('cursorDot');
+if(dot) {
+  document.addEventListener('mousemove', e => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top = e.clientY + 'px';
+  });
+}
+
+// Experience Timeline
+const tlLine = document.getElementById('tlLine');
+const tlFill = document.getElementById('tlFill');
+function updateTl(){
+  if(!tlLine || !tlFill) return; // Prevents crash on pages without a timeline!
+  const h = tlLine.offsetHeight || 300;
+  const lineRect = tlLine.getBoundingClientRect();
+  const p = Math.max(0, Math.min(1, (window.innerHeight * 0.6 - lineRect.top) / h));
+  const fillH = p * h;
+  tlFill.style.height = fillH + 'px';
+  
+  document.querySelectorAll('.tl-dot-wrap').forEach(function(dotWrap){
+    const dotRect = dotWrap.getBoundingClientRect();
+    const dotCenter = (dotRect.top + dotRect.height / 2) - lineRect.top;
+    dotWrap.classList.toggle('active', fillH >= dotCenter);
+  });
+}
+window.addEventListener('scroll', updateTl, {passive:true});
+window.addEventListener('load', updateTl);
+setTimeout(updateTl, 200);
+
+// Skills Rendering
+const skills = [
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg', n:'Azure'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg', n:'AWS'},
+  {t:'img', img:'https://cdn.simpleicons.org/digitalocean/0080FF', n:'DigitalOcean'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg', n:'Kubernetes'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', n:'Docker'},
+  {t:'img', img:'https://cdn.simpleicons.org/helm/0F1689', n:'Helm'},
+  {t:'img', img:'https://cdn.simpleicons.org/terraform/7B42BC', n:'Terraform'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg', n:'Jenkins'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg', n:'GitHub Actions'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', n:'Python'},
+  {t:'img', img:'https://cdn.simpleicons.org/gnubash/4EAA25', n:'Bash'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/powershell/powershell-original.svg', n:'PowerShell'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', n:'Git'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg', n:'Linux'},
+  {t:'icon', icon:'fa-brands fa-microsoft', color:'#00A4EF', n:'Windows Server'},
+  {t:'img', img:'https://cdn.simpleicons.org/vmware/607078', n:'VMware'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/npm/npm-original-wordmark.svg', n:'npm'},
+  {t:'img', img:'https://cdn.simpleicons.org/apachemaven/C71A36', n:'Maven'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gradle/gradle-original.svg', n:'Gradle'}
+];
+const MAX = 12;
+let showAllSk = false;
+
+function renderSkills(){
+  const g = document.getElementById('skillsGrid');
+  if(!g) return; // Prevents crash on the Projects page!
+  const list = showAllSk ? skills : skills.slice(0, MAX);
+  g.innerHTML = list.map(s => `
+    <div class="skill-card">
+      <div class="sk-inner">
+        ${s.t === 'img'
+          ? `<img src="${s.img}" alt="${s.n}" style="width:2.5rem;height:2.5rem;object-fit:contain;">`
+          : `<i class="${s.icon}" style="font-size:2.5rem; color:${s.color}"></i>`
+        }
+        <span class="sk-name">${s.n}</span>
+      </div>
+      <div class="sk-border"></div>
+    </div>`).join('');
+}
+
+function toggleSkills(){
+  showAllSk = !showAllSk;
+  renderSkills();
+  const btn = document.getElementById('skillsToggle');
+  if(btn) btn.textContent = showAllSk ? 'Show Less' : 'Show All (' + skills.length + ')';
+}
+renderSkills();
+
+// Project Filtering (Handles both Home page and Projects page logic)
+const filterBtns = document.querySelectorAll('.f-btn');
+if (filterBtns.length > 0) {
+  // Stamp original order to restore on "All"
+  document.querySelectorAll('.proj-card').forEach((c, i) => c.dataset.order = i);
+
+  filterBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      filterBtns.forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      
+      const f = btn.dataset.f;
+      const grid = document.getElementById('projGrid');
+      if(!grid) return; // Prevents crash if grid is missing
+      
+      const cards = Array.from(grid.querySelectorAll('.proj-card'));
+
+      if (f === 'all') {
+        cards.sort((a, b) => +a.dataset.order - +b.dataset.order)
+             .forEach(c => { c.classList.remove('off'); grid.appendChild(c); });
+      } else {
+        // Checks both data-topic (Projects page) and data-tags (Home page)
+        const matching = cards.filter(c => c.dataset.topic === f || (c.dataset.tags || '').toLowerCase().includes(f));
+        const nonMatching = cards.filter(c => c.dataset.topic !== f && !(c.dataset.tags || '').toLowerCase().includes(f));
+        
+        matching.forEach(c => { c.classList.remove('off'); grid.prepend(c); });
+        nonMatching.forEach(c => { c.classList.add('off'); });
+      }
+    });
+  });
+}
+
+// Copy Toast
+function copyText(text, label){
+  navigator.clipboard.writeText(text).then(() => {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = '<i class="fa-solid fa-check" style="color:#22c55e"></i> ' + label + ' copied!';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  });
+}
+
+// Scroll Reveal
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) e.target.classList.add('visible');
+  });
+}, {threshold:0.05});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+// ---------------------------------------------------------
+// Visitor Counter - Fetches and displays visitor count from Azure Function
+// ---------------------------------------------------------
 async function updateVisitorCount() {
+    const counterElement = document.getElementById('visitor-count');
+    if (!counterElement) return; // Only run if the element exists on the page
+
     try {
         // Production API URL
         const apiUrl = 'https://noah-resume-api.azurewebsites.net/api/getvisitorcount';
@@ -56,74 +200,15 @@ async function updateVisitorCount() {
         const data = await response.json();
         
         // Update the counter display
-        const counterElement = document.getElementById('visitor-count');
-        if (counterElement) {
-            counterElement.textContent = data.count;
-        }
-        
+        counterElement.textContent = data.count;
         console.log('Visitor count updated:', data.count);
         
     } catch (error) {
         console.error('Error fetching visitor count:', error);
-        
         // Display error message to user
-        const counterElement = document.getElementById('visitor-count');
-        if (counterElement) {
-            counterElement.textContent = 'Error loading count';
-        }
+        counterElement.textContent = 'Error loading count';
     }
 }
 
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', updateVisitorCount);
-
-// Dark Mode Toggle Functionality
-// Add this to your existing scripts.js or create a new file
-
-(function() {
-    'use strict';
-
-    // Check for saved theme preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-
-    // Create and add the dark mode toggle button
-    function createDarkModeToggle() {
-        const toggle = document.createElement('button');
-        toggle.className = 'dark-mode-toggle';
-        toggle.setAttribute('aria-label', 'Toggle dark mode');
-        toggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        document.body.appendChild(toggle);
-        return toggle;
-    }
-
-    // Toggle theme function
-    function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        
-        // Update button icon
-        const toggleButton = document.querySelector('.dark-mode-toggle');
-        if (toggleButton) {
-            toggleButton.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        }
-    }
-
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', function() {
-        const toggleButton = createDarkModeToggle();
-        toggleButton.addEventListener('click', toggleTheme);
-    });
-
-    // Optional: Detect system preference if no saved preference exists
-    if (!localStorage.getItem('theme')) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        }
-    }
-})();

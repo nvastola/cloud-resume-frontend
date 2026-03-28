@@ -1,1123 +1,509 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noah Vastola | Cloud Engineering & DevOps Portfolio</title>
-    <meta name="description" content="Noah Vastola - Cloud Engineering & DevOps Portfolio showcasing AWS, Kubernetes, Terraform, and CI/CD projects">
-    <meta name="author" content="Noah Vastola">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1a2332;
-            --text-primary: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --border-color: #2d3748;
-            --card-bg: #1e293b;
-            --card-hover: #2d3a52;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        /* Navigation */
-        nav {
-            background: rgba(26, 35, 50, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-cyan);
-        }
-
-        /* Hero Section */
-        .hero {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 6rem 2rem 4rem;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-        }
-
-        .hero .subtitle {
-            font-size: 1.5rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .hero .description {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 900px;
-            margin: 0 auto 2rem;
-            line-height: 1.8;
-            text-align: left;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 0.875rem 2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        /* Skills Section */
-        .skills-section {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            text-align: center;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            margin: 1rem auto;
-            border-radius: 2px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .skill-category {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            transition: all 0.3s;
-        }
-
-        .skill-category:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
-        }
-
-        .skill-category h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: var(--accent-cyan);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .skill-tag {
-            background: var(--bg-tertiary);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s;
-        }
-
-        .skill-tag:hover {
-            background: var(--card-hover);
-            color: var(--text-primary);
-            border-color: var(--accent-blue);
-        }
-
-        /* Projects Section */
-        .projects-section {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-        }
-
-        .section-intro {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-intro p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 1rem auto 0;
-        }
-
-        .project-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .project-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            transform: scaleX(0);
-            transition: transform 0.3s;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 15px 40px rgba(6, 182, 212, 0.15);
-        }
-
-        .project-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .project-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
-
-        .project-card h3 {
-            font-size: 1.8rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .project-status {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-green);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .project-card p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .project-highlights {
-            list-style: none;
-            margin-bottom: 1.5rem;
-        }
-
-        .project-highlights li {
-            color: var(--text-secondary);
-            padding-left: 1.5rem;
-            position: relative;
-            margin-bottom: 0.75rem;
-        }
-
-        .project-highlights li::before {
-            content: '▹';
-            position: absolute;
-            left: 0;
-            color: var(--accent-cyan);
-            font-size: 1.2rem;
-        }
-
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .tech-badge {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .project-links {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .project-link {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
-
-        .project-link:hover {
-            color: var(--accent-blue);
-        }
-
-        /* Experience Section */
-        .experience-section {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-        }
-
-        .experience-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s;
-        }
-
-        .experience-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
-        }
-
-        .experience-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .experience-card h3 {
-            font-size: 1.5rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .experience-card .company {
-            color: var(--accent-cyan);
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .experience-card .date {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .experience-card ul {
-            list-style: none;
-            margin-bottom: 1rem;
-        }
-
-        .experience-card ul li {
-            color: var(--text-secondary);
-            padding-left: 1.5rem;
-            position: relative;
-            margin-bottom: 0.75rem;
-            line-height: 1.7;
-        }
-
-        .experience-card ul li::before {
-            content: '▹';
-            position: absolute;
-            left: 0;
-            color: var(--accent-cyan);
-            font-size: 1.2rem;
-        }
-
-        /* Certifications */
-        .certs-section {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-        }
-
-        .cert-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .cert-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .cert-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-green);
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
-        }
-
-        .cert-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--accent-green);
-        }
-
-        .cert-card h4 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .cert-card .issuer {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--bg-tertiary);
-            border-top: 1px solid var(--border-color);
-            margin-top: 6rem;
-            padding: 3rem 2rem;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .social-links a {
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            transition: all 0.3s;
-        }
-
-        .social-links a:hover {
-            color: var(--accent-cyan);
-            transform: translateY(-3px);
-        }
-
-        .footer-content p {
-            color: var(--text-secondary);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero .subtitle {
-                font-size: 1.2rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-                font-size: 0.9rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .project-header, .experience-header {
-                flex-direction: column;
-            }
-        }
-
-        /* Terminal Effect */
-        .terminal {
-            background: #1a1a1a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .terminal-header {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .terminal-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .terminal-btn.red { background: #ff5f56; }
-        .terminal-btn.yellow { background: #ffbd2e; }
-        .terminal-btn.green { background: #27c93f; }
-
-        .terminal-content {
-            color: var(--accent-green);
-            font-size: 0.9rem;
-        }
-
-        .terminal-prompt {
-            color: var(--accent-cyan);
-        }
-
-        .terminal-output {
-            color: var(--text-secondary);
-        }
-
-        .view-more-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--accent-cyan);
-            text-decoration: none;
-            font-weight: 600;
-            padding: 1rem 2rem;
-            border: 2px solid var(--accent-cyan);
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .view-more-link:hover {
-            background: rgba(6, 182, 212, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .visitor-counter {
-            margin: 1.5rem 0;
-            font-size: 0.95rem;
-            color: #6c757d; /* or whatever matches your theme */
-        }
-
-        .visitor-counter p {
-            margin: 0;
-        }
-
-        #visitor-count {
-            font-weight: 600;
-            color: #0d6efd; /* or your primary color */
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Noah Vastola – Cloud Engineering & DevOps</title>
+<meta name="description" content="Noah Vastola - Cloud Engineering & DevOps Portfolio showcasing Azure, AWS, Kubernetes, Terraform, Jenkins, and CI/CD projects"/>
+<meta name="author" content="Noah Vastola"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js" type="module"></script>
+
+<link rel="stylesheet" href="css/styles.css"/>
+
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fas fa-code"></i> Noah Vastola
-            </div>
-            <ul class="nav-links">
-                <li><a href="#about">About</a></li>
-                <li><a href="#experience">Experience</a></li>
-                <li><a href="#skills">Skills</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#blog">Blog</a></li>
-                <li><a href="#certifications">Certifications</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero" id="about">
-        <h1>Noah Vastola</h1>
-        <p class="subtitle">Cloud Engineering & DevOps | Baton Rouge, Louisiana</p>
-        <div class="description">
-            <p style="margin-bottom: 1.5rem;">I'm currently the Technology Director for the Louisiana Association of Public Adjusters, where I manage web infrastructure, security implementations, and member-facing systems. While working this role alongside my IT Support position at the LSU AgCenter, I'm actively building production-level cloud engineering skills through hands-on projects and real-world deployments.</p>
-            
-            <p style="margin-bottom: 1.5rem;">I'm working through the full DevOps toolkit: deploying applications to AWS cloud infrastructure, building CI/CD pipelines with Jenkins, orchestrating containers with Kubernetes, automating infrastructure with Terraform and Ansible, and implementing monitoring with Prometheus. Projects also go on my blog — I document the problems I solve and the troubleshooting process because that's where the real learning happens.</p>
-            
-            <p style="margin-bottom: 1.5rem;">My background includes CompTIA Network+ and Security+ certifications, along with hands-on experience in Windows Deployment, Active Directory, and enterprise IT support. This foundation gives me a solid understanding of how infrastructure actually works before it moves to the cloud, which shapes how I approach cloud architecture and automation.</p>
-            
-            <p style="margin-bottom: 1.5rem;"><strong>I'm graduating from LSU in December 2026 with a degree in Information Systems & Analytics and I'm actively looking for cloud engineering or DevOps roles where I can apply the infrastructure and automation skills I've been building.</strong></p>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#about" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="#projects" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="#blogs" class="nav-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <button class="contact-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" title="Contact me"><i class="fa-solid fa-envelope"></i></button>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <hr class="nav-hr"/>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="#projects" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="#blogs" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <button class="contact-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});document.getElementById('mobMenu').classList.remove('open')"><i class="fa-solid fa-envelope"></i></button>
+  </div>
+</div>
+
+<section id="about" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="orb"></div>
+
+  <div class="hero-content">
+    
+    <div class="hero-text">
+      <div class="hero-role-wrap reveal">
+        <div class="hero-role-box">
+          <div class="hero-role">Cloud Engineering &amp; DevOps</div>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay: 0.1s;">
+        <div class="hero-name">Noah Vastola</div>
+      </div>
+      <p class="hero-desc reveal" style="transition-delay: 0.2s;">I build and break infrastructure on AWS and Kubernetes, then write about what I learned.</p>
+
+      <div class="hero-actions reveal" style="transition-delay: 0.3s;">
+        <button class="btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-solid fa-rocket"></i> Let's Connect
+        </button>
+        <a href="https://github.com/nvastola" target="_blank" class="btn-icon" title="GitHub">
+          <i class="fa-brands fa-github"></i>
+        </a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="btn-icon" title="LinkedIn">
+          <i class="fa-brands fa-linkedin"></i>
+        </a>
+        <a href="assets/doc/Resume.pdf" target="_blank" class="btn-icon" title="Resume PDF">
+          <i class="fa-solid fa-file-pdf"></i>
+        </a>
+      </div>
+
+      <div class="visitor-chip reveal" style="transition-delay: 0.4s;">
+        <i class="fa-solid fa-terminal"></i> Visitor Count: <span id="visitor-count">Loading…</span>
+      </div>
+    </div>
+
+    <div class="hero-visual reveal" style="transition-delay: 0.3s;">
+      <dotlottie-wc src="https://lottie.host/f6bc48ee-1db1-4c89-bb62-dccb7033a72a/h5l300aJEi.lottie" style="width: 350px; height: 350px;" autoplay loop></dotlottie-wc>
+    </div>
+
+  </div>
+
+  <div class="scroll-ind reveal" style="transition-delay: 0.5s;">
+    <span>Scroll</span>
+    <div class="scroll-box"><div class="scroll-dot"></div></div>
+  </div>
+</section>
+
+<section id="skills" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="orb"></div>
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:4rem">
+      <h2 class="sec-title">Technical Skills</h2>
+      <p class="sec-sub">A curated selection of my expertise in DevOps and Cloud Computing</p>
+    </div>
+    <div class="skills-grid reveal" id="skillsGrid"></div>
+    <button class="skills-show-btn reveal" id="skillsToggle" onclick="toggleSkills()">Show All (19)</button>
+    <p class="skills-footer reveal">&hellip;and plenty more technologies I&rsquo;m exploring &amp; mastering every day.</p>
+  </div>
+</section>
+
+<section id="experience" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="orb"></div>
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:4rem;">
+      <h2 class="sec-title">Professional Experience</h2>
+      <p class="sec-sub">Highlights of my career showcasing infrastructure, automation, and systems work.</p>
+    </div>
+  </div>
+  <div class="tl-wrap">
+    <div class="tl-line" id="tlLine"><div class="tl-fill" id="tlFill" style="height:0"></div></div>
+
+    <div class="tl-entry reveal">
+      <div class="tl-left">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div class="tl-date-desktop">Dec 2025<br>&ndash;&nbsp;Present</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date-mobile">Dec 2025 &ndash; Present</div>
+        <div class="tl-header">
+          <div class="tl-logo"><i class="fa-solid fa-building"></i></div>
+          <div>
+            <div class="tl-role">Technology Director (Contract)</div>
+            <div class="tl-co">Louisiana Association of Public Adjusters (LAPA) &bull; Remote</div>
+          </div>
+        </div>
+        <p class="tl-desc">Managing web infrastructure, security implementations, and member-facing systems for a professional public adjusters association.</p>
+        <ul class="tl-list">
+          <li>Architected and launched a fully custom WordPress membership site, delivering a live production environment serving members across a multi-tier RBAC system with distinct permission scopes per membership level.</li>
+          <li>Developed custom child theme and PHP templates on Blocksy, heavily customizing layout, structure, and functionality to meet organizational requirements.</li>
+          <li>Assumed domain management via GoDaddy and administer DNS through Flywheel; facilitated Microsoft 365 tenant transfer from prior administrator, now managing all seats, mailboxes, and user accounts alongside SPF/DKIM/MX configuration and SMTP relay setup for authenticated email delivery.</li>
+          <li>Integrated Stripe payment processing and Mailchimp email automation via API and webhooks, reducing member registration from ~30 minutes of manual staff processing to under 2 minutes per applicant.</li>
+          <li>Maintained staging-to-production deployment workflow for WordPress core and plugin upgrades, with compatibility testing and rollback capability; implemented SSL/TLS, RBAC, and secure error logging as the security baseline for a live membership platform.</li>
+        </ul>
+        <div class="tl-badges">
+          <span class="tl-badge">WordPress Administration</span>
+          <span class="tl-badge">SMTP/Mailing Systems</span>
+          <span class="tl-badge">API Integration</span>
+          <span class="tl-badge">System Monitoring</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-entry reveal">
+      <div class="tl-left">
+        <div class="tl-dot-wrap"><div class="tl-dot"></div></div>
+        <div class="tl-date-desktop">Jan 2024<br>&ndash;&nbsp;Present</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date-mobile">Jan 2024 &ndash; Present</div>
+        <div class="tl-header">
+          <div class="tl-logo"><i class="fa-solid fa-seedling"></i></div>
+          <div>
+            <div class="tl-role">IT Support Technician I (Intern)</div>
+            <div class="tl-co">LSU AgCenter &bull; Baton Rouge, LA</div>
+          </div>
+        </div>
+        <p class="tl-desc">Enterprise IT support for a large agricultural research institution, handling everything from device deployment to incident response.</p>
+        <ul class="tl-list">
+          <li>Deployed 150+ Windows devices during enterprise PC refresh using Dell Image Assist for automated OS deployment, driver installation, and application provisioning with zero data loss over a 3-month project.</li>
+          <li>Participated in incident response during CrowdStrike BSOD outage affecting 250+ endpoints, restoring operations within hours.</li>
+          <li>Enhanced security posture by enforcing MFA, investigating phishing attempts, and applying Zero Trust principles.</li>
+          <li>Resolved network issues (VPN, APIPA, wireless, AD replication) through systematic troubleshooting and root cause analysis.</li>
+          <li>Created and maintained support documentation to streamline issue resolution and improve team efficiency.</li>
+        </ul>
+        <div class="tl-badges">
+          <span class="tl-badge">Windows Deployment</span>
+          <span class="tl-badge">Active Directory</span>
+          <span class="tl-badge">Incident Response</span>
+          <span class="tl-badge">Network Troubleshooting</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="orb"></div>
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:4rem">
+      <h2 class="sec-title">My Projects</h2>
+      <p class="sec-sub">Production-focused cloud infrastructure, automation &amp; container orchestration.</p>
+    </div>
+    <div class="proj-grid reveal" id="projGrid">
+
+      <div class="proj-card" data-tags="AWS,Docker,Linux">
+        <div class="proj-thumb"><i class="devicon-amazonwebservices-plain-wordmark colored"></i></div>
+        <div class="proj-body">
+          <div class="proj-name">Complete CI/CD Pipeline: Git Commit to AWS Deployment</div>
+          <div class="proj-desc">Full commit-to-production pipeline with dynamic semantic versioning, automated Docker image builds, and remote SSH deployments via Jenkins and Docker Compose.</div>
+          <div class="proj-tag-row"><span class="proj-tag">Jenkins</span><span class="proj-tag">AWS</span><span class="proj-tag">Docker</span><span class="proj-tag">Maven</span><span class="proj-tag">Java</span><span class="proj-tag">Git</span><span class="proj-tag">Linux</span><span class="proj-tag">Docker Hub</span></div>
+          <div class="proj-links">
+            <a href="blog/devops-project-5.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-card" data-tags="Docker,Linux">
+        <div class="proj-thumb"><i class="devicon-kubernetes-plain colored"></i></div>
+        <div class="proj-body">
+          <div class="proj-name">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</div>
+          <div class="proj-desc">Google's 11-service Online Boutique on a real Linode Kubernetes cluster, hardened with liveness/readiness probes across three protocols, resource limits, and LoadBalancer configuration.</div>
+          <div class="proj-tag-row"><span class="proj-tag">Kubernetes</span><span class="proj-tag">Redis</span><span class="proj-tag">Linode LKE</span><span class="proj-tag">Linux</span></div>
+          <div class="proj-links">
+            <a href="blog/devops-project-6.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/k8s-microservices-demo" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-card" data-tags="Docker,Linux">
+        <div class="proj-thumb"><i class="devicon-jenkins-line"></i></div>
+        <div class="proj-body">
+          <div class="proj-name">Jenkins Shared Library: Scaling Pipeline Automation</div>
+          <div class="proj-desc">Eliminated CI/CD duplication across 10 microservices with reusable Groovy shared library components. Documents the 7-commit debugging journey, credential UUID hunt, and the script object pattern.</div>
+          <div class="proj-tag-row"><span class="proj-tag">Jenkins</span><span class="proj-tag">Docker</span><span class="proj-tag">Groovy</span><span class="proj-tag">Maven</span><span class="proj-tag">Java</span><span class="proj-tag">Git</span></div>
+          <div class="proj-links">
+            <a href="blog/devops-project-4.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/jenkins-shared-library" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align:center;margin-top:4rem" class="reveal">
+      <a href="projects/projects.html" class="btn-outline">View All Projects <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<section id="blogs" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:4rem">
+      <h2 class="sec-title">My Recent Blogs</h2>
+      <p class="sec-sub">I document the real debugging process &mdash; errors, dead ends, and fixes &mdash; because that&rsquo;s where the actual learning happens.</p>
+    </div>
+    
+    <div class="blog-grid reveal">
+
+      <a href="blog/devops-project-6.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-kubernetes-plain colored"></i></div>
+        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
+          
+          <div>
+            <div class="blog-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Mar 19, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 20 min</span>
+            </div>
+            <div class="blog-ttl">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</div>
+            <div class="blog-excerpt">Deploying Google's 11-service Online Boutique on a real Linode cluster and hardening it with probes, resource limits, replicas, and debugging three real errors along the way.</div>
+          </div>
+          
+          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a href="blog/devops-project-4.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-jenkins-line"></i></div>
+        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
+          
+          <div>
+            <div class="blog-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Feb 27, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 18 min</span>
+            </div>
+            <div class="blog-ttl">Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</div>
+            <div class="blog-excerpt">Built a reusable Groovy shared library to eliminate Jenkins CI/CD pipeline duplication — detailing the 7-commit debugging story, credential UUID hunt, and the script object pattern.</div>
+          </div>
+
+          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a href="blog/devops-project-3.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-docker-plain colored"></i></div>
+        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
+          
+          <div>
+            <div class="blog-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Feb 17, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 14 min</span>
+            </div>
+            <div class="blog-ttl">Docker Multi-Container Deployment: From Localhost to AWS ECR</div>
+            <div class="blog-excerpt">Containerizing Node.js + MongoDB, pushing to ECR, and learning why "localhost" doesn't work in Docker the hard way.</div>
+          </div>
+
+          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="currently-grid reveal">
+      <div class="currently-card">
+        <div>
+          <h3><i class="fa-solid fa-graduation-cap"></i> Currently Learning</h3>
+          <p>AWS EKS</p>
+        </div>
+        <img src="assets/img/eks.png" alt="AWS EKS" style="margin-left: auto;"/>
+      </div>
+      <div class="currently-card">
+        <div>
+          <h3><i class="fa-solid fa-book"></i> Currently Reading</h3>
+          <p>Practice of System and Network Administration</p>
+        </div>
+        <img src="assets/img/snav1.jpg" alt="Practice of System and Network Administration" style="margin-left: auto;"/>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:4rem" class="reveal">
+      <a href="blog.html" class="btn-outline">Read All Blog Posts <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<section id="certifications" class="grid-bg">
+  <div class="shapes"></div>
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:4rem">
+      <h2 class="sec-title">Certifications &amp; Education</h2>
+      <p class="sec-sub">Industry-recognized credentials validating my expertise in cloud technologies and DevOps practices.</p>
+    </div>
+    <div class="certs-grid reveal">
+      <div class="cert-card">
+        <div class="cert-img"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="cert-body">
+          <div class="cert-name">CompTIA Security+</div>
+        </div>
+        <div class="cert-overlay"><div><h4>CompTIA Security+</h4><p>Industry-standard security certification demonstrating knowledge of core security functions and concepts.</p><small>Issued: 2025</small></div></div>
+        <div class="cert-bdr"></div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-img"><i class="fa-solid fa-network-wired"></i></div>
+        <div class="cert-body">
+          <div class="cert-name">CompTIA Network+</div>
+        </div>
+        <div class="cert-overlay"><div><h4>CompTIA Network+</h4><p>Validates the technical skills needed to securely establish, maintain, and troubleshoot essential networks.</p><small>Issued: 2025</small></div></div>
+        <div class="cert-bdr"></div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-img"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="cert-body">
+          <div class="cert-name">B.S. Information Systems &amp; Analytics</div>
+        </div>
+        <div class="cert-overlay"><div><h4>B.S. Information Systems &amp; Analytics</h4><p>Louisiana State University</p><small>GPA: 3.67 &bull; Dec 2026</small></div></div>
+        <div class="cert-bdr"></div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-img">
+          <i class="fa-brands fa-aws"></i>
+        </div>
+        <div class="cert-body"><div class="cert-name">AWS Cloud Practitioner</div></div>
+        <div class="cert-overlay"><div><h4>AWS Cloud Practitioner</h4><p>Currently working through AWS EKS and solutions architecture fundamentals.</p><small>In progress</small></div></div>
+        <div class="cert-bdr"></div>
+      </div>
+    </div>
+    <p class="certs-note reveal">Continuously learning and expanding my skill set with new certifications and technologies.</p>
+  </div>
+</section>
+
+<section id="contact" class="grid-bg">
+  <div class="shapes">
+    <div class="shape sh-pulse" style="top:5rem;left:3rem;width:8rem;height:8rem;background:oklch(0.7 0.2 240/0.1)"></div>
+    <div class="shape sh-bounce" style="top:15rem;right:4rem;width:5rem;height:5rem;background:oklch(0.65 0.22 240/0.2)"></div>
+    <div class="shape sh-ping" style="bottom:10rem;left:33%;width:3rem;height:3rem;background:oklch(0.7 0.2 240/0.15)"></div>
+    <div class="shape sh-float" style="bottom:5rem;right:20%;width:4rem;height:4rem;background:oklch(0.6 0.18 240/0.1)"></div>
+  </div>
+  <div class="orb" style="top:25%;right:50%;transform:translateX(50%);width:24rem;height:24rem;background:linear-gradient(135deg,oklch(0.7 0.2 240/0.2),transparent)"></div>
+  
+  <style>
+    /* Contact Specific Styles */
+    .contact-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1000px; margin: 0 auto; }
+    @media (max-width: 768px) { .contact-split-grid { grid-template-columns: 1fr; gap: 2.5rem; text-align: center; } }
+    
+    .contact-bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .contact-bento-grid { grid-template-columns: 1fr; } }
+
+    .c-bento-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; text-decoration: none; transition: all 0.2s ease; }
+    .c-bento-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+    
+    .c-icon-box { width: 44px; height: 44px; border-radius: 8px; background: var(--muted); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.25rem; transition: all 0.2s ease; }
+    .c-bento-card:hover .c-icon-box { background: var(--primary); color: var(--primary-fg); }
+    
+    .c-bento-title { font-weight: 700; color: var(--fg); margin-bottom: 0.25rem; font-size: 1rem; }
+    .c-bento-sub { font-size: 0.85rem; color: var(--muted-fg); }
+  </style>
+
+  <div class="container" style="padding-top:6rem;padding-bottom:6rem; position: relative; z-index: 10;">
+    <div class="contact-split-grid">
+      
+      <div class="reveal">
+        <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; color: var(--fg); margin-bottom: 1.25rem; line-height: 1.1; letter-spacing: -0.03em;">
+          Ready to build<br>something <span style="color: var(--primary);">great?</span>
+        </h2>
+        <p style="color: var(--muted-fg); font-size: 1.1rem; line-height: 1.7; margin-bottom: 2rem;">
+          I'm actively seeking cloud engineering and DevOps roles. My inbox is always open for opportunities, questions, or just a quick hello.
+        </p>
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--fg); font-weight: 600; font-family: var(--mono-font); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">
+          <i class="fa-solid fa-location-dot" style="color: var(--primary); font-size: 1rem;"></i> Baton Rouge, Louisiana
+        </div>
+      </div>
+
+      <div class="contact-bento-grid reveal" style="transition-delay: 0.2s;">
         
-            <!-- Visitor Counter -->
-            <div class="visitor-counter">
-                <p>👁️ Visitor Count: <span id="visitor-count">Loading...</span></p>
-            </div>
+        <a href="mailto:noahvastola@gmail.com" class="c-bento-card">
+          <div class="c-icon-box"><i class="fa-solid fa-envelope"></i></div>
+          <div>
+            <div class="c-bento-title">Email</div>
+            <div class="c-bento-sub">noahvastola@gmail.com</div>
+          </div>
+        </a>
 
-        </div>
-        <div class="cta-buttons">
-            <a href="#projects" class="btn btn-primary">
-                <i class="fas fa-rocket"></i> Projects
-            </a>
-            <a href="https://github.com/nvastola" target="_blank" class="btn btn-secondary">
-                <i class="fab fa-github"></i> GitHub Profile
-            </a>
-        </div>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="c-bento-card">
+          <div class="c-icon-box"><i class="fa-brands fa-linkedin-in"></i></div>
+          <div>
+            <div class="c-bento-title">LinkedIn</div>
+            <div class="c-bento-sub">Let's connect</div>
+          </div>
+        </a>
 
-        <!-- Terminal Effect -->
-        <div class="terminal">
-            <div class="terminal-header">
-                <div class="terminal-btn red"></div>
-                <div class="terminal-btn yellow"></div>
-                <div class="terminal-btn green"></div>
-            </div>
-            <div class="terminal-content">
-                <div><span class="terminal-prompt">$ </span>kubectl get engineer --selector="name=noah"</div>
-                <div class="terminal-output">NAME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STATUS &nbsp;&nbsp;SKILLS</div>
-                <div class="terminal-output">noah-vastola &nbsp;&nbsp;Ready &nbsp;&nbsp;&nbsp;Azure,Git,Terraform,Linux,Python</div>
-                <!-- <div class="terminal-output"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker,CI/CD,Linux,Windows-Server</div> -->
-            </div>
-        </div>
-    </section>
+        <a href="https://github.com/nvastola" target="_blank" class="c-bento-card">
+          <div class="c-icon-box"><i class="fa-brands fa-github"></i></div>
+          <div>
+            <div class="c-bento-title">GitHub</div>
+            <div class="c-bento-sub">@nvastola</div>
+          </div>
+        </a>
 
-    <!-- Experience Section -->
-    <section class="experience-section" id="experience">
-        <h2 class="section-title">Experience</h2>
+        <a href="assets/doc/Resume.pdf" target="_blank" class="c-bento-card">
+          <div class="c-icon-box"><i class="fa-solid fa-file-pdf"></i></div>
+          <div>
+            <div class="c-bento-title">Resume</div>
+            <div class="c-bento-sub">Download PDF</div>
+          </div>
+        </a>
 
-        <div class="experience-card">
-            <div class="experience-header">
-                <div>
-                    <h3>Technology Director (Contract)</h3>
-                    <div class="company">Louisiana Association of Public Adjusters (LAPA)</div>
-                </div>
-                <div class="date">December 2025 - Present</div>
-            </div>
-            <ul>
-                <li>Administer production WordPress infrastructure supporting 200+ members with 99.9% uptime through automated monitoring, daily backups, and incident response protocols.</li>
-                <li>Execute zero-downtime deployments of WordPress core/plugin upgrades using staging-to-production workflow with compatibility testing and rollback capability.</li>
-                <li>Integrated Stripe payment processing and Mailchimp email automation via API/webhooks, reducing manual user registration time by 90%. (30 min → less than 1 min per applicant)</li>
-                <li>Configured Office 365 SMTP relay with SPF/DKIM authentication and troubleshot email delivery issues through systematic log analysis and DNS validation.</li>
-                <li>Implemented security controls including SSL/TLS configuration, RBAC for multi-tier membership system, and secure error logging with production environment isolation.</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">WordPress Administration</span>
-                <span class="tech-badge">SMTP/Mailing Systems</span>
-                <span class="tech-badge">API Integration</span>
-                <span class="tech-badge">System Monitoring</span>
-            </div>
-        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="experience-card">
-            <div class="experience-header">
-                <div>
-                    <h3>IT Support Technician I (Intern)</h3>
-                    <div class="company">LSU AgCenter</div>
-                </div>
-                <div class="date">Jan 2024 - Present</div>
-            </div>
-            <ul>
-                <li>Deployed 150+ Windows devices during enterprise PC refresh using Dell Image Assist for automated OS deployment, driver installation, and application provisioning with zero data loss over 3-month project</li>
-                <li>Participated in incident response during CrowdStrike BSOD outage affecting 250+ endpoints, restoring operations within hours.</li>
-                <li>Enhanced security posture by enforcing MFA, investigating phishing attempts, and applying Zero Trust principles.</li>
-                <li>Resolved network issues (VPN, APIPA, wireless, AD replication) through systematic troubleshooting and root cause analysis.</li>
-                <li>Created and maintained support documentation to streamline issue resolution and improve team efficiency.</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Windows Deployment</span>
-                <span class="tech-badge">Active Directory</span>
-                <span class="tech-badge">Incident Response</span>
-                <span class="tech-badge">Network Troubleshooting</span>
-            </div>
-        </div>
-    </section>
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#blogs">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="#certifications">CompTIA Security+</a></li>
+        <li><a href="#certifications">CompTIA Network+</a></li>
+        <li><a href="#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="blog.html" class="f-social" title="Blog"><i class="fa-solid fa-pen-nib"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: DevOps Portfolio, Cloud Engineer, Azure, AWS, Jenkins, Kubernetes, Docker, Terraform, CI/CD, Baton Rouge</p>
+    </div>
+  </div>
+</footer>
 
-    <!-- Skills Section -->
-    <section class="skills-section" id="skills">
-        <h2 class="section-title">Technical Skills</h2>
-        <div class="skills-grid">
-            <div class="skill-category">
-                <h3><i class="fas fa-cloud"></i> Cloud Platforms</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">AWS (EC2, VPC, ECR)</span>
-                    <span class="skill-tag">Azure</span>
-                    <span class="skill-tag">DigitalOcean</span>
-                </div>
-            </div>
-
-            <div class="skill-category">
-                <h3><i class="fas fa-shipping-fast"></i> CI/CD & Version Control</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">Jenkins</span>
-                    <span class="skill-tag">GitHub Actions</span>
-                    <span class="skill-tag">Git</span>
-                    <span class="skill-tag">GitHub</span>
-                    <span class="skill-tag">GitLab</span>
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <h3><i class="fas fa-dharmachakra"></i> Container & Orchestration</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">Docker</span>
-                    <span class="skill-tag">Docker Compose</span>
-                    <span class="skill-tag">Kubernetes</span>
-                    <span class="skill-tag">Helm</span>
-                <!-- <span class="skill-tag">AWS EKS</span> -->
-                </div>
-            </div>
-            
-            <div class="skill-category">
-                <h3><i class="fas fa-code"></i> Programming & Scripting</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">Python</span>
-                    <span class="skill-tag">Bash</span>
-                    <span class="skill-tag">PowerShell</span>
-                </div>
-            </div>
-
-            <div class="skill-category">
-                <h3><i class="fas fa-cog"></i> Infrastructure as Code & Automation</h3>
-                <div class="skill-tags">
-                    <!-- <span class="skill-tag">Ansible</span> -->
-                    <span class="skill-tag">Terraform</span>
-                </div>
-            </div>
-
-            <div class="skill-category">
-                <h3><i class="fas fa-chart-line"></i> Monitoring & Security</h3>
-                <div class="skill-tags">
-                    <!-- <span class="skill-tag">Prometheus</span>
-                    <span class="skill-tag">Grafana</span> -->
-                    <span class="skill-tag">Wazuh SIEM</span>
-                </div>
-            </div>
-
-            <div class="skill-category">
-                <h3><i class="fas fa-server"></i> Systems Administration</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">Linux (Ubuntu<!--, RHEL-->)</span>
-                    <span class="skill-tag">Windows Server</span>
-                    <span class="skill-tag">Active Directory</span>
-                    <span class="skill-tag">Group Policy</span>
-                    <span class="skill-tag">DNS/DHCP</span>
-                    <span class="skill-tag">VMware</span>
-                </div>
-            </div>
-
-            <div class="skill-category">
-                <h3><i class="fas fa-tools"></i> Build & Package Management</h3>
-                <div class="skill-tags">
-                    <span class="skill-tag">Maven</span>
-                    <span class="skill-tag">Gradle</span>
-                    <span class="skill-tag">npm</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section class="projects-section" id="projects">
-        <h2 class="section-title">Projects</h2>
-        <div class="section-intro">
-            <p>Production-focused cloud infrastructure, automation, and container orchestration projects.</p>
-        </div>
-
-        <!-- AWS CI/CD Pipeline -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Complete CI/CD Pipeline: Git Commit to AWS Deployment</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Built a complete end-to-end CI/CD pipeline automating the entire workflow from Git commit to AWS EC2 deployment. Implemented dynamic versioning, remote deployment via SSH, and Docker Compose orchestration—achieving zero-touch deployments.
-            </p>
-            <ul class="project-highlights">
-                <li>Automated version incrementing in pom.xml and tagging Docker images with version + build number</li>
-                <li>Built Jenkins pipeline integrating shared library functions for JAR builds, image creation, and Docker Hub pushes</li>
-                <li>Configured remote SSH deployment from Jenkins (DigitalOcean) to EC2 instance with converted SSH keys</li>
-                <li>Deployed multi-container stack (app + PostgreSQL) using Docker Compose with environment variable injection</li>
-                <li>Implemented Git integration to commit version bumps back to repository for continuous version tracking</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">AWS</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Git</span>
-                <span class="tech-badge">Linux</span>
-                <span class="tech-badge">Maven</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Docker Hub</span>
-            </div>
-
-            <div class="project-links">
-                <a href="blog/devops-project-5.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-                <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" class="project-link"><i class="fab fa-gitlab"></i>Gitlab Repository</a>
-            </div>
-
-        </div>
-
-        <!-- Jenkins Shared Library -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Jenkins Shared Library: Scaling Pipeline Automation</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Built a Jenkins Shared Library to eliminate duplicate pipeline code and enable reusable CI/CD automation. Learned Groovy scripting, the script object pattern, and how to structure shared libraries for enterprise-scale Jenkins environments.
-            </p>
-            <ul class="project-highlights">
-                <li>Created reusable Groovy functions for common pipeline tasks (build, Docker operations, deployment)</li>
-                <li>Implemented the script object pattern to pass Jenkins context into shared library functions</li>
-                <li>Configured both global and project-specific library usage in Jenkinsfiles</li>
-                <li>Debugged credential handling, password escaping, and Git authentication in shared library context</li>
-                <li>Versioned shared library using Git tags for controlled rollout of pipeline changes</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Jenkins</span>
-                <span class="tech-badge">Groovy</span>
-                <span class="tech-badge">Java</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Maven</span>
-                <span class="tech-badge">Git</span>
-            </div>
-
-            <div class="project-links">
-                <a href="blog/devops-project-4.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-                <a href="https://gitlab.com/nvastola/jenkins-shared-library" class="project-link"><i class="fab fa-gitlab"></i>Gitlab Repository</a>
-            </div>
-
-        </div>
-
-        <!-- Kubernetes Microservices -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Deploy Microservices on Kubernetes with Production & Security Best Practices</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Deployed Google's 11-service Online Boutique microservices demo on a real Linode Kubernetes cluster, then hardened the deployment with nine production and security best practices across configuration and security.
-            </p>
-            <ul class="project-highlights">
-                <li>Configured Deployments and Services for 11 microservices with correct inter-service environment variable wiring</li>
-                <li>Added liveness and readiness probes using three protocols: gRPC (most services), TCP socket (Redis), and HTTP (frontend)</li>
-                <li>Defined resource requests and limits per container, with custom values for memory-intensive services</li>
-                <li>Replaced NodePort with LoadBalancer service for a single, secure external entry point</li>
-                <li>Debugged three real errors: YAML indentation rejecting a Deployment, non-existent image tags, and a frontend crash loop from a missing environment variable</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Kubernetes</span>
-                <span class="tech-badge">Redis</span>
-                <span class="tech-badge">Linode LKE</span>
-                <span class="tech-badge">Linux</span>
-            </div>
-
-            <div class="project-links">
-                <a href="blog/devops-project-6.html" class="project-link">
-                    <i class="fas fa-blog"></i> Read the full story
-                </a>
-                <a href="https://gitlab.com/nvastola/k8s-microservices-demo" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
-            </div>
-
-        </div>
-
-        <!-- Cloud Resume Challenge -->
-        <div class="project-card">
-            <div class="project-header">
-                <div>
-                    <h3>Cloud-Native Resume Website</h3>
-                </div>
-                <span class="project-status">Completed</span>
-            </div>
-            <p>
-                Built a serverless resume website hosted on Azure with Infrastructure as Code and CI/CD automation.
-            </p>
-            <ul class="project-highlights">
-                <li>Deployed static website using Azure Static Web Apps with custom domain and SSL/TLS</li>
-                <li>Built serverless visitor counter API using Azure Functions and CosmosDB</li>
-                <li>Automated infrastructure deployment using Terraform with Azure backend state management</li>
-                <li>Implemented CI/CD pipeline with GitHub Actions for automated testing and deployment</li>
-            </ul>
-            <div class="tech-stack">
-                <span class="tech-badge">Azure</span>
-                <span class="tech-badge">Terraform</span>
-                <span class="tech-badge">GitHub Actions</span>
-                <span class="tech-badge">PowerShell</span>
-                <span class="tech-badge">JavaScript</span>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 3rem;">
-            <a href="projects/projects.html" class="view-more-link">
-                <i class="fas fa-folder-open"></i> View All Projects
-            </a>
-        </div>
-
-    </section>
-
-    <!-- Blog Section -->
-    <section class="projects-section" id="blog">
-        <h2 class="section-title">Latest from the Blog</h2>
-        <div class="section-intro">
-            <p>Documenting my journey through cloud infrastructure, DevOps, and the real troubleshooting stories behind the projects.</p>
-        </div>
-
-        <!-- Featured Blog Post -->
-        <div class="project-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05)); border: 2px solid var(--accent-cyan);">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                <span style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-star"></i> Latest Post
-                </span>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <i class="fas fa-calendar"></i> March 19, 2026
-                </span>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <i class="fas fa-clock"></i> 20 min read
-                </span>
-            </div>
-            
-            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h3>
-            
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.05rem;">
-                Deploying Google's 11-service Online Boutique on a real Linode Kubernetes cluster, then hardening it with nine production and security best practices — liveness and readiness probes across three protocols, resource requests and limits, multiple replicas, and swapping NodePort for a LoadBalancer. Three debugging cycles included: a YAML indentation error, image tags that didn't exist in the registry, and a frontend crash loop from one missing environment variable.
-            </p>
-            
-            <div class="tech-stack" style="margin-bottom: 1.5rem;">
-                <span class="tech-badge">Kubernetes</span>
-                <span class="tech-badge">Docker</span>
-                <span class="tech-badge">Linode LKE</span>
-                <span class="tech-badge">Microservices</span>
-                <span class="tech-badge">YAML</span>
-                <span class="tech-badge">Security</span>
-            </div>
-            
-            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                <a href="blog/devops-project-6.html" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
-                    <i class="fas fa-book-open"></i> Read Full Story
-                </a>
-                <a href="blog.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-cyan); text-decoration: none; font-weight: 600; transition: color 0.3s;">
-                    View All Blog Posts <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- Currently Learning/Reading Section -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem;">
-            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">
-                <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
-                    <i class="fas fa-graduation-cap"></i> Currently Learning
-                </h3>
-                <img src="assets/img/eks.png" alt="AWS EKS" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
-                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">AWS EKS</p>
-            </div>
-            
-            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent-cyan)'; this.style.boxShadow='0 10px 30px rgba(6, 182, 212, 0.1)';" onmouseout="this.style.transform=''; this.style.borderColor='var(--border-color)'; this.style.boxShadow='';">
-                <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">
-                    <i class="fas fa-book"></i> Currently Reading
-                </h3>
-                <img src="assets/img/snav1.jpg" alt="Practice of System and Network Administration" style="max-width: 180px; margin-bottom: 1rem; border-radius: 8px;">
-                <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Practice of System and Network Administration</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Certifications -->
-    <section class="certs-section" id="certifications">
-        <h2 class="section-title">Certifications & Education</h2>
-        <div class="cert-grid">
-            <div class="cert-card">
-                <div class="cert-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h4>Security+</h4>
-                <p class="issuer">CompTIA (2025)</p>
-            </div>
-            <div class="cert-card">
-                <div class="cert-icon">
-                    <i class="fas fa-network-wired"></i>
-                </div>
-                <h4>Network+</h4>
-                <p class="issuer">CompTIA (2025)</p>
-            </div>
-            <div class="cert-card">
-                <div class="cert-icon">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h4>B.S. Information Systems & Analytics</h4>
-                <p class="issuer">Louisiana State University<br>GPA: 3.67 | Dec 2026</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer id="contact">
-        <div class="footer-content">
-            <h2 style="margin-bottom: 1.5rem; font-size: 2rem;">Let's Connect</h2>
-            <p style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.1rem; line-height: 1.8;">
-                I'm actively seeking cloud engineering and DevOps roles starting December 2026. 
-                Let's connect if you're building teams that value automation, reliability, and continuous improvement.
-            </p>
-            <div class="social-links">
-                <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" title="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://github.com/nvastola" target="_blank" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="blog.html" title="Blog">
-                    <i class="fas fa-blog"></i>
-                </a>
-                <a href="mailto:noahvastola@gmail.com" title="Email">
-                    <i class="fas fa-envelope"></i>
-                </a>
-                <a href="assets/doc/Resume.pdf" target="_blank" title="Resume">
-                    <i class="fas fa-file-pdf"></i>
-                </a>
-            </div>
-            <p>&copy; 2026 Noah Vastola. Built with passion for cloud infrastructure.</p>
-        </div>
-    </footer>
-
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Add scroll effect to navigation
-        let lastScroll = 0;
-        const nav = document.querySelector('nav');
-        
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 100) {
-                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
-            } else {
-                nav.style.boxShadow = 'none';
-            }
-            
-            lastScroll = currentScroll;
-        });
-    </script>
-
-    <!-- Visitor Counter Script -->
-    <script src="js/scripts.js"></script>
-
+<script src="js/scripts.js"></script>
 </body>
 </html>

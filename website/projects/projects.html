@@ -1,747 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Projects | Noah Vastola</title>
-    <meta name="description" content="Complete portfolio of cloud infrastructure, DevOps automation, and container orchestration projects">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>All Projects | Noah Vastola – Cloud Engineering & DevOps</title>
+<meta name="description" content="Complete portfolio of cloud infrastructure, DevOps automation, and container orchestration projects by Noah Vastola."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1a2332;
-            --text-primary: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --border-color: #2d3748;
-            --card-bg: #1e293b;
-            --card-hover: #2d3a52;
-        }
+<link rel="stylesheet" href="../css/styles.css"/>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
+<style>
+  /* Multi-icon thumbnail layout */
+  .thumb-icons { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+  .thumb-icons img { width: 36px; height: 36px; object-fit: contain; transition: transform 0.2s ease; }
+  .proj-card:hover .thumb-icons img { transform: scale(1.1); }
 
-        /* ── Nav ── */
-        nav {
-            background: rgba(26, 35, 50, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-        }
-        .logo:hover { color: var(--accent-cyan); }
-        .back-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
-        .back-link:hover { color: var(--accent-cyan); }
+  /* Top card meta details */
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .card-topic-pill { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 4px; background: var(--muted); color: var(--fg); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
 
-        /* ── Header ── */
-        .header {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem 3rem;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-        }
-        .header .subtitle {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-        .header .description {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.8;
-        }
+  /* Tag images */
+  .proj-tag img { width: 14px; height: 14px; object-fit: contain; flex-shrink: 0; }
+  .proj-tag { display: inline-flex; align-items: center; gap: 0.4rem; }
 
-        /* ── Stats ── */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0 0;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        .stat-card:hover { transform: translateY(-3px); border-color: var(--accent-cyan); }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-        .stat-label { color: var(--text-secondary); font-size: 0.95rem; }
+  /* Filtering layout */
+  .filter-section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 3rem; position: relative; z-index: 10; text-align: center; }
+  .filter-label { font-family: var(--mono-font); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 1rem; }
+  .f-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+</style>
 
-        /* ── Legend ── */
-        .legend {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 2rem 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            align-items: center;
-        }
-        .legend-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-right: 0.25rem;
-        }
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.35rem 0.85rem;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
-        .legend-item .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        /* Topic colors — used by legend + card left border */
-        .topic-linux       { --topic-color: #06b6d4; --topic-bg: rgba(6,182,212,0.08);   --topic-border: rgba(6,182,212,0.25); }
-        .topic-containers  { --topic-color: #3b82f6; --topic-bg: rgba(59,130,246,0.08);  --topic-border: rgba(59,130,246,0.25); }
-        .topic-cicd        { --topic-color: #10b981; --topic-bg: rgba(16,185,129,0.08);  --topic-border: rgba(16,185,129,0.25); }
-        .topic-kubernetes  { --topic-color: #a78bfa; --topic-bg: rgba(139,92,246,0.08);  --topic-border: rgba(139,92,246,0.25); }
-        .topic-iac         { --topic-color: #f59e0b; --topic-bg: rgba(245,158,11,0.08);  --topic-border: rgba(245,158,11,0.25); }
-        .topic-automation  { --topic-color: #38bdf8; --topic-bg: rgba(56,189,248,0.08);  --topic-border: rgba(56,189,248,0.25); }
-        .topic-monitoring  { --topic-color: #fb923c; --topic-bg: rgba(251,146,60,0.08);  --topic-border: rgba(251,146,60,0.25); }
-
-        .legend-item {
-            background: var(--topic-bg);
-            border: 1px solid var(--topic-border);
-            color: var(--topic-color);
-        }
-        .legend-item .dot { background: var(--topic-color); }
-        .legend-item:hover { filter: brightness(1.2); }
-        .legend-item.dimmed { opacity: 0.35; }
-
-        /* ── Grid ── */
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 2rem 5rem;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* ── Project Card ── */
-        .project-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.8rem;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            /* Left accent border per topic */
-            border-left: 3px solid var(--topic-color);
-        }
-
-        /* Top shimmer bar on hover */
-        .project-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 3px;
-            background: linear-gradient(90deg, var(--topic-color), transparent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s;
-        }
-        .project-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--topic-color);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 0 1px var(--topic-border);
-        }
-        .project-card:hover::before { transform: scaleX(1); }
-
-        /* Dimming for filter */
-        .project-card.dimmed {
-            opacity: 0.25;
-            transform: none !important;
-            pointer-events: none;
-        }
-
-        /* Card top row */
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .module-label {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--topic-color);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.3rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .status-completed {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--accent-green);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .status-coming-soon {
-            background: rgba(251, 191, 36, 0.1);
-            color: var(--accent-orange);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.4;
-        }
-        .card-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.75;
-            flex: 1;
-        }
-
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-        }
-        .tech-badge {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .project-links {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            padding-top: 0.25rem;
-            border-top: 1px solid var(--border-color);
-        }
-        .project-link {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        .project-link:hover { color: var(--accent-blue); }
-
-        /* ── Footer ── */
-        .footer {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            text-align: center;
-        }
-        .back-to-portfolio {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .back-to-portfolio:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 768px) {
-            .header h1 { font-size: 2rem; }
-            .nav-container { flex-direction: column; gap: 1rem; }
-            .card-grid { grid-template-columns: 1fr; }
-            .legend { gap: 0.5rem; }
-        }
-    </style>
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-container">
-            <a href="../index.html" class="logo"><i class="fas fa-code"></i> Noah Vastola</a>
-            <a href="../index.html#projects" class="back-link"><i class="fas fa-arrow-left"></i> Back to Portfolio</a>
-        </div>
-    </nav>
+<div class="cursor-dot" id="cursorDot"></div>
 
-    <header class="header">
-        <h1>All Projects</h1>
-        <p class="subtitle">Cloud Infrastructure • CI/CD Automation • Container Orchestration</p>
-        <p class="description">Comprehensive collection of DevOps projects demonstrating hands-on experience with cloud platforms, infrastructure automation, containerization, and production deployment practices.</p>
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-number">8</div>
-                <div class="stat-label">Projects Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">6</div>
-                <div class="stat-label">In Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">20+</div>
-                <div class="stat-label">Technologies</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Topic filter legend -->
-    <div class="legend">
-        <span class="legend-label">Filter:</span>
-        <span class="legend-item topic-linux"      data-topic="linux"      onclick="filterTopic(this)"><span class="dot"></span> Linux &amp; Servers</span>
-        <span class="legend-item topic-containers"  data-topic="containers" onclick="filterTopic(this)"><span class="dot"></span> Containers</span>
-        <span class="legend-item topic-cicd"        data-topic="cicd"       onclick="filterTopic(this)"><span class="dot"></span> CI/CD with Jenkins</span>
-        <span class="legend-item topic-kubernetes"  data-topic="kubernetes" onclick="filterTopic(this)"><span class="dot"></span> Kubernetes</span>
-        <span class="legend-item topic-iac"         data-topic="iac"        onclick="filterTopic(this)"><span class="dot"></span> Infrastructure as Code</span>
-        <span class="legend-item topic-automation"  data-topic="automation" onclick="filterTopic(this)"><span class="dot"></span> Cloud Automation</span>
-        <span class="legend-item topic-monitoring"  data-topic="monitoring" onclick="filterTopic(this)"><span class="dot"></span> Monitoring</span>
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../index.html#projects" class="nav-link active"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../index.html#blogs" class="nav-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
     </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
 
-    <main class="content">
-        <div class="card-grid">
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../index.html#projects" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../index.html#blogs" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
 
-            <!-- 01: Deploy Java App -->
-            <div class="project-card topic-linux" data-topic="linux">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-server"></i> Linux &amp; Servers</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Deploy Java Application to Production Linux Server</h3>
-                <p class="card-description">Provisioned and hardened a DigitalOcean droplet, then deployed a Java Gradle application following security and operations best practices. Configured the server for production workloads with proper user access controls and automated application startup.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">DigitalOcean</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Java</span>
-                    <span class="tech-badge">Gradle</span>
-                </div>
-                <div class="project-links">
-                    <a href="../blog/devops-project-1.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
+<section id="page-hero" class="grid-bg" style="padding-top: 140px; padding-bottom: 2rem;">
+  <div class="container" style="text-align:center">
+    <div class="reveal">
+      <div class="hero-role-box" style="margin-bottom: 1.5rem;">
+        <div class="hero-role"><i class="fa-solid fa-diagram-project"></i> Full Portfolio</div>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay: 0.1s;">
+      <h1 class="sec-title">All Projects</h1>
+    </div>
+    <p class="sec-sub reveal" style="transition-delay: 0.2s;">Hands-on projects documenting real deployments, real errors, and real fixes &mdash; because that&rsquo;s where the learning actually happens.</p>
+  </div>
+</section>
 
-            <!-- 02: Nexus -->
-            <div class="project-card topic-linux" data-topic="linux">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-server"></i> Linux &amp; Servers</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Deploy Nexus Repository Manager for Centralized Artifact Management</h3>
-                <p class="card-description">Deployed and configured Nexus Repository Manager on DigitalOcean to serve as a centralized artifact repository for Java applications. Implemented role-based access control and integrated with multiple build tools for automated artifact publishing.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Nexus</span>
-                    <span class="tech-badge">DigitalOcean</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Java</span>
-                    <span class="tech-badge">Gradle</span>
-                    <span class="tech-badge">Maven</span>
-                </div>
-                <div class="project-links">
-                    <a href="../blog/devops-project-2.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
+<section style="padding: 0;">
+  <div class="filter-section reveal" style="transition-delay: 0.3s;">
+    <div class="filter-label"><i class="fa-solid fa-filter" style="margin-right:.4rem"></i>Filter by topic</div>
+    <div class="filter-bar" style="justify-content: center;">
+      <button class="f-btn on" data-f="all">All Projects</button>
+      <button class="f-btn" data-f="linux"><span class="dot"></span> Linux &amp; Servers</button>
+      <button class="f-btn" data-f="containers"><span class="dot"></span> Containers</button>
+      <button class="f-btn" data-f="cicd"><span class="dot"></span> CI/CD with Jenkins</button>
+      <button class="f-btn" data-f="kubernetes"><span class="dot"></span> Kubernetes</button>
+      <button class="f-btn" data-f="iac"><span class="dot"></span> Infrastructure as Code</button>
+    </div>
+  </div>
+</section>
 
-            <!-- 03: Docker -->
-            <div class="project-card topic-containers" data-topic="containers">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fab fa-docker"></i> Containers</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Deploy Multi-Container Application with Docker and AWS ECR</h3>
-                <p class="card-description">Containerized a full-stack Node.js application with MongoDB and MongoExpress, orchestrated multi-container deployment using Docker Compose, and implemented a complete container registry workflow with AWS ECR. Simulated production CI/CD pipeline by building, publishing, and deploying containerized applications.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Node.js</span>
-                    <span class="tech-badge">Amazon ECR</span>
-                    <span class="tech-badge">MongoDB</span>
-                    <span class="tech-badge">MongoExpress</span>
-                </div>
-                <div class="project-links">
-                    <a href="../blog/devops-project-3.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
+<section style="padding-top: 2rem;">
+  <div class="container" style="max-width: 1200px;">
+    <div class="proj-grid" id="projGrid">
 
-            <!-- 04: Jenkins Shared Library -->
-            <div class="project-card topic-cicd" data-topic="cicd">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-code-branch"></i> CI/CD with Jenkins</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Build Reusable Jenkins Shared Library</h3>
-                <p class="card-description">Create a centralized Jenkins Shared Library to standardize CI/CD pipeline code across multiple projects. Implement reusable Groovy functions for common build, test, and deployment tasks to eliminate code duplication and enforce best practices organization-wide.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Jenkins</span>
-                    <span class="tech-badge">Groovy</span>
-                    <span class="tech-badge">Git</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">Java</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://gitlab.com/nvastola/jenkins-shared-library" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
-                    <a href="../blog/devops-project-4.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
-
-            <!-- 05: End-to-End CI/CD -->
-            <div class="project-card topic-cicd" data-topic="cicd">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-code-branch"></i> CI/CD with Jenkins</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">End-to-End CI/CD Pipeline with Automated Versioning</h3>
-                <p class="card-description">Build a complete CI/CD pipeline automating the entire software delivery lifecycle from code commit to production deployment. Implement automatic semantic versioning, Docker image builds, and zero-downtime deployments using Jenkins and Docker Compose.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Jenkins</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Docker Hub</span>
-                    <span class="tech-badge">AWS</span>
-                    <span class="tech-badge">Git</span>
-                    <span class="tech-badge">Java</span>
-                    <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">Linux</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
-                    <a href="../blog/devops-project-5.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
-
-            <!-- 06: Windows Domain Lab -->
-            <div class="project-card topic-linux" data-topic="linux">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-server"></i> Linux &amp; Servers</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Enterprise Windows Domain Lab</h3>
-                <p class="card-description">Built and administered a Windows domain environment with enterprise-grade security and automation. Deployed Windows Server 2022 with redundant domain controllers, 5 organizational units, and 10+ Group Policy Objects enforcing security policies. Automated user provisioning using PowerShell scripts, reducing admin time by 75%.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Active Directory</span>
-                    <span class="tech-badge">Group Policy</span>
-                    <span class="tech-badge">PowerShell</span>
-                    <span class="tech-badge">Windows Server</span>
-                    <span class="tech-badge">LAPS</span>
-                </div>
-            </div>
-
-            <!-- 07: Security & SIEM -->
-            <div class="project-card topic-monitoring" data-topic="monitoring">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-chart-line"></i> Monitoring &amp; Observability</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Security Monitoring with Wazuh SIEM</h3>
-                <p class="card-description">Deployed Wazuh SIEM for centralized security monitoring and log aggregation across 10+ endpoints. Configured custom detection rules for privilege escalation, failed logins, and malware indicators. Applied CIS benchmark hardening to Windows and Linux systems, implementing 50+ security controls for production-grade system hardening.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Wazuh</span>
-                    <span class="tech-badge">SIEM</span>
-                    <span class="tech-badge">Security Hardening</span>
-                    <span class="tech-badge">CIS Benchmarks</span>
-                    <span class="tech-badge">Log Analysis</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Windows</span>
-                </div>
-            </div>
-
-            <!-- 08: Kubernetes Microservices -->
-            <div class="project-card topic-kubernetes" data-topic="kubernetes">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-dharmachakra"></i> Kubernetes</span>
-                    <span class="status-badge status-completed">✓ Completed</span>
-                </div>
-                <h3 class="card-title">Deploy Production Microservices on Kubernetes</h3>
-                <p class="card-description">Deploy a multi-tier online shop application to a production Kubernetes cluster following enterprise security and scalability patterns. Configure persistent storage, service mesh networking, and high-availability Redis caching with proper resource limits and health checks.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Kubernetes</span>
-                    <span class="tech-badge">Redis</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Linode LKE</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://gitlab.com/nvastola/k8s-microservices-demo" class="project-link"><i class="fab fa-gitlab"></i> GitLab Repository</a>
-                    <a href="../blog/devops-project-6.html" class="project-link"><i class="fas fa-blog"></i> Blog Post</a>
-                </div>
-            </div>
-
-            <!-- 09: EKS CI/CD -->
-            <div class="project-card topic-cicd" data-topic="cicd">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-code-branch"></i> CI/CD with Jenkins</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Complete CI/CD Pipeline with Kubernetes on AWS EKS</h3>
-                <p class="card-description">Build an end-to-end CI/CD pipeline integrating Kubernetes deployment on AWS EKS with automated image builds pushed to AWS ECR. Implement version incrementing, automated testing, and deployment workflows using Jenkins to orchestrate the entire software delivery process.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Kubernetes</span>
-                    <span class="tech-badge">Jenkins</span>
-                    <span class="tech-badge">AWS EKS</span>
-                    <span class="tech-badge">AWS ECR</span>
-                    <span class="tech-badge">Java</span>
-                    <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Git</span>
-                </div>
-            </div>
-
-            <!-- 10: Terraform CI/CD -->
-            <div class="project-card topic-iac" data-topic="iac">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-layer-group"></i> Infrastructure as Code</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Automated Infrastructure Provisioning with Terraform CI/CD</h3>
-                <p class="card-description">Automate AWS infrastructure provisioning and integrate it into a complete CI/CD pipeline. The pipeline provisions EC2 instances, VPCs, and networking on-demand, then deploys applications using Docker, eliminating manual server configuration and enabling infrastructure as code practices.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Terraform</span>
-                    <span class="tech-badge">Jenkins</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">AWS</span>
-                    <span class="tech-badge">Git</span>
-                    <span class="tech-badge">Java</span>
-                    <span class="tech-badge">Maven</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Docker Hub</span>
-                </div>
-            </div>
-
-            <!-- 11: Python Utilities -->
-            <div class="project-card topic-automation" data-topic="automation">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fab fa-python"></i> Cloud Automation</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Build DevOps Utilities with Python</h3>
-                <p class="card-description">Develop Python scripts for common DevOps tasks including log parsing, system monitoring, and API interactions. Learn Python fundamentals through practical automation scenarios relevant to infrastructure management and application deployment.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Python</span>
-                    <span class="tech-badge">REST APIs</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Logging</span>
-                </div>
-            </div>
-
-            <!-- 12: Python Automation -->
-            <div class="project-card topic-automation" data-topic="automation">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fab fa-python"></i> Cloud Automation</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Automate Infrastructure Tasks with Python</h3>
-                <p class="card-description">Create Python automation scripts to streamline repetitive infrastructure tasks including server health checks, backup automation, and resource cleanup. Implement scheduled jobs and event-driven automation to reduce manual operations and improve reliability.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Python</span>
-                    <span class="tech-badge">AWS SDK (Boto3)</span>
-                    <span class="tech-badge">Cron</span>
-                    <span class="tech-badge">Linux</span>
-                    <span class="tech-badge">Slack API</span>
-                </div>
-            </div>
-
-            <!-- 13: Ansible -->
-            <div class="project-card topic-iac" data-topic="iac">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-layer-group"></i> Infrastructure as Code</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Terraform and Ansible Integration for Configuration Management</h3>
-                <p class="card-description">Integrate Ansible configuration management with Terraform infrastructure provisioning for complete infrastructure automation. Automatically execute Ansible playbooks to configure servers immediately after Terraform provisions them, creating a seamless infrastructure deployment workflow.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Ansible</span>
-                    <span class="tech-badge">Terraform</span>
-                    <span class="tech-badge">AWS</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Linux</span>
-                </div>
-            </div>
-
-            <!-- 14: Prometheus -->
-            <div class="project-card topic-monitoring" data-topic="monitoring">
-                <div class="card-meta">
-                    <span class="module-label"><i class="fas fa-chart-line"></i> Monitoring &amp; Observability</span>
-                    <span class="status-badge status-coming-soon">Coming Soon</span>
-                </div>
-                <h3 class="card-title">Deploy Prometheus Monitoring Stack on Kubernetes</h3>
-                <p class="card-description">Deploy a production-grade monitoring stack using Prometheus Operator on AWS EKS. Configure Prometheus for metrics collection, Grafana for visualization, and Alert Manager for incident notifications, providing complete observability for Kubernetes workloads.</p>
-                <div class="tech-stack">
-                    <span class="tech-badge">Prometheus</span>
-                    <span class="tech-badge">Kubernetes</span>
-                    <span class="tech-badge">Helm</span>
-                    <span class="tech-badge">AWS EKS</span>
-                    <span class="tech-badge">eksctl</span>
-                    <span class="tech-badge">Grafana</span>
-                    <span class="tech-badge">Linux</span>
-                </div>
-            </div>
-
+      <div class="proj-card reveal" data-topic="iac">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg" alt="Azure" loading="lazy">
+            <img src="https://cdn.simpleicons.org/terraform/7B42BC" alt="Terraform" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg" alt="GitHub Actions" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/powershell/powershell-original.svg" alt="PowerShell" loading="lazy">
+          </div>
         </div>
-    </main>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-layer-group"></i> IaC</span>
+          </div>
+          <div class="proj-name">Cloud-Native Resume Website on Azure</div>
+          <div class="proj-desc">Serverless resume site on Azure with a Terraform-provisioned backend, CosmosDB visitor counter via Azure Functions, and automated deploys through GitHub Actions.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg" alt="">Azure</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/terraform/7B42BC" alt="">Terraform</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg" alt="">GitHub Actions</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/powershell/powershell-original.svg" alt="">PowerShell</span>
+          </div>
+          <div class="proj-links">
+            <span class="proj-link" style="color:var(--primary);border-color:var(--primary);cursor:default"><i class="fa-solid fa-check"></i> This Site</span>
+          </div>
+        </div>
+      </div>
 
-    <footer class="footer">
-        <a href="../index.html#projects" class="back-to-portfolio">
-            <i class="fas fa-arrow-left"></i> Back to Portfolio
-        </a>
-    </footer>
+      <div class="proj-card reveal" data-topic="linux">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="Linux" loading="lazy">
+            <img src="https://cdn.simpleicons.org/digitalocean/0080FF" alt="DigitalOcean" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="Java" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gradle/gradle-original.svg" alt="Gradle" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-server"></i> Linux &amp; Servers</span>
+          </div>
+          <div class="proj-name">Deploy Java Application to Production Linux Server</div>
+          <div class="proj-desc">Provisioned and secured a DigitalOcean droplet to serve a Java Gradle app — implemented SSH key auth, cloud firewall rules, and a dedicated non-root application user.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/digitalocean/0080FF" alt="">DigitalOcean</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="">Linux</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="">Java</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gradle/gradle-original.svg" alt="">Gradle</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-1.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+          </div>
+        </div>
+      </div>
 
-    <script>
-        // Nav shadow on scroll
-        const nav = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
-            nav.style.boxShadow = window.pageYOffset > 100 ? '0 2px 20px rgba(0,0,0,0.3)' : 'none';
-        });
+      <div class="proj-card reveal" data-topic="linux">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.simpleicons.org/sonatype/aaaaaa" alt="Nexus" loading="lazy">
+            <img src="https://cdn.simpleicons.org/apachemaven/C71A36" alt="Maven" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gradle/gradle-original.svg" alt="Gradle" loading="lazy">
+            <img src="https://cdn.simpleicons.org/digitalocean/0080FF" alt="DigitalOcean" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-server"></i> Linux &amp; Servers</span>
+          </div>
+          <div class="proj-name">Deploy Nexus Repository Manager for Centralized Artifact Management</div>
+          <div class="proj-desc">Deployed Nexus on DigitalOcean as a private artifact store with RBAC, cleanup policies, and Maven/Gradle integration for automated publishing.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/sonatype/aaaaaa" alt="">Nexus</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/digitalocean/0080FF" alt="">DigitalOcean</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/apachemaven/C71A36" alt="">Maven</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gradle/gradle-original.svg" alt="">Gradle</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-2.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+          </div>
+        </div>
+      </div>
 
-        // Topic filter — click to highlight, click again to clear
-        let activeFilter = null;
-        const cardGrid = document.querySelector('.card-grid');
-        let originalOrder = [];
+      <div class="proj-card reveal" data-topic="containers">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="AWS ECR" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-plain-wordmark.svg" alt="Node.js" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" alt="MongoDB" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-brands fa-docker"></i> Containers</span>
+          </div>
+          <div class="proj-name">Deploy Multi-Container Application with Docker and AWS ECR</div>
+          <div class="proj-desc">Containerized a Node.js + MongoDB app with Docker Compose, pushed versioned images to AWS ECR, and simulated a remote deployment by pulling the image from the registry.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="">Docker</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="">AWS ECR</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" alt="">MongoDB</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-3.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+          </div>
+        </div>
+      </div>
 
-        // Store original order on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            originalOrder = Array.from(cardGrid.children);
-        });
+      <div class="proj-card reveal" data-topic="cicd">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="Jenkins" loading="lazy">
+            <img src="https://cdn.simpleicons.org/apachegroovy/4298B8" alt="Groovy" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" alt="Git" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-code-branch"></i> CI/CD with Jenkins</span>
+          </div>
+          <div class="proj-name">Build Reusable Jenkins Shared Library</div>
+          <div class="proj-desc">Built a centralized Jenkins Shared Library of reusable Groovy functions — eliminating pipeline duplication across microservices.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="">Jenkins</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/apachegroovy/4298B8" alt="">Groovy</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="">Docker</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/apachemaven/C71A36" alt="">Maven</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-4.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/jenkins-shared-library" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
 
-        function filterTopic(legendItem) {
-            const topic = legendItem.dataset.topic;
-            const allCards = Array.from(document.querySelectorAll('.project-card'));
-            const allLegendItems = document.querySelectorAll('.legend-item');
+      <div class="proj-card reveal" data-topic="cicd">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="Jenkins" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="AWS EC2" loading="lazy">
+            <img src="https://cdn.simpleicons.org/apachemaven/C71A36" alt="Maven" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-code-branch"></i> CI/CD with Jenkins</span>
+          </div>
+          <div class="proj-name">End-to-End CI/CD Pipeline with Automated Versioning</div>
+          <div class="proj-desc">Full commit-to-production pipeline with dynamic semantic versioning, automated Docker image builds, and remote SSH deployments via Jenkins and Docker Compose.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="">Jenkins</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="">Docker</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="">AWS EC2</span>
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/apachemaven/C71A36" alt="">Maven</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-5.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
 
-            if (activeFilter === topic) {
-                // Clear filter - restore original order
-                activeFilter = null;
-                allCards.forEach(c => c.classList.remove('dimmed'));
-                allLegendItems.forEach(l => l.classList.remove('dimmed'));
-                
-                // Restore original order
-                cardGrid.innerHTML = '';
-                originalOrder.forEach(card => cardGrid.appendChild(card));
-            } else {
-                // Apply filter
-                activeFilter = topic;
-                
-                // Separate matching and non-matching cards
-                const matchingCards = allCards.filter(c => c.dataset.topic === topic);
-                const nonMatchingCards = allCards.filter(c => c.dataset.topic !== topic);
-                
-                // Clear grid and reorder: matching first, then non-matching
-                cardGrid.innerHTML = '';
-                matchingCards.forEach(card => {
-                    card.classList.remove('dimmed');
-                    cardGrid.appendChild(card);
-                });
-                nonMatchingCards.forEach(card => {
-                    card.classList.add('dimmed');
-                    cardGrid.appendChild(card);
-                });
-                
-                // Update legend
-                allLegendItems.forEach(l => {
-                    l.classList.toggle('dimmed', l.dataset.topic !== topic);
-                });
-                
-                // Scroll to top of grid
-                cardGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    </script>
+      <div class="proj-card reveal" data-topic="kubernetes">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg" alt="Kubernetes" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg" alt="Redis" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="Linux" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-dharmachakra"></i> Kubernetes</span>
+          </div>
+          <div class="proj-name">Deploy Production Microservices on Kubernetes</div>
+          <div class="proj-desc">Deployed Google's 11-service Online Boutique on a live Linode LKE cluster with resource limits, liveness/readiness probes, and LoadBalancer config.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg" alt="">Kubernetes</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg" alt="">Redis</span>
+            <span class="proj-tag">Linode LKE</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="">Linux</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-6.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/k8s-microservices-demo" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <div style="text-align:center;margin-top:4rem" class="reveal">
+      <a href="../index.html#projects" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#blogs">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../blog.html" class="f-social" title="Blog"><i class="fa-solid fa-pen-nib"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: DevOps Portfolio, Cloud Engineer, Azure, AWS, Jenkins, Kubernetes, Docker, Terraform, CI/CD, Baton Rouge</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/scripts.js"></script>
 
 </body>
 </html>

@@ -1,505 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare | Noah Vastola</title>
-    <meta name="description" content="Building a Jenkins Shared Library to eliminate copy-paste pipeline code across 10 microservices. Learning Groovy, the script object pattern, and how enterprises scale CI/CD automation.">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare | Noah Vastola</title>
+<meta name="description" content="Building a Jenkins Shared Library to eliminate copy-paste pipeline code across 10 microservices. Learning Groovy, the script object pattern, and how enterprises scale CI/CD automation."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1a2332;
-            --text-primary: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --accent-yellow: #fbbf24;
-            --accent-red: #ef4444;
-            --border-color: #2d3748;
-            --card-bg: #1e293b;
-            --code-bg: #1a1a1a;
-        }
+<link rel="stylesheet" href="../css/styles.css"/>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            line-height: 1.8;
-            min-height: 100vh;
-        }
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
 
-        nav {
-            background: rgba(26, 35, 50, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
 
-        .nav-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
 
-        .nav-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
 
-        .nav-link:hover {
-            color: var(--accent-cyan);
-        }
+  /* Blockquotes */
+  .article-body blockquote { margin: 2rem 0; padding: 1rem 1.5rem; border-left: 4px solid var(--primary); background: var(--muted); border-radius: 0 6px 6px 0; font-style: italic; color: var(--fg); font-size: 1rem; line-height: 1.8; }
 
-        .article-header {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 4rem 2rem 2rem;
-        }
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: block; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
 
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .breadcrumb a {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .breadcrumb a:hover {
-            color: var(--accent-blue);
-        }
-
-        .article-header h1 {
-            font-size: 2.8rem;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .article-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        .meta-item i {
-            color: var(--accent-cyan);
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            padding: 0.4rem 0.9rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .article-content {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .article-body {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 3rem;
-        }
-
-        .article-body h2 {
-            font-size: 2rem;
-            margin: 2.5rem 0 1.5rem;
-            color: var(--text-primary);
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--accent-cyan);
-        }
-
-        .article-body h2:first-child {
-            margin-top: 0;
-        }
-
-        .article-body h3 {
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem;
-            color: var(--accent-cyan);
-        }
-
-        .article-body h4 {
-            font-size: 1.2rem;
-            margin: 1.5rem 0 1rem;
-            color: var(--text-primary);
-        }
-
-        .article-body p {
-            margin-bottom: 1.5rem;
-            line-height: 1.9;
-            color: var(--text-secondary);
-        }
-
-        .article-body strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .article-body ul, .article-body ol {
-            margin-bottom: 1.5rem;
-            padding-left: 2rem;
-        }
-
-        .article-body li {
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        .article-body ul li::marker {
-            color: var(--accent-cyan);
-        }
-
-        .article-body code {
-            background: var(--code-bg);
-            color: var(--accent-green);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .article-body pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            overflow-x: auto;
-        }
-
-        .article-body pre code {
-            background: none;
-            padding: 0;
-            color: var(--accent-green);
-        }
-
-        .callout {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            border-left: 4px solid;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .callout-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            font-size: 1.1rem;
-        }
-
-        .callout.warning {
-            border-color: var(--accent-yellow);
-            background: rgba(251, 191, 36, 0.05);
-        }
-
-        .callout.warning .callout-title {
-            color: var(--accent-yellow);
-        }
-
-        .callout.error {
-            border-color: var(--accent-red);
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .callout.error .callout-title {
-            color: var(--accent-red);
-        }
-
-        .callout.success {
-            border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .callout.success .callout-title {
-            color: var(--accent-green);
-        }
-
-        .callout.info {
-            border-color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .callout.info .callout-title {
-            color: var(--accent-blue);
-        }
-
-        .callout p:last-child {
-            margin-bottom: 0;
-        }
-
-        blockquote {
-            margin: 2rem 0;
-            padding: 1.5rem 2rem;
-            border-left: 4px solid var(--accent-cyan);
-            background: rgba(6, 182, 212, 0.05);
-            font-style: italic;
-            color: var(--text-primary);
-        }
-
-        .article-footer {
-            max-width: 900px;
-            margin: 3rem auto;
-            padding: 0 2rem;
-        }
-
-        .back-to-blog {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .back-to-blog:hover {
-            background: var(--bg-tertiary);
-            color: var(--accent-cyan);
-            border-color: var(--accent-cyan);
-        }
-
-        .related-posts {
-            max-width: 900px;
-            margin: 3rem auto;
-            padding: 0 2rem 4rem;
-        }
-
-        .related-posts h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .related-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .related-card:hover {
-            border-color: var(--accent-cyan);
-            transform: translateY(-4px);
-        }
-
-        .related-card h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            font-size: 1.2rem;
-        }
-
-        .related-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .article-header h1 {
-                font-size: 2rem;
-            }
-
-            .article-body {
-                padding: 2rem 1.5rem;
-            }
-
-            .article-body h2 {
-                font-size: 1.6rem;
-            }
-
-            .article-body h3 {
-                font-size: 1.3rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-            }
-        }
-    </style>
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
 </head>
 <body>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../index.html" class="nav-link">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <a href="../blog.html" class="nav-link">
-                    <i class="fas fa-blog"></i> Blog
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <header class="article-header">
-        <div class="breadcrumb">
-            <a href="../blog.html">Blog</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Jenkins Shared Library</span>
-        </div>
+<div class="cursor-dot" id="cursorDot"></div>
 
-        <h1>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h1>
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
 
-        <div class="article-meta">
-            <div class="meta-item">
-                <i class="fas fa-calendar-alt"></i>
-                February 27, 2026
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                18 min read
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-user"></i>
-                Noah Vastola
-            </div>
-        </div>
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
 
-        <div class="tags">
-            <span class="tag">Jenkins</span>
-            <span class="tag">Groovy</span>
-            <span class="tag">Docker</span>
-            <span class="tag">Git</span>
-            <span class="tag">Java</span>
-            <span class="tag">Maven</span>
-        </div>
-    </header>
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Jenkins Shared Library</span>
+    </div>
+    
+    <h1 class="post-title">Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> February 27, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 18 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">Jenkins</span>
+      <span class="post-tag">Groovy</span>
+      <span class="post-tag">Docker</span>
+      <span class="post-tag">Git</span>
+      <span class="post-tag">Java</span>
+      <span class="post-tag">Maven</span>
+    </div>
+  </div>
+</section>
 
-    <main class="article-content">
-        <article class="article-body">
+<div class="article-wrap">
+  <article class="article-body">
 
-<p>After containerizing applications with Docker (<a href="devops-project-3.html" style="color: var(--accent-cyan); text-decoration: none;">Project 3</a>) and understanding the manual CI/CD workflow, the next step was obvious: automate it. That's where Jenkins comes in.</p>
+    <p>After containerizing applications with Docker (<a href="devops-project-3.html">Project 3</a>) and understanding the manual CI/CD workflow, the next step was obvious: automate it. That's where Jenkins comes in.</p>
 
-<p>But here's what I didn't expect: automating one pipeline is straightforward. Automating ten nearly identical pipelines? That's where things get messy fast. And that's exactly the problem Jenkins Shared Libraries solve.</p>
+    <p>But here's what I didn't expect: automating one pipeline is straightforward. Automating ten nearly identical pipelines? That's where things get messy fast. And that's exactly the problem Jenkins Shared Libraries solve.</p>
 
-<p>This project took me from writing basic Jenkinsfiles to building reusable pipeline code that can be shared across multiple projects. I learned why enterprises don't just copy-paste pipeline logic, how Groovy classes work differently inside Jenkins, and why the <code>script</code> object is simultaneously confusing and essential.</p>
+    <p>This project took me from writing basic Jenkinsfiles to building reusable pipeline code that can be shared across multiple projects. I learned why enterprises don't just copy-paste pipeline logic, how Groovy classes work differently inside Jenkins, and why the <code>script</code> object is simultaneously confusing and essential.</p>
 
-<strong>It took about 8 hours over two days.</strong> And I finally understand how companies manage hundreds of CI/CD pipelines without losing their minds.
+    <p><strong>It took about 8 hours over two days.</strong> And I finally understand how companies manage hundreds of CI/CD pipelines without losing their minds.</p>
 
+    <h2>The Problem (Or: Why Copy-Paste Doesn't Scale)</h2>
 
+    <p><strong>The scenario:</strong></p>
 
-<h2>The Problem (Or: Why Copy-Paste Doesn't Scale)</h2>
+    <p>Imagine you're working on a microservices application with 10 different services:</p>
+    <ul>
+      <li>user-authentication</li>
+      <li>payment-processing</li>
+      <li>order-management</li>
+      <li>inventory-service</li>
+      <li>notification-service</li>
+      <li>...and 5 more</li>
+    </ul>
 
-<p><strong>The scenario:</strong></p>
+    <p>All of them are Java Maven applications. All of them need Jenkins pipelines. And 90% of the pipeline logic is identical:</p>
+    <ol>
+      <li>Build JAR with Maven</li>
+      <li>Build Docker image</li>
+      <li>Login to Docker registry</li>
+      <li>Push image to registry</li>
+    </ol>
 
-<p>Imagine you're working on a microservices application with 10 different services:</p>
-<ul>
-<li>user-authentication</li>
-<li>payment-processing</li>
-<li>order-management</li>
-<li>inventory-service</li>
-<li>notification-service</li>
-<li>...and 5 more</li>
+    <p><strong>Without Jenkins Shared Library, you'd have:</strong></p>
+    <ul>
+      <li>10 repositories</li>
+      <li>10 Jenkinsfiles</li>
+      <li>10 copies of the same build/push logic</li>
+      <li>100+ lines of duplicated code per repo</li>
+    </ul>
 
-</ul>
-<p>All of them are Java Maven applications. All of them need Jenkins pipelines. And 90% of the pipeline logic is identical:</p>
+    <p><strong>What happens when something changes?</strong></p>
+    <ul>
+      <li>Nexus repository URL changes? Update 10 files.</li>
+      <li>Switch from Maven to Gradle? Update 10 files.</li>
+      <li>New Docker registry? Update 10 files.</li>
+      <li>Bug in build logic? Fix it 10 times.</li>
+    </ul>
 
-<ol>
-<li>Build JAR with Maven</li>
-<li>Build Docker image</li>
-<li>Login to Docker registry</li>
-<li>Push image to registry</li>
+    <p>This is a maintenance nightmare. And it gets worse with every new microservice you add.</p>
 
-</ol>
-<strong>Without Jenkins Shared Library, you'd have:</strong>
-<ul>
-<li>10 repositories</li>
-<li>10 Jenkinsfiles</li>
-<li>10 copies of the same build/push logic</li>
-<li>100+ lines of duplicated code per repo</li>
+    <h2>The Solution: Extract the Logic</h2>
 
-</ul>
-<strong>What happens when something changes?</strong>
+    <p>Jenkins Shared Library is a separate Git repository containing reusable Groovy code. Instead of copying the same pipeline logic into every project, you write it once and reference it from all your Jenkinsfiles.</p>
 
-<ul>
-<li>Nexus repository URL changes? Update 10 files.</li>
-<li>Switch from Maven to Gradle? Update 10 files.</li>
-<li>New Docker registry? Update 10 files.</li>
-<li>Bug in build logic? Fix it 10 times.</li>
-
-</ul>
-<p>This is a maintenance nightmare. And it gets worse with every new microservice you add.</p>
-
-
-
-<h2>The Solution: Extract the Logic</h2>
-
-<p>Jenkins Shared Library is a separate Git repository containing reusable Groovy code. Instead of copying the same pipeline logic into every project, you write it once and reference it from all your Jenkinsfiles.</p>
-
-<p><strong>The concept:</strong></p>
-
-<pre><code>jenkins-shared-library (Git repo)
+    <p><strong>The concept:</strong></p>
+    <pre><code>jenkins-shared-library (Git repo)
 ├── buildJar()
 ├── buildDockerImage()
 ├── dockerLogin()
@@ -507,46 +220,41 @@
 
 microservice-1 → calls buildJar(), buildDockerImage()...
 microservice-2 → calls buildJar(), buildDockerImage()...
-microservice-3 → calls buildJar(), buildDockerImage()...
-</code></pre>
+microservice-3 → calls buildJar(), buildDockerImage()...</code></pre>
 
-<p>One source of truth. Ten projects using it. Change once, affect everywhere.</p>
+    <p>One source of truth. Ten projects using it. Change once, affect everywhere.</p>
 
+    <h2>Part 0: The Jenkins Journey So Far</h2>
 
+    <p>Before diving into Shared Libraries, let me back up and explain how I got here.</p>
 
-<h2>Part 0: The Jenkins Journey So Far</h2>
+    <h3>Jenkins Setup</h3>
 
-<p>Before diving into Shared Libraries, let me back up and explain how I got here.</p>
+    <p>I'm running Jenkins on a <strong>DigitalOcean Ubuntu 22.04 droplet</strong> as a Docker container. The setup process was:</p>
+    <ol>
+      <li>Create a $48/month droplet (4GB RAM, 4 vCPUs, 160GB storage)</li>
+      <li>Install Docker on Ubuntu</li>
+      <li>Run Jenkins: <code>docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts</code></li>
+      <li>Initialize Jenkins and install plugins (Pipeline, Git, Docker)</li>
+      <li>Configure build tools (Maven 3.9)</li>
+    </ol>
 
-<h3>Jenkins Setup</h3>
+    <p><strong>The tricky part:</strong> Making Docker available inside Jenkins.</p>
 
-<p>I'm running Jenkins on a <strong>DigitalOcean Ubuntu 22.04 droplet</strong> as a Docker container. The setup process was:</p>
+    <p>Since Jenkins is running in a Docker container, and I need Jenkins to build Docker images, I had to mount the Docker socket from the host:</p>
 
-<ol>
-<li>Create a $48/month droplet (4GB RAM, 4 vCPUs, 160GB storage)</li>
-<li>Install Docker on Ubuntu</li>
-<li>Run Jenkins: <code>docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts</code></li>
-<li>Initialize Jenkins and install plugins (Pipeline, Git, Docker)</li>
-<li>Configure build tools (Maven 3.9)</li>
-
-</ol>
-<strong>The tricky part:</strong> Making Docker available inside Jenkins.
-
-<p>Since Jenkins is running in a Docker container, and I need Jenkins to build Docker images, I had to mount the Docker socket from the host:</p>
-
-<pre><code>docker run -d -p 8080:8080 -p 50000:50000 \
+    <pre><code>docker run -d -p 8080:8080 -p 50000:50000 \
   -v jenkins_home:/var/jenkins_home \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  jenkins/jenkins:lts
-</code></pre>
+  jenkins/jenkins:lts</code></pre>
 
-<p>This lets Jenkins use the host's Docker daemon (Docker-in-Docker without actually nesting containers).</p>
+    <p>This lets Jenkins use the host's Docker daemon (Docker-in-Docker without actually nesting containers).</p>
 
-<strong>But there's a catch:</strong> Mounting the socket alone doesn't give you the <code>docker</code> command inside the Jenkins container. You need to install Docker CLI.
+    <p><strong>But there's a catch:</strong> Mounting the socket alone doesn't give you the <code>docker</code> command inside the Jenkins container. You need to install Docker CLI.</p>
 
-<p>I had to access the running Jenkins container and install Docker:</p>
+    <p>I had to access the running Jenkins container and install Docker:</p>
 
-<pre><code># Get the container ID
+    <pre><code># Get the container ID
 docker ps
 
 # Access the container as root
@@ -557,127 +265,79 @@ apt-get update
 apt-get install -y docker.io
 
 # Verify
-docker --version
-</code></pre>
+docker --version</code></pre>
 
-<p>Now Jenkins can execute <code>docker build</code>, <code>docker push</code>, etc. in pipeline steps.</p>
+    <p>Now Jenkins can execute <code>docker build</code>, <code>docker push</code>, etc. in pipeline steps.</p>
 
-<h3>Jenkins Plugin and Tool Configuration</h3>
+    <h3>Jenkins Plugin and Tool Configuration</h3>
 
-<p>After Jenkins was running, I configured the necessary plugins:</p>
+    <p><strong>Plugins configured:</strong></p>
+    <ul>
+      <li><strong>Pipeline</strong> — For Jenkinsfile support</li>
+      <li><strong>Git</strong> — For repository integration</li>
+      <li><strong>Maven Integration</strong> — For Maven builds</li>
+      <li><strong>NodeJS</strong> — For Node.js projects (installed for future use)</li>
+    </ul>
 
-<p><strong>Plugins configured:</strong></p>
-<ul>
-<li><strong>Pipeline</strong> - For Jenkinsfile support</li>
-<li><strong>Git</strong> - For repository integration</li>
-<li><strong>Maven Integration</strong> - For Maven builds</li>
-<li><strong>NodeJS</strong> - For Node.js projects (even though I'm using Java, installed for future use)</li>
+    <p>Then I configured build tools in <strong>Manage Jenkins → Tools:</strong></p>
 
-</ul>
-<p>Then I configured build tools in <strong>Manage Jenkins → Tools:</strong></p>
+    <p><strong>Maven configuration:</strong></p>
+    <ul>
+      <li>Name: <code>maven-3.9</code></li>
+      <li>Install automatically: ✅</li>
+      <li>Version: 3.9.12</li>
+    </ul>
 
-<p><strong>Maven configuration:</strong></p>
-<ul>
-<li>Name: <code>maven-3.9</code></li>
-<li>Install automatically: ✅</li>
-<li>Version: 3.9.12</li>
-
-</ul>
-<p>This is why my Jenkinsfile can reference:</p>
-<pre><code>tools {
+    <p>This is why my Jenkinsfile can reference:</p>
+    <pre><code>tools {
     maven 'maven-3.9'
-}
-</code></pre>
+}</code></pre>
 
-<p>Jenkins automatically downloads and uses Maven 3.9.12 for this pipeline.</p>
+    <p><strong>Git configuration:</strong></p>
+    <ul>
+      <li>Git installations: Default (uses system git)</li>
+    </ul>
 
-<p><strong>Git configuration:</strong></p>
-<ul>
-<li>Git installations: Default (uses system git)</li>
+    <p><strong>Credentials setup — GitLab:</strong></p>
+    <ul>
+      <li>Jenkins → Manage Jenkins → Credentials → System → Global credentials → Add Credentials</li>
+      <li><strong>Type:</strong> Username with password</li>
+      <li><strong>Username:</strong> my GitLab username</li>
+      <li><strong>Password:</strong> my GitLab password</li>
+      <li><strong>ID:</strong> (auto-generated UUID like <code>b12881fa-58d1-4a47-828f-970217c47e67</code>)</li>
+      <li><strong>Description:</strong> GitLab credentials</li>
+    </ul>
 
-</ul>
-<strong>Credentials setup:</strong>
+    <p><strong>Credentials setup — Docker Hub:</strong></p>
+    <ul>
+      <li><strong>Type:</strong> Username with password (not personal access token, not SSH key)</li>
+      <li><strong>Username:</strong> my Docker Hub username</li>
+      <li><strong>Password:</strong> my Docker Hub password</li>
+      <li><strong>ID:</strong> <code>0849fe1b-1263-4101-9fcf-1a7bb0b567d4</code></li>
+      <li><strong>Description:</strong> Docker Hub credentials</li>
+    </ul>
 
-<p>I created credentials for GitLab access in Jenkins:</p>
-<ul>
-<li>Jenkins → Manage Jenkins → Credentials → System → Global credentials → Add Credentials</li>
-<li><strong>Type:</strong> Username with password</li>
-<li><strong>Username:</strong> my GitLab username</li>
-<li><strong>Password:</strong> my GitLab password</li>
-<li><strong>ID:</strong> (auto-generated UUID like <code>b12881fa-58d1-4a47-828f-970217c47e67</code>)</li>
-<li><strong>Description:</strong> GitLab credentials</li>
+    <p><strong>Important:</strong> Later when I reference these in Groovy code, I use the UUID (the ID field), not the description or username.</p>
 
-</ul>
-<p>I used the same approach for Docker Hub credentials:</p>
-<ul>
-<li><strong>Type:</strong> Username with password (not personal access token, not SSH key)</li>
-<li><strong>Username:</strong> my Docker Hub username</li>
-<li><strong>Password:</strong> my Docker Hub password</li>
-<li><strong>ID:</strong> <code>0849fe1b-1263-4101-9fcf-1a7bb0b567d4</code></li>
-<li><strong>Description:</strong> Docker Hub credentials</li>
+    <h3>The Progression I Actually Took</h3>
 
-</ul>
-<strong>Important:</strong> Later when I reference these in Groovy code, I use the UUID (the ID field), not the description or username.
+    <p>I didn't start with Shared Libraries. I went through multiple stages of learning Jenkins:</p>
 
-<h3>The Progression I Actually Took</h3>
+    <p><strong>Stage 1: Freestyle Jobs</strong></p>
+    <p>I started by clicking through the Jenkins UI. Everything was manual: New Item → Freestyle project → configure Git → add shell build steps. This is how I got the first builds working, but it was all UI clicks, no version control.</p>
 
-<p>I didn't start with Shared Libraries. I went through multiple stages of learning Jenkins:</p>
+    <p><strong>My actual Freestyle job build steps:</strong></p>
+    <pre><code>chmod +x freestyle-build.sh
+./freestyle-build.sh</code></pre>
 
-<p><strong>Stage 1: Freestyle Jobs</strong></p>
+    <p>The shell script contained the Docker build and push logic. Later, this exact logic would move into the shared library as <code>buildImage()</code> and <code>dockerPush()</code> functions.</p>
 
-<p>I started by clicking through the Jenkins UI to configure build steps. Everything was manual:</p>
-<ul>
-<li>Click "New Item"</li>
-<li>Select "Freestyle project"</li>
-<li>Configure Git repository in UI</li>
-<li>Add build step → "Execute shell"</li>
-<li>Type: <code>mvn package</code></li>
-<li>Add another build step → "Execute shell"</li>
-<li>Type: <code>docker build -t my-app .</code></li>
+    <p>Build step 2 was "Invoke top-level Maven targets" with goals: <code>clean package</code>. Later, I simplified to just <code>mvn package</code>—the <code>clean</code> wasn't necessary since Jenkins builds in fresh workspaces.</p>
 
-</ul>
-<strong>My actual Freestyle job configuration:</strong>
+    <p><strong>Stage 2: Pipeline Jobs with Jenkinsfile</strong></p>
+    <p>Then I learned about Pipeline jobs. Now my pipeline was code:</p>
 
-<p><strong>Source Code Management:</strong></p>
-<ul>
-<li>Git</li>
-<li>Repository URL: <code>https://gitlab.com/my-repo/java-maven-app.git</code></li>
-<li>Credentials: (select the GitLab username/password credential)</li>
-<li>Branch: <code>jenkins-jobs</code></li>
-
-</ul>
-<strong>Build Steps:</strong>
-
-<ol>
-<li><strong>Execute shell:</strong></li>
-<pre><code>chmod +x freestyle-build.sh
-./freestyle-build.sh
-</code></pre>
-
-</ol>
-<p>This shell script contained the Docker build and push logic:</p>
-<pre><code>#!/bin/bash
-docker build -t my-app:latest .
-docker push my-app:latest
-</code></pre>
-
-<p>Later, this exact logic would move into the shared library as <code>buildImage()</code> and <code>dockerPush()</code> functions.</p>
-
-<ol>
-<li><strong>Invoke top-level Maven targets:</strong></li>
-<li>Maven Version: <code>maven-3.9</code></li>
-<li>Goals: <code>clean package</code></li>
-
-</ol>
-<p>The <code>clean</code> goal removes previous build artifacts, then <code>package</code> compiles and packages the JAR. Later, I simplified this to just <code>mvn package</code> in the pipeline—the <code>clean</code> wasn't necessary since Jenkins builds in fresh workspaces.</p>
-
-<p>This worked, but everything was configured through the UI. If Jenkins crashed or I needed to recreate the job on another server, I'd have to click through all these settings again. No version control, no portability.</p>
-
-<p><strong>Stage 2: Pipeline Jobs with Jenkinsfile</strong></p>
-
-<p>Then I learned about Pipeline jobs. Now my pipeline was code:</p>
-
-<pre><code>pipeline {
+    <pre><code>pipeline {
     agent any
     stages {
         stage('Build') {
@@ -687,16 +347,14 @@ docker push my-app:latest
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p>Better! The pipeline is version controlled. But everything was in one massive Jenkinsfile.</p>
+    <p>Better! The pipeline is version controlled. But everything was in one massive Jenkinsfile.</p>
 
-<p><strong>Stage 3: External Groovy Scripts</strong></p>
+    <p><strong>Stage 3: External Groovy Scripts</strong></p>
+    <p>Next, I learned to extract logic into external Groovy scripts. I created <code>script.groovy</code>:</p>
 
-<p>Next, I learned to extract logic into external Groovy scripts. I created <code>script.groovy</code>:</p>
-
-<pre><code>def buildJar() {
+    <pre><code>def buildJar() {
     echo "Building JAR..."
     sh 'mvn package'
 }
@@ -706,12 +364,11 @@ def deployApp() {
     // Environment-specific deployment logic
 }
 
-return this
-</code></pre>
+return this</code></pre>
 
-<p>And loaded it in my Jenkinsfile:</p>
+    <p>And loaded it in my Jenkinsfile:</p>
 
-<pre><code>def gv
+    <pre><code>def gv
 
 pipeline {
     stages {
@@ -737,184 +394,100 @@ pipeline {
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>What's actually in <code>script.groovy</code>:</strong></p>
+    <p>This is cleaner. But <code>script.groovy</code> lives in the project repository. Every project has its own copy. If 10 projects all need <code>buildJar()</code>, I'm still copying the same logic 10 times.</p>
 
-<pre><code>def buildImage() {
-    echo 'building the image...'
-}
+    <p><strong>Stage 4: Multibranch Pipeline</strong></p>
+    <p><strong>Regular Pipeline job:</strong> Points to one Git branch. If you have feature branches, you need to create separate jobs manually for each one.</p>
+    <p><strong>Multibranch Pipeline:</strong> Automatically discovers all branches in your repository and creates pipeline jobs for each one. Push a new branch? Jenkins creates a job. Delete a branch? Jenkins removes the job.</p>
 
-def deployApp() {
-    echo 'deploying the application...'
-}
+    <p><strong>How I configured it:</strong></p>
+    <ul>
+      <li>Jenkins → New Item → Multibranch Pipeline</li>
+      <li>Branch Sources → Git → Repository URL and credentials</li>
+      <li>Scan Multibranch Pipeline Triggers → Periodically if not otherwise run (every hour)</li>
+    </ul>
 
-return this
-</code></pre>
+    <p><strong>Key benefit:</strong> The <code>BRANCH_NAME</code> environment variable is automatically available in multibranch pipelines. This is why my <code>buildJar()</code> function can echo <code>"building the application for branch $BRANCH_NAME"</code>—it works for master, develop, feature branches, all automatically.</p>
 
-<p>At this stage, both build and deployment logic were in the local script. Later in this project, I would extract <code>buildImage()</code> into the shared library, leaving only <code>deployApp()</code> here.</p>
+    <p><strong>Stage 5: Shared Library (This Project)</strong></p>
+    <p>This is where I finally extracted the common logic into a separate repository that all projects can reference.</p>
 
-<p>Right now it just echoes messages. In a real scenario, <code>deployApp()</code> would contain environment-specific deployment logic:</p>
-<ul>
-<li>SSH to servers</li>
-<li>Update configuration files</li>
-<li>Restart services</li>
-<li>Run database migrations</li>
-<li>Specific to dev vs staging vs production</li>
+    <p><strong>Why this progression matters:</strong> My current Jenkinsfile still loads <code>script.groovy</code> for <code>deployApp()</code>. You might wonder why, if I have a shared library. Answer: deployment logic is <strong>environment-specific</strong>. Build logic (Maven, Docker) is <strong>universal</strong>. Universal logic moves to the shared library. Environment-specific logic stays in the project.</p>
 
-</ul>
-<p>The <code>return this</code> at the end is important—it makes the script's functions available to the Jenkinsfile.</p>
+    <p><strong>Timeline:</strong> This entire progression (Freestyle → Pipeline → Scripts → Multibranch → Shared Library) took about a week of learning. The shared library project itself took 4 hours in one afternoon — but only because I'd already built the foundational knowledge.</p>
 
-<p>This is cleaner. But <code>script.groovy</code> lives in the project repository. Every project has its own copy. If 10 projects all need <code>buildJar()</code>, I'm still copying the same logic 10 times.</p>
+    <h3>Early Problems: The Maven Version Issue</h3>
 
-<p><strong>Stage 4: Multibranch Pipeline</strong></p>
+    <p>Before I could even build pipelines successfully, I had to fix the application itself. The Java Maven app had a <code>pom.xml</code> with this:</p>
 
-<p>I also learned about Multibranch Pipelines, which are fundamentally different from regular Pipeline jobs.</p>
+    <pre><code>&lt;version&gt;3.5.5.RELEASE&lt;/version&gt;</code></pre>
 
-<strong>Regular Pipeline job:</strong> Points to one Git branch (usually <code>master</code>). If you have feature branches, you need to create separate jobs manually for each one.
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Jenkins Build Error</div>
+      <pre><code>Could not find artifact org.springframework.boot:spring-boot-maven-plugin:jar:3.5.5.RELEASE</code></pre>
+    </div>
 
-<strong>Multibranch Pipeline:</strong> Automatically discovers all branches in your repository and creates pipeline jobs for each one. Push a new branch? Jenkins creates a job. Delete a branch? Jenkins removes the job.
+    <p><strong>The problem:</strong> Spring Boot 3.5.5 exists, but the version string <code>3.5.5.RELEASE</code> doesn't. Spring Boot 2.x used the <code>.RELEASE</code> suffix, but Spring Boot 3.x dropped it. Someone mixed the old naming convention with the newer version number.</p>
 
-<p><strong>How I configured it:</strong></p>
-<ul>
-<li>Jenkins → New Item → Multibranch Pipeline</li>
-<li>Branch Sources → Git → Repository URL and credentials</li>
-<li>Scan Multibranch Pipeline Triggers → Periodically if not otherwise run (every hour)</li>
-<li>Jenkins scans the repository, finds all branches with Jenkinsfiles, creates jobs</li>
+    <p><strong>The fix:</strong> Changed both occurrences to <code>3.5.5</code>. This was the second time I hit version compatibility issues (first was Gradle in <a href="devops-project-1.html">Project 1</a>), reinforcing that dependency management is a constant concern in Java projects.</p>
 
-</ul>
-<strong>Key benefit:</strong> The <code>BRANCH_NAME</code> environment variable is automatically available in multibranch pipelines. This is why my <code>buildJar()</code> function can echo <code>"building the application for branch $BRANCH_NAME"</code>—it works for master, develop, feature branches, all automatically.
+    <h2>Part 1: Early Pipeline Syntax Errors</h2>
 
-<p><strong>Stage 5: Shared Library (This Project)</strong></p>
+    <p>During my initial learning of Pipeline jobs, I hit several Groovy syntax errors that taught me the language's quirks.</p>
 
-<p>This is where I finally extracted the common logic into a separate repository that all projects can reference.</p>
+    <h3>The First Error: Missing Colon</h3>
 
-<p><strong>Why this progression matters:</strong></p>
+    <p>I was trying to create an input prompt to select deployment environment:</p>
 
-<p>My current Jenkinsfile still has this:</p>
+    <pre><code>env.ENV = input message: "Select environment", ok "Done", parameters: [choice(name: 'ONE', choices: ['dev', 'staging', 'prod'])]</code></pre>
 
-<pre><code>gv = load "script.groovy"
-...
-gv.deployApp()
-</code></pre>
-
-<p>You might wonder: "If you have a shared library, why are you still loading <code>script.groovy</code>?"</p>
-
-<strong>Answer:</strong> Deployment logic is <strong>environment-specific</strong>. Deploying to dev vs staging vs production requires different configurations, credentials, and steps. This logic should stay in the project repository where it can be customized per environment.
-
-<p>Build logic (Maven, Docker) is <strong>universal</strong>. Every Java Maven app builds the same way. This is what moves to the shared library.</p>
-
-<strong>Timeline clarification:</strong> This entire progression (Freestyle → Pipeline → Scripts → Multibranch → Shared Library) took me about a week of learning and experimentation, working a few hours each day. The shared library project itself—which is the focus of this post—took about 4 hours in one afternoon. But I could only build it that efficiently because I'd already learned the foundational patterns.
-
-<h3>Early Problems: The Maven Version Issue</h3>
-
-<p>Before I could even build pipelines successfully, I had to fix the application itself. The Java Maven app I was using (from Nana's GitLab) had a <code>pom.xml</code> with this:</p>
-
-<pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-    &lt;version&gt;3.5.5.RELEASE&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<p><strong>Jenkins build error:</strong></p>
-
-<pre><code>Could not find artifact org.springframework.boot:spring-boot-maven-plugin:jar:3.5.5.RELEASE
-</code></pre>
-
-<strong>The problem:</strong> Spring Boot 3.5.5 exists, but the version string <code>3.5.5.RELEASE</code> doesn't. Spring Boot 2.x used the <code>.RELEASE</code> suffix (like <code>2.7.11.RELEASE</code>), but Spring Boot 3.x dropped that suffix and uses plain semantic versioning. Someone mixed the old naming convention with the newer version numbers.
-
-<strong>The fix:</strong> Changed both occurrences to <code>3.5.5</code> (a real version):
-
-<pre><code>&lt;version&gt;3.5.5&lt;/version&gt;
-</code></pre>
-
-<strong>Why this matters:</strong> This was the second time I hit version compatibility issues (first was Gradle in <a href="devops-project-1.html" style="color: var(--accent-cyan); text-decoration: none;">Project 1</a>), and it reinforced that dependency management is a constant concern in Java projects. Always verify versions exist in Maven Central before using them.
-
-<p>With that fixed, I could start building pipelines.</p>
-
-
-
-<h2>Part 1: Early Pipeline Syntax Errors</h2>
-
-<p>During my initial learning of Pipeline jobs (Stage 2), I hit several Groovy syntax errors that taught me the language's quirks. These weren't specific to shared libraries, but they're worth documenting because you'll hit the same issues.</p>
-
-<h3>The First Error: Missing Colon</h3>
-
-<p>Early on, I was trying to create an input prompt to select deployment environment:</p>
-
-<pre><code>stage("deploy") {
-    steps {
-        script {
-            env.ENV = input message: "Select environment", ok "Done", parameters: [choice(name: 'ONE', choices: ['dev', 'staging', 'prod'])]
-        }
-    }
-}
-</code></pre>
-
-<p><strong>Error:</strong></p>
-
-<pre><code>expecting '}', found ',' @ line 44, column 94.
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <pre><code>expecting '}', found ',' @ line 44, column 94.
    nment to deploy to", ok "Done", paramete
-                                 ^
-</code></pre>
+                                 ^</code></pre>
+    </div>
 
-<strong>The problem:</strong> <code>ok "Done"</code> should be <code>ok: "Done"</code>. Groovy named parameters need colons.
+    <p><strong>The problem:</strong> <code>ok "Done"</code> should be <code>ok: "Done"</code>. Groovy named parameters need colons.</p>
 
-<p><strong>The fix:</strong></p>
+    <pre><code>env.ENV = input message: "Select environment", ok: "Done", parameters: [...]</code></pre>
 
-<pre><code>env.ENV = input message: "Select environment", ok: "Done", parameters: [...]
-</code></pre>
+    <h3>The Second Error: Variable Typo</h3>
 
-<h3>The Second Error: Variable Typo</h3>
+    <p>After fixing the syntax, I got a runtime error:</p>
 
-<p>After fixing the syntax, I got a runtime error:</p>
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <pre><code>No such property: ECHO for class: groovy.lang.Binding</code></pre>
+    </div>
 
-<pre><code>No such property: ECHO for class: groovy.lang.Binding
-</code></pre>
+    <p>I had defined <code>ENV</code>, then tried to use <code>ECHO</code>. Classic typo. Fixed it to <code>${ENV}</code>.</p>
 
-<p><strong>The problem:</strong></p>
+    <h3>How to Read Jenkins Errors</h3>
 
-<pre><code>env.ENV = input message: "...", ok: "Done", parameters: [...]
-echo "Deploying to ${ECHO}"  // ← ECHO doesn't exist!
-</code></pre>
+    <p>Jenkins stack traces are intimidating. Here's the pattern:</p>
+    <ol>
+      <li><strong>First line after "exception:"</strong> — The actual error</li>
+      <li><strong>WorkflowScript.run(line X)</strong> — Which line in your Jenkinsfile</li>
+      <li><strong>Everything else</strong> — Jenkins internal code (usually ignore)</li>
+    </ol>
 
-<p>I defined <code>ENV</code>, then tried to use <code>ECHO</code>. Classic typo. Fixed it to <code>${ENV}</code>.</p>
+    <pre><code>No such property: ECHO for class: groovy.lang.Binding
+WorkflowScript.run(WorkflowScript:47)</code></pre>
 
-<h3>How to Read Jenkins Errors</h3>
+    <p>Translation: "Line 47 is trying to use a variable called ECHO, but it doesn't exist." Once I understood this pattern, debugging got much faster.</p>
 
-<p>Jenkins stack traces are intimidating. Here's the pattern:</p>
+    <h2>Part 2: Creating the Shared Library Repository</h2>
 
-<p><strong>What to look for:</strong></p>
-<ol>
-<li><strong>First line after "exception:"</strong> - The actual error</li>
-<li><strong>WorkflowScript.run(line X)</strong> - Which line in your Jenkinsfile</li>
-<li><strong>Everything else</strong> - Jenkins internal code (usually ignore)</li>
+    <p>With Jenkins working and pipelines building successfully, I started building the shared library. First step: create the repository structure.</p>
 
-</ol>
-<strong>Example:</strong>
-<pre><code>No such property: ECHO for class: groovy.lang.Binding
-WorkflowScript.run(WorkflowScript:47)
-</code></pre>
+    <h3>The Required Structure</h3>
 
-<p>Translation: "Line 47 is trying to use a variable called ECHO, but it doesn't exist."</p>
+    <p>Jenkins Shared Library has a specific directory structure:</p>
 
-<p>Once I understood this pattern, debugging got much faster.</p>
-
-
-
-
-
-<h2>Part 2: Creating the Shared Library Repository</h2>
-
-<p>With Jenkins working and pipelines building successfully, I started building the shared library. First step: create the repository structure.</p>
-
-<h3>The Required Structure</h3>
-
-<p>Jenkins Shared Library has a specific directory structure:</p>
-
-<pre><code>jenkins-shared-library/
+    <pre><code>jenkins-shared-library/
 ├── vars/              # Global functions (the main folder)
 │   ├── buildJar.groovy
 │   ├── buildImage.groovy
@@ -923,101 +496,74 @@ WorkflowScript.run(WorkflowScript:47)
 ├── src/               # Helper classes
 │   └── com/example/
 │       └── Docker.groovy
-└── resources/         # Non-Groovy files (SQL, shell scripts, JSON)
-</code></pre>
+└── resources/         # Non-Groovy files (SQL, shell scripts, JSON)</code></pre>
 
-<p><strong>The <code>vars/</code> folder:</strong></p>
-<ul>
-<li>Contains functions you call directly from Jenkinsfiles</li>
-<li>Each <code>.groovy</code> file becomes a global function</li>
-<li>File name = function name</li>
+    <p><strong>The <code>vars/</code> folder:</strong> Contains functions you call directly from Jenkinsfiles. Each <code>.groovy</code> file becomes a global function — file name = function name.</p>
+    <p><strong>The <code>src/</code> folder:</strong> Contains helper classes for complex logic. Standard Groovy class structure, imported and used by <code>vars/</code> functions.</p>
+    <p><strong>The <code>resources/</code> folder:</strong> External libraries and non-Groovy files. I didn't use this for this project.</p>
 
-</ul>
-<strong>The <code>src/</code> folder:</strong>
-<ul>
-<li>Contains helper classes for complex logic</li>
-<li>Standard Groovy class structure</li>
-<li>Imported and used by <code>vars/</code> functions</li>
+    <h3>Creating the Repository</h3>
 
-</ul>
-<strong>The <code>resources/</code> folder:</strong>
-<ul>
-<li>External libraries and non-Groovy files</li>
-<li>I didn't use this for this project</li>
+    <p>I created the shared library repository using this workflow:</p>
 
-<h3>Creating the Repository</h3>
-
-</ul>
-<p>I created the shared library repository using this workflow:</p>
-
-<p><strong>1. Create the structure locally in IntelliJ:</strong></p>
-<pre><code>jenkins-shared-library/
+    <p><strong>1. Create the structure locally in IntelliJ:</strong></p>
+    <pre><code>jenkins-shared-library/
 ├── vars/
 │   ├── buildJar.groovy
 │   ├── buildImage.groovy
 │   └── (other functions)
 └── src/
     └── com/example/
-        └── Docker.groovy
-</code></pre>
+        └── Docker.groovy</code></pre>
 
-<p><strong>2. Create repository on GitLab:</strong></p>
-<ul>
-<li>GitLab UI → New Project → <code>jenkins-shared-library</code></li>
-<li>Initialize with README: No (I'm creating locally first)</li>
+    <p><strong>2. Create the repository on GitLab:</strong></p>
+    <ul>
+      <li>GitLab UI → New Project → <code>jenkins-shared-library</code></li>
+      <li>Initialize with README: No (I'm creating locally first)</li>
+    </ul>
 
-</ul>
-<strong>3. Initialize Git and connect to remote:</strong>
-<pre><code>cd jenkins-shared-library
+    <p><strong>3. Initialize Git locally and connect to the remote:</strong></p>
+    <pre><code>cd jenkins-shared-library
 git init
 git add .
 git commit -m "Initial commit"
 git remote add origin https://gitlab.com/nvastola/jenkins-shared-library.git
-git push -u origin master
-</code></pre>
+git push -u origin master</code></pre>
 
-<p>Now the shared library is in version control and accessible to Jenkins.</p>
+    <p>Now the shared library is in version control and accessible to Jenkins.</p>
 
+    <h2>Part 3: Writing the First Function (buildJar)</h2>
 
+    <p>I started by extracting the Maven build logic into a shared function.</p>
 
-<h2>Part 3: Writing the First Function (buildJar)</h2>
-
-<p>I started by extracting the Maven build logic into a shared function.</p>
-
-<p><strong>Original Jenkins pipeline step:</strong></p>
-
-<pre><code>stage("build jar") {
+    <p><strong>Original Jenkins pipeline step:</strong></p>
+    <pre><code>stage("build jar") {
     steps {
         script {
             echo "Building the application..."
             sh 'mvn package'
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Extracted into <code>vars/buildJar.groovy</code>:</strong></p>
-
-<pre><code>#!/user/bin/env groovy
+    <p><strong>Extracted into <code>vars/buildJar.groovy</code>:</strong></p>
+    <pre><code>#!/user/bin/env groovy
 
 def call() {
     echo "building the application for branch $BRANCH_NAME"
     sh 'mvn package'
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Key concepts:</strong></p>
+    <p><strong>Key concepts:</strong></p>
+    <ol>
+      <li><strong>The shebang line:</strong> <code>#!/user/bin/env groovy</code> tells your editor this is a Groovy script</li>
+      <li><strong>The <code>call()</code> method:</strong> Required. This is what gets executed when you call <code>buildJar()</code> from a Jenkinsfile</li>
+      <li><strong>Direct access to Jenkins commands:</strong> Inside <code>vars/</code> functions, you can use <code>echo</code>, <code>sh</code>, <code>withCredentials</code>, etc. directly</li>
+      <li><strong>The <code>$BRANCH_NAME</code> variable:</strong> A Jenkins environment variable automatically available in multibranch pipelines</li>
+    </ol>
 
-<ol>
-<li><strong>The shebang line:</strong> <code>#!/user/bin/env groovy</code> tells your editor this is a Groovy script</li>
-<li><strong>The <code>call()</code> method:</strong> Required. This is what gets executed when you call <code>buildJar()</code> from a Jenkinsfile</li>
-<li><strong>Direct access to Jenkins commands:</strong> Inside <code>vars/</code> functions, you can use <code>echo</code>, <code>sh</code>, <code>withCredentials</code>, etc. directly</li>
-<li><strong>The <code>$BRANCH_NAME</code> variable:</strong> This is a Jenkins environment variable automatically available in multibranch pipelines. It contains the name of the Git branch being built (e.g., "master", "develop", "feature/new-login"). This wouldn't work in a regular Pipeline job—only in Multibranch Pipelines.</li>
-
-</ol>
-<strong>Updated Jenkinsfile:</strong>
-
-<pre><code>@Library('jenkins-shared-library') _
+    <p><strong>Updated Jenkinsfile:</strong></p>
+    <pre><code>@Library('jenkins-shared-library') _
 
 pipeline {
     agent any
@@ -1030,22 +576,21 @@ pipeline {
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p>From ~5 lines of logic to 1 function call. And now every project can use <code>buildJar()</code> without rewriting it.</p>
+    <p>From ~5 lines of logic to 1 function call. And now every project can use <code>buildJar()</code> without rewriting it.</p>
 
-<strong>Note:</strong> Groovy lets you call functions with or without parentheses. You'll see both <code>buildJar()</code> and <code>buildImage 'imageName'</code> in Jenkins pipelines—both work the same way.
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Groovy Syntax Note</div>
+      <p>Groovy lets you call functions with or without parentheses. You'll see both <code>buildJar()</code> and <code>buildImage 'imageName'</code> in Jenkins pipelines — both work the same way.</p>
+    </div>
 
+    <h2>Part 4: The Docker Image Function (First Attempt)</h2>
 
+    <p>Next, I extracted the Docker build logic. This is where things got complicated.</p>
 
-<h2>Part 4: The Docker Image Function (First Attempt)</h2>
-
-<p>Next, I extracted the Docker build logic. This is where things got complicated.</p>
-
-<p><strong>Original pipeline logic:</strong></p>
-
-<pre><code>stage("build image") {
+    <p><strong>Original pipeline logic:</strong></p>
+    <pre><code>stage("build image") {
     steps {
         script {
             echo "Building the Docker image..."
@@ -1056,72 +601,29 @@ pipeline {
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>First attempt at <code>vars/buildImage.groovy</code>:</strong></p>
+    <p>This worked! But the function did <strong>three different things</strong>. What if another project needs to login to Docker but not build? What if I want to build but push to a different registry?</p>
 
-<pre><code>#!/usr/bin/env groovy
+    <p><strong>Better approach:</strong> Split into three separate functions:</p>
+    <ul>
+      <li><code>buildDockerImage(imageName)</code> — Just build</li>
+      <li><code>dockerLogin()</code> — Just authenticate</li>
+      <li><code>dockerPush(imageName)</code> — Just push</li>
+    </ul>
 
-def call(String imageName) {
-    echo "Building Docker image..."
-    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-        sh "docker build -t ${imageName} ."
-        sh "echo $PASS | docker login -u $USER --password-stdin nexus.example.com"
-        sh "docker push ${imageName}"
-    }
-}
-</code></pre>
+    <p>This is where I learned about the <strong>Single Responsibility Principle</strong> in pipeline code. Each function should do one thing.</p>
 
-<p>This worked! I could call <code>buildImage("my-app:${BUILD_NUMBER}")</code> from the Jenkinsfile and it would build, login, and push.</p>
+    <h2>Part 5: Using Classes (Understanding the <code>script</code> Object)</h2>
 
-<p>But there was a problem: this function does <strong>three different things</strong>. What if another project needs to login to Docker but not build? What if I want to build but push to a different registry?</p>
+    <p>For better organization, I wanted to move the Docker logic into a proper Groovy class. This is where I learned an important concept about how Jenkins Shared Libraries work.</p>
 
-<strong>Better approach:</strong> Split it into three separate functions:
-<ul>
-<li><code>buildDockerImage(imageName)</code> - Just build</li>
-<li><code>dockerLogin()</code> - Just authenticate</li>
-<li><code>dockerPush(imageName)</code> - Just push</li>
+    <p>Inside <code>vars/</code> functions, Jenkins pipeline commands (<code>echo</code>, <code>sh</code>, <code>withCredentials</code>) are available globally. But inside classes in <code>src/</code>, they're <strong>not available by default</strong>. You have to explicitly pass the Jenkins context through a special object called <code>script</code>.</p>
 
-</ul>
-<p>This is where I learned about the <strong>Single Responsibility Principle</strong> in pipeline code. Each function should do one thing.</p>
+    <h3>Creating the Docker Class</h3>
 
-
-
-<h2>Part 5: Using Classes (Understanding the <code>script</code> Object)</h2>
-
-<p>For better organization, I wanted to move the Docker logic into a proper Groovy class. This is where I learned an important concept about how Jenkins Shared Libraries work.</p>
-
-<h3>Creating the Docker Class</h3>
-
-<p>I created <code>src/com/example/Docker.groovy</code>:</p>
-
-<pre><code>package com.example
-
-class Docker {
-    
-    def buildDockerImage(String imageName) {
-        echo "Building Docker image ${imageName}..."
-        sh "docker build -t ${imageName} ."
-    }
-    
-    def dockerLogin() {
-        withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-            sh "echo $PASS | docker login -u $USER --password-stdin nexus.example.com"
-        }
-    }
-}
-</code></pre>
-
-<p><strong>But before writing this, I learned from the tutorial that there's a critical difference between <code>vars/</code> and <code>src/</code> code:</strong></p>
-
-<p>Inside <code>vars/</code> functions, Jenkins pipeline commands (<code>echo</code>, <code>sh</code>, <code>withCredentials</code>) are available globally. But inside classes in <code>src/</code>, they're <strong>not available by default</strong>. You have to explicitly pass the Jenkins context through a special object called <code>script</code>.</p>
-
-<strong>This is the pattern:</strong> Classes need access to the Jenkins pipeline context through this <code>script</code> object.
-
-<p><strong>Updated Docker class:</strong></p>
-
-<pre><code>#!/user/bin/env groovy
+    <p><strong>Updated Docker class with the <code>script</code> pattern:</strong></p>
+    <pre><code>#!/user/bin/env groovy
 package com.example
 
 class Docker implements Serializable {
@@ -1146,141 +648,79 @@ class Docker implements Serializable {
     def dockerPush(String imageName) {
         script.sh "docker push $imageName"
     }
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Key changes:</strong></p>
+    <p><strong>Key changes:</strong></p>
+    <ol>
+      <li><strong><code>implements Serializable</code></strong> — Required for Jenkins to save the state between pipeline steps</li>
+      <li><strong>Constructor takes <code>script</code></strong> — We pass the Jenkins context when creating the object</li>
+      <li><strong>All commands use <code>script.</code></strong> — <code>script.echo</code>, <code>script.sh</code>, <code>script.withCredentials</code></li>
+      <li><strong>Variables use single quotes</strong> — Prevents interpolation issues with special characters in passwords</li>
+    </ol>
 
-<ol>
-<li><strong><code>implements Serializable</code></strong> - Required for Jenkins to save the state between pipeline steps</li>
-<li><strong>Constructor takes <code>script</code></strong> - We pass the Jenkins context when creating the object</li>
-<li><strong>All commands use <code>script.</code></strong> - <code>script.echo</code>, <code>script.sh</code>, <code>script.withCredentials</code>, <code>script.usernamePassword</code></li>
-<li><strong>Credential ID is for Docker Hub</strong> - <code>credentialsId: '0849fe1b...'</code> references the Docker Hub username/password credential I created in Jenkins</li>
-<li><strong>Variables use single quotes</strong> - <code>'${script.PASS}</code> prevents interpolation issues with special characters in passwords</li>
-</ol>
+    <h3>Why the Credential Syntax Is Weird</h3>
 
-<h3>Why the Credential Syntax Is Weird</h3>
+    <p>Look at this line:</p>
+    <pre><code>script.sh "echo '${script.PASS} | docker login -u '${script.USER} --password-stdin"</code></pre>
 
-<p>Look at this line:</p>
+    <p>Why the single quotes around the variables?</p>
 
-<pre><code>script.sh "echo '${script.PASS} | docker login -u '${script.USER} --password-stdin"
-</code></pre>
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Password Escaping Problem</div>
+      <p><strong>I learned this the hard way.</strong> My first attempt used double quotes around the password variable. The credentials were correct, but Docker kept returning "unauthorized: incorrect username or password."</p>
+      <p><strong>The problem:</strong> My password contained special characters (<code>$</code>, <code>!</code>, etc.) that bash was interpreting as variables or commands. Without the single quotes, the shell tried to expand <code>$</code> symbols in the password.</p>
+      <p><strong>The fix:</strong> Wrap variables in single quotes to pass them literally to the shell. Now bash treats the password as a literal string, special characters and all.</p>
+    </div>
 
-<p>Why the single quotes around <code>${script.PASS}</code> and <code>${script.USER}</code>?</p>
+    <h3>Using the Class from vars/</h3>
 
-<strong>I learned this the hard way.</strong> My first attempt was:
-
-<pre><code>script.sh "echo ${script.PASS} | docker login -u ${script.USER} --password-stdin"
-</code></pre>
-
-<p><strong>Error:</strong></p>
-
-<pre><code>docker login: Error response from daemon: Get "https://registry-1.docker.io/v2/": 
-unauthorized: incorrect username or password
-</code></pre>
-
-<p>But the credentials were correct! I could login manually with the same username and password.</p>
-
-<strong>The problem:</strong> My password contained special characters (<code>$</code>, <code>!</code>, etc.) that bash was interpreting as variables or commands. Without the single quotes, the shell tried to expand <code>$</code> symbols in the password.
-
-<strong>The fix:</strong> Wrap variables in single quotes to pass them literally to the shell:
-
-<pre><code>script.sh "echo '${script.PASS} | docker login -u '${script.USER} --password-stdin"
-</code></pre>
-
-<p>Now bash treats the password as a literal string, special characters and all.</p>
-
-<h3>Using the Class from vars/</h3>
-
-<p>Now I could use this class from <code>vars/buildImage.groovy</code>:</p>
-
-<pre><code>#!/usr/bin/env groovy
+    <p>Now I could use this class from <code>vars/buildImage.groovy</code>:</p>
+    <pre><code>#!/usr/bin/env groovy
 
 import com.example.Docker
 
 def call(String imageName) {
     return new Docker(this).buildDockerImage(imageName)
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>What's happening:</strong></p>
-<ol>
-<li>Import the Docker class</li>
-<li>Create a new instance: <code>new Docker(this)</code></li>
-<li>The <code>this</code> keyword passes the current Jenkins context (the script object)</li>
-<li>Call the method: <code>.buildDockerImage(imageName)</code></li>
+    <p><strong>What's happening:</strong></p>
+    <ol>
+      <li>Import the Docker class</li>
+      <li>Create a new instance: <code>new Docker(this)</code></li>
+      <li>The <code>this</code> keyword passes the current Jenkins context (the script object)</li>
+      <li>Call the method: <code>.buildDockerImage(imageName)</code></li>
+    </ol>
 
-</ol>
-<strong>In the Jenkinsfile:</strong>
+    <h2>Part 6: Splitting Into Multiple Functions</h2>
 
-<pre><code>@Library('jenkins-shared-library') _
+    <p>With the class working, I split the Docker functionality into separate functions:</p>
 
-pipeline {
-    agent any
-    tools {
-        maven 'maven-3.9'
-    }
-    stages {
-        stage("build image") {
-            steps {
-                script {
-                    buildImage('nvastola/demo-app:jma-3.0')
-                }
-            }
-        }
-    }
-}
-</code></pre>
-
-<strong>Note:</strong> At this point, I was using the global library (configured in Jenkins UI). Later, I would switch to project-specific library loading for better control, but during the Docker class development, I kept it global for simplicity.
-
-<p>Same simple interface, but now the implementation is properly organized in a class.</p>
-
-
-
-<h2>Part 6: Splitting Into Multiple Functions</h2>
-
-<p>With the class working, I split the Docker functionality into separate functions:</p>
-
-<p><strong><code>vars/buildImage.groovy</code>:</strong></p>
-<pre><code>#!/usr/bin/env groovy
+    <p><strong><code>vars/buildImage.groovy</code>:</strong></p>
+    <pre><code>#!/usr/bin/env groovy
 import com.example.Docker
 
 def call(String imageName) {
     return new Docker(this).buildDockerImage(imageName)
-}
-</code></pre>
+}</code></pre>
 
-<p><strong><code>vars/dockerLogin.groovy</code>:</strong></p>
-<pre><code>#!/usr/bin/env groovy
+    <p><strong><code>vars/dockerLogin.groovy</code>:</strong></p>
+    <pre><code>#!/usr/bin/env groovy
 import com.example.Docker
 
 def call() {
     return new Docker(this).dockerLogin()
-}
-</code></pre>
+}</code></pre>
 
-<p><strong><code>vars/dockerPush.groovy</code>:</strong></p>
-<pre><code>#!/usr/bin/env groovy
+    <p><strong><code>vars/dockerPush.groovy</code>:</strong></p>
+    <pre><code>#!/usr/bin/env groovy
 import com.example.Docker
 
 def call(String imageName) {
     return new Docker(this).dockerPush(imageName)
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Final files in the <code>vars/</code> folder:</strong></p>
-<pre><code>buildJar.groovy
-buildImage.groovy
-dockerLogin.groovy
-dockerPush.groovy
-</code></pre>
-
-<p>Each <code>vars/</code> file is a thin wrapper that creates a Docker class instance and calls the appropriate method. The actual logic lives in the <code>src/com/example/Docker.groovy</code> class for better organization.</p>
-
-<p><strong>Updated Jenkinsfile (using global library):</strong></p>
-
-<pre><code>@Library('jenkins-shared-library') _
+    <p><strong>Updated Jenkinsfile (using global library):</strong></p>
+    <pre><code>@Library('jenkins-shared-library') _
 
 pipeline {
     agent any
@@ -1306,230 +746,144 @@ pipeline {
             }
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p>Now each step is explicit and reusable independently. Another pipeline might only need <code>dockerLogin()</code> and <code>dockerPush()</code> if they're not building images in Jenkins.</p>
+    <p>Now each step is explicit and reusable independently. Another pipeline might only need <code>dockerLogin()</code> and <code>dockerPush()</code> if they're not building images in Jenkins.</p>
 
-<p>At this point, I was still using the global library approach. The switch to project-specific library loading came later for better version control and portability.</p>
+    <h3>The Real Iteration Process (What My Commits Show)</h3>
 
-<h3>The Real Iteration Process (What My Commits Show)</h3>
+    <p>The post so far makes it seem like I wrote clean code that mostly worked. That's not what happened.</p>
 
-<p>The post so far makes it seem like I wrote clean code that mostly worked. That's not what happened.</p>
+    <p>Looking at my commit history, I made <strong>7 commits in about 1 hour:</strong></p>
+    <ol>
+      <li><code>Initial commit</code> — Basic structure</li>
+      <li><code>fix docker credentials to push to private repo</code> — Credential syntax struggle</li>
+      <li><code>deleted brace that broke code buildImage</code> — Syntax error (missing/extra <code>}</code>)</li>
+      <li><code>call docker build with param</code> — Learning function parameters</li>
+      <li><code>docker groovy changes - extracting logic</code> — Moving to Docker class</li>
+      <li><code>more docker groovy changes - splitting into separate steps</code> — Refactoring</li>
+      <li><code>fixed syntax error in buildImage.groovy</code> — More syntax issues</li>
+    </ol>
 
-<p>Looking at my commit history for the shared library repository, I made <strong>7 commits in about 1 hour:</strong></p>
+    <p><strong>That's one commit every 8–9 minutes.</strong> The cycle was: write code → push to GitLab → run Jenkins pipeline → see error → fix error → repeat.</p>
 
-<ol>
-<li><code>Initial commit</code> - Basic structure</li>
-<li><code>fix docker credentials to push to private repo</code> - Credential syntax struggle</li>
-<li><code>deleted brace that broke code buildImage</code> - Syntax error (missing/extra <code>}</code>)</li>
-<li><code>call docker build with param</code> - Learning function parameters</li>
-<li><code>docker groovy changes - extracting logic</code> - Moving to Docker class</li>
-<li><code>more docker groovy changes - splitting into separate steps</code> - Refactoring into separate functions</li>
-<li><code>fixed syntax error in buildImage.groovy</code> - More syntax issues</li>
+    <h3>The Brace Error That Cost Me 10 Minutes</h3>
 
-</ol>
-<strong>That's one commit every 8-9 minutes.</strong> This wasn't smooth. I was constantly:
-<ol>
-<li>Write code</li>
-<li>Push to GitLab</li>
-<li>Run Jenkins pipeline</li>
-<li>See error</li>
-<li>Fix error</li>
-<li>Repeat</li>
-</ol>
-
-<h3>The Brace Error That Cost Me 10 Minutes</h3>
-
-<p>Commit #3: "deleted brace that broke code buildImage"</p>
-
-<p>I had written:</p>
-
-<pre><code>def buildDockerImage(String imageName) {
+    <p>I had written:</p>
+    <pre><code>def buildDockerImage(String imageName) {
     script.echo 'building the docker image...'
         script.sh "docker build -t $imageName ."
     }  // ← Extra closing brace here
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Jenkins error:</strong></p>
-
-<pre><code>WorkflowScript: 14: unexpected token: } @ line 14, column 5.
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <pre><code>WorkflowScript: 14: unexpected token: } @ line 14, column 5.
        }
-       ^
-</code></pre>
+       ^</code></pre>
+    </div>
 
-<p>I stared at this for 10 minutes trying to figure out what was wrong. The error said "line 14" but my logic error was actually on line 13—I had indented <code>script.sh</code> incorrectly, making it look like it was inside the <code>echo</code> call, so I "fixed" it by adding an extra closing brace.</p>
+    <p>I stared at this for 10 minutes. The error said "line 14" but my logic error was on line 13—I had indented <code>script.sh</code> incorrectly, making it look like it was inside the <code>echo</code> call, so I "fixed" it by adding an extra closing brace.</p>
 
-<p>The actual fix was just proper indentation:</p>
-
-<pre><code>def buildDockerImage(String imageName) {
+    <p>The actual fix was just proper indentation:</p>
+    <pre><code>def buildDockerImage(String imageName) {
     script.echo 'building the docker image...'
     script.sh "docker build -t $imageName ."
-}
-</code></pre>
+}</code></pre>
 
-<strong>Lesson:</strong> Groovy doesn't care about indentation, but humans do. If your indentation is wrong, you'll add syntax errors trying to "fix" it.
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-lightbulb"></i> Lesson</div>
+      <p>Groovy doesn't care about indentation, but humans do. If your indentation is wrong, you'll add syntax errors trying to "fix" it.</p>
+    </div>
 
-<h3>The Credential ID Hunt</h3>
+    <h3>The Credential ID Hunt</h3>
 
-<p>Another commit that took longer than it should have: <strong>"Corrected credentialsId to proper ID for docker sign in"</strong></p>
+    <p>In my Jenkinsfile, I initially wrote:</p>
+    <pre><code>credentialsId: 'docker-hub-repo'</code></pre>
 
-<p>In my Java Maven app Jenkinsfile, I initially wrote:</p>
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <pre><code>could not find credentials entry with ID 'docker-hub-repo'</code></pre>
+    </div>
 
-<pre><code>credentialsId: 'docker-hub-repo'
-</code></pre>
+    <p>But I <strong>knew</strong> I had created Docker Hub credentials in Jenkins. I could see them in the UI with the description "Docker Hub credentials."</p>
 
-<p><strong>Error:</strong></p>
+    <p><strong>The problem:</strong> Jenkins credentials need the <strong>UUID</strong>, not the credential name. To find it:</p>
+    <ol>
+      <li>Jenkins → Manage Jenkins → Credentials</li>
+      <li>Click "System" → "Global credentials"</li>
+      <li>Click your credential</li>
+      <li>Look at the browser URL: <code>credentials/store/system/domain/_/credential/0849fe1b-1263-4101-9fcf-1a7bb0b567d4/</code></li>
+      <li>Copy that UUID</li>
+    </ol>
 
-<pre><code>could not find credentials entry with ID 'docker-hub-repo'
-</code></pre>
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Why This Is Confusing</div>
+      <p>When you create credentials in Jenkins, you give them a name and description. But the pipeline needs the ID, which is this long UUID only visible in the URL. Documentation rarely shows this step clearly. Write down the UUID immediately when creating credentials — don't hunt for it later.</p>
+    </div>
 
-<p>But I <strong>knew</strong> I had created Docker Hub credentials in Jenkins. I could see them in the UI with the description "Docker Hub credentials".</p>
+    <h3>The First Successful Run</h3>
 
-<strong>The problem:</strong> Jenkins credentials need the <strong>UUID</strong>, not the credential name.
+    <p>After 7 commits, multiple syntax errors, the credential ID hunt, and the password escaping issue, I finally got a clean pipeline run.</p>
 
-<p>To find it:</p>
-<ol>
-<li>Jenkins → Manage Jenkins → Credentials</li>
-<li>Click "System" → "Global credentials"</li>
-<li>Click your credential</li>
-<li>Look at the browser URL: <code>credentials/store/system/domain/_/credential/0849fe1b-1263-4101-9fcf-1a7bb0b567d4/</code></li>
-<li>Copy that UUID: <code>0849fe1b-1263-4101-9fcf-1a7bb0b567d4</code></li>
-
-</ol>
-<strong>Fixed code:</strong>
-
-<pre><code>credentialsId: '0849fe1b-1263-4101-9fcf-1a7bb0b567d4'
-</code></pre>
-
-<p>Now it worked.</p>
-
-<strong>Why this is confusing:</strong> When you create credentials in Jenkins, you give them a name and description. But the pipeline needs the ID, which is this long UUID that's only visible in the URL. Documentation rarely shows this step clearly.
-
-<h3>The First Successful Run</h3>
-
-<p>After 7 commits in one hour, multiple syntax errors, the credential ID hunt, and the password escaping issue, I finally got a clean pipeline run.</p>
-
-<p><strong>Jenkins Console Output:</strong></p>
-
-<pre><code>Started by user noah
+    <div class="callout success">
+      <div class="callout-title"><i class="fa-solid fa-circle-check"></i> Jenkins Console Output</div>
+      <pre><code>Started by user noah
 ...
 [Pipeline] stage (build jar)
-[Pipeline] { (build jar)
-[Pipeline] script
-[Pipeline] {
 [Pipeline] echo
 building the application for branch master
 [Pipeline] sh
 + mvn package
-[INFO] Scanning for projects...
-[INFO] Building java-maven-app 1.1.8
-...
 [INFO] BUILD SUCCESS
-[Pipeline] }
-[Pipeline] // script
-[Pipeline] }
-[Pipeline] // stage
 
 [Pipeline] stage (build and push image)
-[Pipeline] { (build and push image)
-[Pipeline] script
-[Pipeline] {
 [Pipeline] echo
 building the docker image...
 [Pipeline] sh
 + docker build -t nvastola/demo-app:jma-3.0 .
-Successfully built 8a3f2b1c4d5e
 Successfully tagged nvastola/demo-app:jma-3.0
 [Pipeline] withCredentials
-[Pipeline] {
-[Pipeline] sh
-+ echo &lt;strong&gt;** | docker login -u &lt;/strong&gt;** --password-stdin
 Login Succeeded
-[Pipeline] }
-[Pipeline] // withCredentials
 [Pipeline] sh
 + docker push nvastola/demo-app:jma-3.0
-The push refers to repository [docker.io/nvastola/demo-app]
 jma-3.0: digest: sha256:abc123... size: 2421
-[Pipeline] }
-[Pipeline] // script
-[Pipeline] }
-[Pipeline] // stage
 
-Finished: SUCCESS
-</code></pre>
+Finished: SUCCESS</code></pre>
+    </div>
 
-<p><strong>That "Finished: SUCCESS" hit different.</strong></p>
+    <p><strong>That "Finished: SUCCESS" hit different.</strong> Not because the pipeline worked—that was expected after fixing all the errors. But because I realized: <strong>this exact same build logic can now be used by 10 other projects.</strong> Just reference the shared library and call the functions. No copying code. No maintaining duplicates.</p>
 
-<p>Not because the pipeline worked—that was expected after fixing all the errors. But because I realized:</p>
+    <p>I verified on Docker Hub by navigating to <code>nvastola/demo-app</code> → Tags → confirmed <code>jma-3.0</code> was there. I also pulled and ran the image locally to verify the entire pipeline worked end-to-end.</p>
 
-<strong>This exact same build logic can now be used by 10 other projects.</strong> Just reference the shared library and call <code>buildJar()</code>, <code>buildImage()</code>, <code>dockerLogin()</code>, <code>dockerPush()</code>. No copying code. No maintaining duplicates.
+    <h2>Part 7: Making the Library Available in Jenkins</h2>
 
-<p>One change to the shared library updates all pipelines that use it.</p>
+    <p>With the code written, I needed to make it available to Jenkins pipelines. There are two ways.</p>
 
-<p><strong>That's the actual value of this entire exercise.</strong></p>
+    <h3>Option 1: Global Library (For Everyone)</h3>
 
-<h3>Verifying the Build</h3>
+    <p><strong>Jenkins → Manage Jenkins → System → Global Pipeline Libraries:</strong></p>
+    <ul>
+      <li><strong>Name:</strong> <code>jenkins-shared-library</code></li>
+      <li><strong>Default version:</strong> <code>master</code></li>
+      <li><strong>Retrieval method:</strong> Modern SCM → Git</li>
+      <li><strong>Repository URL:</strong> <code>https://gitlab.com/nvastola/jenkins-shared-library.git</code></li>
+    </ul>
 
-<p>After the "SUCCESS" message, I verified the build actually worked by checking Docker Hub:</p>
-
-<ol>
-<li>Opened https://hub.docker.com/</li>
-<li>Logged in</li>
-<li>Navigated to my <code>nvastola/demo-app</code> repository</li>
-<li>Checked the Tags tab</li>
-<li>Confirmed <code>jma-3.0</code> was there with the correct digest: <code>sha256:abc123...</code></li>
-
-</ol>
-<strong>This is important:</strong> Don't just trust the Jenkins console output. Actually verify your artifacts exist where they're supposed to be.
-
-<p>Later, I also pulled and ran the image locally to make sure it actually works:</p>
-
-<pre><code>docker pull nvastola/demo-app:jma-3.0
-docker run -p 8080:8080 nvastola/demo-app:jma-3.0
-# Check http://localhost:8080 - application runs
-</code></pre>
-
-<p>If it runs locally from the pulled image, I know the entire pipeline worked: build → push → pull → run.</p>
-
-
-
-<h2>Part 7: Making the Library Available in Jenkins</h2>
-
-<p>With the code written, I needed to make it available to Jenkins pipelines. There are two ways to do this.</p>
-
-<h3>Option 1: Global Library (For Everyone)</h3>
-
-<p><strong>Jenkins → Manage Jenkins → System → Global Pipeline Libraries:</strong></p>
-
-<ul>
-<li><strong>Name:</strong> <code>jenkins-shared-library</code></li>
-<li><strong>Default version:</strong> <code>master</code></li>
-<li><strong>Retrieval method:</strong> Modern SCM → Git</li>
-<li><strong>Repository URL:</strong> <code>https://gitlab.com/nvastola/jenkins-shared-library.git</code></li>
-<li><strong>Credentials:</strong> Your Git credentials</li>
-
-</ul>
-<strong>In Jenkinsfile:</strong>
-
-<pre><code>@Library('jenkins-shared-library') _
+    <p><strong>In Jenkinsfile:</strong></p>
+    <pre><code>@Library('jenkins-shared-library') _
 
 pipeline {
     // Your pipeline
-}
-</code></pre>
+}</code></pre>
 
-<p>The <code>_</code> (underscore) imports the library but doesn't assign it to a variable. This is a Groovy convention.</p>
+    <p>The <code>_</code> (underscore) imports the library but doesn't assign it to a variable. This is a Groovy convention. I started with this approach because it seemed simpler—configure once in Jenkins UI, use everywhere.</p>
 
-<strong>I started with this approach</strong> because it seemed simpler—configure once in Jenkins UI, use everywhere.
+    <h3>Option 2: Project-Specific (For One Pipeline)</h3>
 
-<h3>Option 2: Project-Specific (For One Pipeline)</h3>
+    <p>After using the global library for a while, I switched to project-specific for more control:</p>
 
-<p>After using the global library for a while, I switched to project-specific for more control. If you don't want to make the library available globally, you can load it directly in your Jenkinsfile:</p>
-
-<pre><code>#!/usr/bin/env groovy
+    <pre><code>#!/usr/bin/env groovy
 library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
     [$class: 'GitSCMSource',
     remote: 'https://gitlab.com/nvastola/jenkins-shared-library.git',
@@ -1537,124 +891,82 @@ library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
 
 pipeline {
     // Your pipeline
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>Why I switched:</strong></p>
-<ul>
-<li><strong>Explicit versioning:</strong> Each Jenkinsfile declares exactly which library version it uses</li>
-<li><strong>Testing:</strong> I can test library changes in one pipeline before affecting all pipelines</li>
-<li><strong>Visibility:</strong> The Jenkinsfile shows all dependencies—no hidden global config</li>
-<li><strong>Portability:</strong> If I move the Jenkinsfile to a different Jenkins instance, the library reference comes with it</li>
+    <p><strong>Why I switched:</strong></p>
+    <ul>
+      <li><strong>Explicit versioning:</strong> Each Jenkinsfile declares exactly which library version it uses</li>
+      <li><strong>Testing:</strong> I can test library changes in one pipeline before affecting all pipelines</li>
+      <li><strong>Visibility:</strong> The Jenkinsfile shows all dependencies — no hidden global config</li>
+      <li><strong>Portability:</strong> If I move the Jenkinsfile to a different Jenkins instance, the library reference comes with it</li>
+    </ul>
 
-</ul>
-<strong>Current approach:</strong> I'm using project-specific in my Jenkinsfile (as shown above) because it gives me explicit control and portability.
+    <h2>Part 8: Versioning the Library</h2>
 
+    <p>One powerful feature of Shared Libraries is versioning. You can reference specific versions in your Jenkinsfile:</p>
 
-
-<h2>Part 8: Versioning the Library</h2>
-
-<p>One powerful feature of Shared Libraries is versioning. You can reference specific versions in your Jenkinsfile:</p>
-
-<pre><code>@Library('jenkins-shared-library@v1.0.0') _  // Use tagged version
+    <pre><code>@Library('jenkins-shared-library@v1.0.0') _  // Use tagged version
 
 @Library('jenkins-shared-library@develop') _  // Use develop branch
 
-@Library('jenkins-shared-library@abc123') _  // Use specific commit
-</code></pre>
+@Library('jenkins-shared-library@abc123') _  // Use specific commit</code></pre>
 
-<p><strong>Why this matters:</strong></p>
+    <p><strong>Why this matters:</strong></p>
+    <ul>
+      <li><strong>Stability:</strong> Production pipelines can use <code>v1.0.0</code> while dev pipelines test <code>v2.0.0-beta</code></li>
+      <li><strong>Rollback:</strong> If a library update breaks things, revert to the previous version</li>
+      <li><strong>Testing:</strong> New library features can be tested on non-critical pipelines first</li>
+    </ul>
 
-<ul>
-<li><strong>Stability:</strong> Production pipelines can use <code>v1.0.0</code> while dev pipelines test <code>v2.0.0-beta</code></li>
-<li><strong>Rollback:</strong> If a library update breaks things, revert to the previous version</li>
-<li><strong>Testing:</strong> New library features can be tested on non-critical pipelines first</li>
+    <p><strong>In production, you'd use Git tags:</strong></p>
+    <pre><code>git tag -a v1.0.0 -m "Initial stable release"
+git push origin v1.0.0</code></pre>
 
-</ul>
-<strong>In production, you'd use Git tags:</strong>
+    <p>For this learning project, I'm using <code>@master</code> to always pull the latest code. In a real environment with multiple teams, I would tag stable releases.</p>
 
-<pre><code>git tag -a v1.0.0 -m "Initial stable release"
-git push origin v1.0.0
-</code></pre>
+    <h2>Part 9: Integrating the Library (The First Real Test)</h2>
 
-<p>Then reference it: <code>@Library('jenkins-shared-library@v1.0.0')</code></p>
+    <p>With the shared library built and available in Jenkins, it was time for the moment of truth: actually using it in a pipeline.</p>
 
-<strong>For this learning project, I didn't create version tags.</strong> I'm using <code>@master</code> to always pull the latest code. In a real environment with multiple teams, I would tag stable releases.
+    <h3>The First Function Call</h3>
 
-
-
-<h2>Part 9: Integrating the Library (The First Real Test)</h2>
-
-<p>With the shared library built and available in Jenkins, it was time for the moment of truth: actually using it in a pipeline.</p>
-
-<p>I opened my Java Maven app repository and modified the Jenkinsfile. This was the transition from building library code to actually using it.</p>
-
-<h3>Adding the Library Reference</h3>
-
-<p>At the top of my Jenkinsfile, I added the library reference:</p>
-
-<pre><code>#!/usr/bin/env groovy
-library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
-    [$class: 'GitSCMSource',
-    remote: 'https://gitlab.com/nvastola/jenkins-shared-library.git',
-    credentialsId: 'b12881fa-58d1-4a47-828f-970217c47e67'])
-</code></pre>
-
-<p>This tells Jenkins: "Before running this pipeline, load the shared library from my GitLab repository."</p>
-
-<h3>The First Function Call</h3>
-
-<p>Then I replaced the inline build logic with a function call:</p>
-
-<p><strong>Before (inline code):</strong></p>
-<pre><code>stage("build jar") {
+    <p><strong>Before (inline code):</strong></p>
+    <pre><code>stage("build jar") {
     steps {
         script {
             echo "Building the application..."
             sh 'mvn package'
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p><strong>After (shared library function):</strong></p>
-<pre><code>stage("build jar") {
+    <p><strong>After (shared library function):</strong></p>
+    <pre><code>stage("build jar") {
     steps {
         script {
             buildJar()
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p>I saved the Jenkinsfile, committed, and pushed to GitLab.</p>
+    <p><strong>Jenkins Console Output on first run:</strong></p>
 
-<h3>The First Build</h3>
-
-<p>I went to Jenkins and clicked "Build Now" on my multibranch pipeline.</p>
-
-<p>Jenkins started the build. I watched the console output:</p>
-
-<pre><code>Loading library jenkins-shared-library@master
+    <pre><code>Loading library jenkins-shared-library@master
 ...
-[Pipeline] stage (build jar)
-[Pipeline] { (build jar)
-[Pipeline] script
-[Pipeline] {
 [Pipeline] echo
 building the application for branch master
 [Pipeline] sh
 + mvn package
-...
-</code></pre>
+...</code></pre>
 
-<strong>It worked!</strong> The <code>buildJar()</code> function from my shared library executed. Jenkins loaded the library, found the function, and ran it.
+    <div class="callout success">
+      <div class="callout-title"><i class="fa-solid fa-circle-check"></i> It Worked</div>
+      <p>The <code>buildJar()</code> function from my shared library executed. Jenkins loaded the library, found the function, and ran it.</p>
+    </div>
 
-<h3>Adding More Functions</h3>
+    <h3>Adding More Functions</h3>
 
-<p>Encouraged by success, I replaced the Docker build logic too:</p>
-
-<pre><code>stage("build and push image") {
+    <pre><code>stage("build and push image") {
     steps {
         script {
             buildImage 'nvastola/demo-app:jma-3.0'
@@ -1662,94 +974,44 @@ building the application for branch master
             dockerPush 'nvastola/demo-app:jma-3.0'
         }
     }
-}
-</code></pre>
+}</code></pre>
 
-<p>Notice the Groovy syntax: <code>buildImage 'nvastola/demo-app:jma-3.0'</code> works the same as <code>buildImage('nvastola/demo-app:jma-3.0')</code>. Groovy lets you omit parentheses for single-argument functions.</p>
+    <p>Notice the Groovy syntax: <code>buildImage 'nvastola/demo-app:jma-3.0'</code> works the same as <code>buildImage('nvastola/demo-app:jma-3.0')</code>. Groovy lets you omit parentheses for single-argument functions.</p>
 
-<p>Ran the build again:</p>
+    <h3>What About Deployment?</h3>
 
-<pre><code>[Pipeline] stage (build and push image)
-[Pipeline] { (build and push image)
-[Pipeline] script
-[Pipeline] {
-[Pipeline] echo
-building the docker image...
-[Pipeline] sh
-+ docker build -t nvastola/demo-app:jma-3.0 .
-Successfully built 8a3f2b1c4d5e
-[Pipeline] withCredentials
-Login Succeeded
-[Pipeline] sh
-+ docker push nvastola/demo-app:jma-3.0
-...
-Finished: SUCCESS
-</code></pre>
+    <p>The deployment stage still calls <code>gv.deployApp()</code> from <code>script.groovy</code> rather than the shared library. This is intentional:</p>
+    <ul>
+      <li><strong>Build logic is universal</strong> → Shared library</li>
+      <li><strong>Deployment logic is environment-specific</strong> → Local script</li>
+    </ul>
 
-<h3>The Realization</h3>
+    <p>Deployment to dev vs staging vs production involves different servers, credentials, and configurations. That logic should live in the project repository where it can be customized per environment.</p>
 
-<p>Seeing "Finished: SUCCESS" wasn't just satisfying because the build worked. It was satisfying because I realized:</p>
+    <h2>What I Learned (The Real Takeaways)</h2>
 
-<strong>This exact Jenkinsfile can now be copied to 10 other Java Maven projects.</strong> Just change the image name. The build logic is centralized in the shared library.
+    <h3>1. DRY Applies to Infrastructure Code Too</h3>
 
-<p>If I need to change how Maven builds work (add a new flag, change the repository, switch to Gradle), I update <strong>one file</strong> in the shared library. All 10 projects instantly use the new logic.</p>
+    <p>"Don't Repeat Yourself" isn't just for application code. Pipeline logic is code. If you're copying it, you're doing it wrong.</p>
 
-<strong>That's the power of shared libraries.</strong> Not just code reuse—centralized maintenance.
+    <p><strong>Before Shared Library:</strong></p>
+    <ul>
+      <li>10 microservices × 100 lines of pipeline code = 1,000 lines</li>
+      <li>Change Docker registry? Update 10 files</li>
+    </ul>
 
-<h3>What About Deployment?</h3>
+    <p><strong>After Shared Library:</strong></p>
+    <ul>
+      <li>10 microservices × 10 lines of function calls = 100 lines</li>
+      <li>1 shared library × 100 lines of implementation = 100 lines</li>
+      <li>Total: 200 lines (80% reduction). Change Docker registry? Update 1 file.</li>
+    </ul>
 
-<p>You might notice my Jenkinsfile still has:</p>
+    <h3>2. The <code>script</code> Object Is Essential for Classes</h3>
 
-<pre><code>stage("deploy") {
-    steps {
-        script {
-            gv.deployApp()
-        }
-    }
-}
-</code></pre>
+    <p>Inside <code>vars/</code> functions, Jenkins commands work directly. Inside <code>src/</code> classes, you need the <code>script</code> object. Why? <code>vars/</code> functions run in the Jenkins pipeline context automatically. Classes don't — they're just Groovy classes. You have to explicitly pass the Jenkins context.</p>
 
-<p>The deployment logic stayed in <code>script.groovy</code> (local to the project) rather than moving to the shared library. This is intentional:</p>
-
-<ul>
-<li><strong>Build logic is universal</strong> → Shared library</li>
-<li><strong>Deployment logic is environment-specific</strong> → Local script</li>
-
-</ul>
-<p>Deployment to dev vs staging vs production involves different servers, credentials, and configurations. That logic should live in the project repository where it can be customized per environment.</p>
-
-
-
-<h2>What I Learned (The Real Takeaways)</h2>
-
-<h3>1. DRY Applies to Infrastructure Code Too</h3>
-
-<p>"Don't Repeat Yourself" isn't just for application code. Pipeline logic is code. If you're copying it, you're doing it wrong.</p>
-
-<p><strong>Before Shared Library:</strong></p>
-<ul>
-<li>10 microservices × 100 lines of pipeline code = 1,000 lines</li>
-<li>Change Docker registry? Update 10 files</li>
-
-</ul>
-<strong>After Shared Library:</strong>
-<ul>
-<li>10 microservices × 10 lines of function calls = 100 lines</li>
-<li>1 shared library × 100 lines of implementation = 100 lines</li>
-<li>Total: 200 lines (80% reduction)</li>
-<li>Change Docker registry? Update 1 file</li>
-</ul>
-
-<h3>2. The <code>script</code> Object Is Essential for Classes</h3>
-
-<p>This was the most confusing part. Inside <code>vars/</code> functions, Jenkins commands work directly. Inside <code>src/</code> classes, you need the <code>script</code> object.</p>
-
-<p><strong>Why?</strong></p>
-
-<code>vars/</code> functions run in the Jenkins pipeline context automatically. Classes don't—they're just Groovy classes. You have to explicitly pass the Jenkins context (the <code>script</code> object) to them.
-
-<p><strong>Pattern:</strong></p>
-<pre><code>// vars/myFunction.groovy
+    <pre><code>// vars/myFunction.groovy
 def call() {
     return new MyClass(this).doSomething()  // Pass 'this' as script
 }
@@ -1759,103 +1021,72 @@ class MyClass implements Serializable {
     def script
     MyClass(script) { this.script = script }
     def doSomething() { script.echo "Hi" }
-}
-</code></pre>
+}</code></pre>
 
-<h3>3. Single Responsibility Principle for Functions</h3>
+    <h3>3. Single Responsibility Principle for Functions</h3>
 
-<p>Splitting <code>buildAndPushImage()</code> into three separate functions (<code>buildDockerImage</code>, <code>dockerLogin</code>, <code>dockerPush</code>) made the library more flexible.</p>
+    <p>Splitting <code>buildAndPushImage()</code> into three separate functions made the library more flexible:</p>
+    <ul>
+      <li>✅ Compose them however you need</li>
+      <li>✅ Test each independently</li>
+      <li>✅ Other projects can use just the parts they need</li>
+    </ul>
 
-<p><strong>One big function:</strong></p>
-<ul>
-<li>❌ Can't reuse login logic without building</li>
-<li>❌ Can't build without pushing</li>
-<li>❌ Hard to test individual steps</li>
+    <h3>4. Versioning Gives You Safety</h3>
 
-</ul>
-<strong>Three small functions:</strong>
-<ul>
-<li>✅ Compose them however you need</li>
-<li>✅ Test each independently</li>
-<li>✅ Other projects can use just the parts they need</li>
-</ul>
+    <p>Being able to pin pipelines to specific library versions means you can test changes without breaking production, roll back if something goes wrong, and migrate gradually. This is critical in enterprise environments where stability matters.</p>
 
-<h3>4. Versioning Gives You Safety</h3>
+    <h2>Production Considerations (What's Still Missing)</h2>
 
-<p>Being able to pin pipelines to specific library versions means you can:</p>
-<ul>
-<li>Test changes without breaking production</li>
-<li>Roll back if something goes wrong</li>
-<li>Migrate gradually (some pipelines on v1, some on v2)</li>
-</ul>
+    <h3>What I Built (Learning)</h3>
+    <ul>
+      <li>✅ Basic shared library with reusable functions</li>
+      <li>✅ Organized code with classes</li>
+      <li>✅ Version control with Git</li>
+      <li>✅ Functions for build, Docker, and deploy</li>
+    </ul>
 
-<p>This is critical in enterprise environments where stability matters.</p>
+    <h3>What Production Would Add</h3>
 
-<h2>Production Considerations (What's Still Missing)</h2>
+    <p><strong>Testing:</strong></p>
+    <ul>
+      <li>Unit tests for Groovy classes</li>
+      <li>Integration tests for pipeline functions</li>
+      <li>Automated testing in CI before merging changes</li>
+    </ul>
 
-<h3>What I Built (Learning)</h3>
-<ul>
-<li>✅ Basic shared library with reusable functions</li>
-<li>✅ Organized code with classes</li>
-<li>✅ Version control with Git</li>
-<li>✅ Functions for build, Docker, and deploy</li>
-</ul>
+    <p><strong>Documentation:</strong></p>
+    <ul>
+      <li>README with function signatures and examples</li>
+      <li>Inline documentation for parameters</li>
+      <li>Changelog for version updates</li>
+    </ul>
 
-<h3>What Production Would Add</h3>
+    <p><strong>Security:</strong></p>
+    <ul>
+      <li>Separate libraries for different security levels</li>
+      <li>Approval process for library changes</li>
+      <li>Audit logging for who uses which functions</li>
+    </ul>
 
-<strong>Testing:</strong>
-<ul>
-<li>Unit tests for Groovy classes</li>
-<li>Integration tests for pipeline functions</li>
-<li>Automated testing in CI before merging changes</li>
-</ul>
+    <p><strong>Organization:</strong></p>
+    <ul>
+      <li>Separate libraries for different purposes (docker-library, maven-library, kubernetes-library)</li>
+      <li>Team-specific libraries vs company-wide libraries</li>
+      <li>Deprecation policy for old functions</li>
+    </ul>
 
-<strong>Documentation:</strong>
-<ul>
-<li>README with function signatures and examples</li>
-<li>Inline documentation for parameters</li>
-<li>Changelog for version updates</li>
-</ul>
+    <h2>How This Connects to Real Enterprise DevOps</h2>
 
-<strong>Security:</strong>
-<ul>
-<li>Separate libraries for different security levels</li>
-<li>Approval process for library changes</li>
-<li>Audit logging for who uses which functions</li>
-</ul>
+    <p>In a company with 100+ microservices, 10+ teams, and multiple programming languages, you might have:</p>
+    <ul>
+      <li><strong>Core library:</strong> Docker, notifications, security scanning (used by everyone)</li>
+      <li><strong>Language-specific libraries:</strong> Java/Maven, Python/pip, Node/npm</li>
+      <li><strong>Team-specific libraries:</strong> Payment team's deploy logic, Auth team's testing functions</li>
+    </ul>
 
-<strong>Organization:</strong>
-<ul>
-<li>Separate libraries for different purposes (docker-library, maven-library, kubernetes-library)</li>
-<li>Team-specific libraries vs company-wide libraries</li>
-<li>Deprecation policy for old functions</li>
-</ul>
-
-<strong>Monitoring:</strong>
-<ul>
-<li>Track which pipelines use which library versions</li>
-<li>Alert on failed library updates</li>
-<li>Metrics on function usage</li>
-</ul>
-
-<h2>How This Connects to Real Enterprise DevOps</h2>
-
-<p>In a company with:</p>
-<ul>
-<li>100+ microservices</li>
-<li>10+ teams</li>
-<li>Multiple programming languages</li>
-
-</ul>
-<p>You might have:</p>
-<ul>
-<li><strong>Core library:</strong> Docker, notifications, security scanning (used by everyone)</li>
-<li><strong>Language-specific libraries:</strong> Java/Maven, Python/pip, Node/npm</li>
-<li><strong>Team-specific libraries:</strong> Payment team's deploy logic, Auth team's testing functions</li>
-
-</ul>
-<strong>The pattern scales:</strong>
-<pre><code>jenkins-shared-library-core (v2.1.0)
+    <p><strong>The pattern scales:</strong></p>
+    <pre><code>jenkins-shared-library-core (v2.1.0)
 ├── Used by all 100 microservices
 ├── Managed by platform team
 └── Changes require approval
@@ -1863,189 +1094,163 @@ class MyClass implements Serializable {
 jenkins-shared-library-payment (v1.5.0)
 ├── Used by payment microservices
 ├── Managed by payment team
-└── Can change independently
-</code></pre>
+└── Can change independently</code></pre>
 
-<p>Each team controls their own library but benefits from shared core functionality. This is how companies manage complexity at scale.</p>
+    <p>Each team controls their own library but benefits from shared core functionality. This is how companies manage complexity at scale.</p>
 
+    <h2>Reflection: The Learning Process</h2>
 
+    <p><strong>What worked:</strong></p>
+    <ul>
+      <li>Starting with Freestyle jobs before jumping to pipelines</li>
+      <li>Learning external Groovy scripts before shared libraries</li>
+      <li>Writing simple functions in vars/ before adding src/ classes</li>
+      <li>Using project-specific library first, then making it global</li>
+      <li>Committing frequently (even broken code) to track progress</li>
+    </ul>
 
-<h2>Reflection: The Learning Process</h2>
+    <p><strong>What I'd do differently:</strong></p>
+    <ul>
+      <li>Read about the <code>script</code> object before writing classes (would have saved an hour)</li>
+      <li>Write down the credential UUID immediately instead of hunting for it later</li>
+      <li>Document functions as I wrote them, not afterward</li>
+    </ul>
 
-<p><strong>What worked:</strong></p>
-<ul>
-<li>Starting with Freestyle jobs before jumping to pipelines</li>
-<li>Learning external Groovy scripts before shared libraries</li>
-<li>Writing simple functions in vars/ before adding src/ classes</li>
-<li>Testing each function individually</li>
-<li>Using project-specific library first, then making it global</li>
-<li>Committing frequently (even broken code) to track progress</li>
+    <h3>The Nexus Rebuild Lesson</h3>
 
-</ul>
-<strong>What I'd do differently:</strong>
-<ul>
-<li>Read about the <code>script</code> object before writing classes (would have saved an hour)</li>
-<li>Write down the credential UUID immediately instead of hunting for it later</li>
-<li>Use more descriptive variable names in examples (not just <code>imageName</code>)</li>
-<li>Set up testing earlier (currently just manually running pipelines)</li>
-<li>Document functions as I wrote them, not afterward</li>
-</ul>
+    <p>Before this project, I deployed Nexus to a DigitalOcean droplet and manually configured it. Then I realized I'd set up the Docker repository wrong—it needed an HTTP connector, not HTTPS. My first instinct: rebuild the entire droplet from scratch.</p>
 
-<h3>The Nexus Rebuild Lesson</h3>
+    <p>Halfway through clicking through the Nexus UI for the second time, it hit me: I could have just run Nexus in Docker:</p>
 
-<p>Before this project, I had a related experience that taught me why Docker matters for infrastructure.</p>
-
-<p>I deployed Nexus Repository Manager to a DigitalOcean droplet and manually configured it. I was pushing Docker images to Nexus's Docker hosted repository alongside Maven artifacts. Then I realized I'd set up the Docker repository wrong—it needed an HTTP connector, not HTTPS, to work properly with Jenkins.</p>
-
-<p>My first instinct: <strong>Rebuild the entire droplet from scratch</strong> and manually configure everything again.</p>
-
-<p>Halfway through clicking through the Nexus UI for the second time, it hit me: I could have just run Nexus in Docker:</p>
-
-<pre><code>docker run -d \
+    <pre><code>docker run -d \
   -p 8081:8081 \
   -p 8083:8083 \
   -v nexus-data:/nexus-data \
-  sonatype/nexus3
-</code></pre>
+  sonatype/nexus3</code></pre>
 
-<p>Expose the ports during container creation, done. Configuration can be scripted or at least documented in a Dockerfile.</p>
+    <p>Expose the ports during container creation, done. Configuration can be scripted or at least documented in a Dockerfile.</p>
 
-<p>But I didn't think of that initially because I was still in the "manual server configuration" mindset.</p>
+    <p><strong>This is why Docker and infrastructure-as-code matter:</strong></p>
+    <ul>
+      <li>Manual setup: One mistake = rebuild everything</li>
+      <li>Docker: One mistake = <code>docker rm</code>, change config, <code>docker run</code> again</li>
+    </ul>
 
-<p><strong>This is why Docker and infrastructure-as-code matter:</strong></p>
-<ul>
-<li>Manual setup: One mistake = rebuild everything</li>
-<li>Docker: One mistake = <code>docker rm</code>, change config, <code>docker run</code> again</li>
+    <p>I spent 2 hours rebuilding manually when I could have spent 5 minutes with Docker. But you have to make the mistake to learn the lesson.</p>
 
-</ul>
-<p>I spent 2 hours rebuilding manually when I could have spent 5 minutes with Docker. But you have to make the mistake to learn the lesson.</p>
+    <h3>Why Docker Hub Instead of Nexus?</h3>
 
-<h3>Why Docker Hub Instead of Nexus?</h3>
+    <p>After the Nexus rebuild, I decided to keep Nexus for Maven artifacts (JAR files) but use Docker Hub for Docker images.</p>
 
-<p>After the Nexus rebuild, I decided to keep Nexus for Maven artifacts (JAR files) but use Docker Hub for Docker images.</p>
+    <p><strong>Reasoning:</strong></p>
+    <ol>
+      <li><strong>Learning opportunity:</strong> I wanted to learn how to push to both Nexus and Docker Hub from Jenkins</li>
+      <li><strong>Simplicity:</strong> Docker Hub doesn't require server management</li>
+      <li><strong>Cost:</strong> The Nexus droplet was temporary for learning — I wasn't going to keep paying $48/month for a personal project</li>
+      <li><strong>Separation of concerns:</strong> Maven artifacts in Nexus, Docker images in Docker Hub</li>
+    </ol>
 
-<p><strong>Reasoning:</strong></p>
-<ol>
-<li><strong>Learning opportunity:</strong> I wanted to learn how to push to both Nexus and Docker Hub from Jenkins</li>
-<li><strong>Simplicity:</strong> Docker Hub doesn't require server management</li>
-<li><strong>Cost:</strong> The Nexus droplet was temporary for learning—I wasn't going to keep paying $48/month for a personal project</li>
-<li><strong>Separation of concerns:</strong> Maven artifacts in Nexus, Docker images in Docker Hub</li>
+    <p>In a real company, everything would probably go through Nexus (or Artifactory, or AWS ECR). But for learning, using different repositories for different artifact types taught me how to configure multiple destinations.</p>
 
-</ol>
-<p>In a real company, everything would probably go through Nexus (or Artifactory, or AWS ECR). But for learning, using different repositories for different artifact types taught me how to configure multiple destinations.</p>
+    <p><strong>Time investment:</strong> ~4 hours in one afternoon (after a week of learning Jenkins fundamentals)<br>
+    <strong>Cost:</strong> $48/month (DigitalOcean droplet: 4GB RAM, 4 vCPUs, 160GB storage for Jenkins)</p>
 
-<strong>Time investment:</strong> ~4 hours in one afternoon (after a week of learning Jenkins fundamentals)  
-<strong>Cost:</strong> $48/month (DigitalOcean droplet: 4GB RAM, 4 vCPUs, 160GB storage for Jenkins)
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Note on Cost</div>
+      <p>The Nexus droplet from Project 2 was temporary for learning and has been shut down. For this project, I only kept the Jenkins droplet running and used Docker Hub (free) for image storage.</p>
+    </div>
 
-<strong>Note on cost:</strong> The Nexus droplet from Project 2 was temporary for learning and has been shut down. For this project, I only kept the Jenkins droplet running and used Docker Hub (free) for image storage.
+    <p><strong>Breakdown (one afternoon, ~4 hours):</strong></p>
+    <ul>
+      <li>30 min: Creating shared library repository structure</li>
+      <li>45 min: Writing first functions (buildJar, buildImage)</li>
+      <li>1 hour: Learning and implementing the <code>script</code> object pattern for the Docker class</li>
+      <li>1 hour: The 7-commit rapid iteration (syntax errors, credential UUID hunt, password escaping, refactoring)</li>
+      <li>45 min: Splitting into separate functions and organizing code</li>
+    </ul>
 
-<p><strong>Breakdown (one afternoon, ~4 hours):</strong></p>
-<ul>
-<li>30 minutes: Creating shared library repository structure</li>
-<li>45 minutes: Writing first functions (buildJar, buildImage)</li>
-<li>1 hour: Learning and implementing the <code>script</code> object pattern for the Docker class</li>
-<li>1 hour: The 7-commit rapid iteration (syntax errors, credential UUID hunt, password escaping, refactoring)</li>
-<li>45 minutes: Splitting into separate functions and organizing code</li>
+    <p><strong>What took the longest:</strong> The 7-commit iteration hour. Syntax errors, finding the credential UUID, figuring out password escaping — lots of small issues that added up. The <code>script</code> object pattern itself was straightforward once I understood it from the tutorial.</p>
 
-</ul>
-<strong>What took the longest:</strong> The 7-commit iteration hour. Syntax errors, finding the credential UUID, figuring out password escaping—lots of small issues that added up. The <code>script</code> object pattern itself was straightforward once I understood it from the tutorial.
+    <h2>The Pattern I Now Understand</h2>
 
+    <p><strong>Manual work</strong> (Projects 1–2): SSH to server, run commands by hand. Copy files with <code>scp</code>. Understand what deployment actually does.</p>
+    <p><strong>Containerization</strong> (Project 3): Package apps with dependencies. Build → Tag → Push → Pull → Deploy. Simulate CI/CD workflow manually.</p>
+    <p><strong>Automation</strong> (Project 4, earlier): Write Jenkinsfiles to automate the workflow. One pipeline per project. Still copying logic between projects.</p>
+    <p><strong>Scaled Automation</strong> (This project): Extract common logic into reusable functions. One library, many projects. Change once, affect everywhere.</p>
+    <p><strong>Next:</strong> AWS Services for cloud infrastructure — because running everything locally or on a single DigitalOcean droplet doesn't scale to production.</p>
 
+    <h2>What's Next</h2>
 
-<h2>The Pattern I Now Understand</h2>
+    <p>With Jenkins pipelines automated and shared libraries handling common logic, the next challenge is <strong>AWS Services</strong>. I've been working locally and with DigitalOcean, but real enterprise infrastructure runs on AWS.</p>
 
-<strong>Manual work</strong> (Projects 1-2):
-<ul>
-<li>SSH to server, run commands by hand</li>
-<li>Copy files with <code>scp</code></li>
-<li>Understand what deployment actually does</li>
+    <p>I'm expecting:</p>
+    <ul>
+      <li>EC2 instances and security groups</li>
+      <li>S3 for storage</li>
+      <li>IAM roles and permissions</li>
+      <li>VPCs and networking</li>
+      <li>More "why isn't this working?" moments with AWS-specific configurations</li>
+    </ul>
 
-</ul>
-<strong>Containerization</strong> (Project 3):
-<ul>
-<li>Package apps with dependencies</li>
-<li>Build → Tag → Push → Pull → Deploy</li>
-<li>Simulate CI/CD workflow manually</li>
+    <p>But I'm also seeing how all these pieces connect: Docker packages the apps, Jenkins builds and deploys them, Shared Libraries keep the automation DRY, and AWS will provide the scalable infrastructure to run it all.</p>
 
-</ul>
-<strong>Automation</strong> (Project 4):
-<ul>
-<li>Write Jenkinsfiles to automate the workflow</li>
-<li>One pipeline per project</li>
-<li>Still copying logic between projects</li>
+    <p><a href="https://gitlab.com/nvastola/jenkins-shared-library" target="_blank">GitLab Repository &rarr;</a></p>
 
-</ul>
-<strong>Scaled Automation</strong> (Project 5 - This one):
-<ul>
-<li>Extract common logic into reusable functions</li>
-<li>One library, many projects</li>
-<li>Change once, affect everywhere</li>
+  </article>
+</div>
 
-</ul>
-<strong>Next:</strong> AWS Services for cloud infrastructure. Because running everything locally or on a single DigitalOcean droplet doesn't scale to production.
+<div class="related-section">
+  <div class="related-title">Up Next in the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-5.html" class="related-card">
+      <h4>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h4>
+      <p>Building end-to-end automation: OpenSSL key format battles, dynamic versioning, remote deployment to EC2, and achieving zero-touch deployments.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top: 3rem; text-align: center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
 
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Jenkins, Groovy, Shared Library, CI/CD, Docker, Maven, Pipeline Automation</p>
+    </div>
+  </div>
+</footer>
 
+<script src="../js/scripts.js"></script>
 
-<h2>What's Next</h2>
-
-<p>With Jenkins pipelines automated and shared libraries handling common logic, the next challenge is <strong>AWS Services</strong>. I've been working locally and with DigitalOcean, but real enterprise infrastructure runs on AWS.</p>
-
-<p>I'm expecting:</p>
-<ul>
-<li>EC2 instances and security groups</li>
-<li>S3 for storage</li>
-<li>IAM roles and permissions</li>
-<li>VPCs and networking</li>
-<li>More "why isn't this working?" moments with AWS-specific configurations</li>
-</ul>
-
-<p>But I'm also seeing how all these pieces connect: Docker packages the apps, Jenkins builds and deploys them, Shared Libraries keep the automation DRY, and AWS will provide the scalable infrastructure to run it all.</p>
-
-<a href="https://gitlab.com/nvastola/jenkins-shared-library" style="color: var(--accent-cyan); text-decoration: none;">Gitlab Repository</a>
-
-        </div>
-
-        </article>
-    </main>
-
-    <footer class="article-footer">
-        <a href="../blog.html" class="back-to-blog">
-            <i class="fas fa-arrow-left"></i> Back to All Posts
-        </a>
-    </footer>
-
-    <section class="related-posts">
-        <h3>Up Next in the Series</h3>
-        <div class="related-grid">
-            <a href="devops-project-5.html" class="related-card">
-                <h4>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h4>
-                <p>Building end-to-end automation: OpenSSL key format battles, dynamic versioning, remote deployment to EC2, and achieving zero-touch deployments...</p>
-            </a>
-        </div>
-    </section>
-
-    <script>
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        const nav = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 100) {
-                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
-            } else {
-                nav.style.boxShadow = 'none';
-            }
-        });
-    </script>
 </body>
 </html>

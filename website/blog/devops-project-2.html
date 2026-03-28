@@ -1,663 +1,366 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setting Up Nexus Repository Manager | Noah Vastola</title>
-    <meta name="description" content="Tackling architecture mismatches, silent failures, and RBAC security while setting up Nexus Repository Manager on DigitalOcean.">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Setting Up Nexus Repository Manager | Noah Vastola</title>
+<meta name="description" content="Tackling architecture mismatches, silent failures, and RBAC security while setting up Nexus Repository Manager on DigitalOcean."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1a2332;
-            --text-primary: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --accent-yellow: #fbbf24;
-            --accent-red: #ef4444;
-            --border-color: #2d3748;
-            --card-bg: #1e293b;
-            --code-bg: #1a1a1a;
-        }
+<link rel="stylesheet" href="../css/styles.css"/>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            line-height: 1.8;
-            min-height: 100vh;
-        }
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
 
-        /* Navigation */
-        nav {
-            background: rgba(26, 35, 50, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
 
-        .nav-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
 
-        .nav-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
 
-        .nav-link:hover {
-            color: var(--accent-cyan);
-        }
+  /* Blockquotes */
+  .article-body blockquote { margin: 2rem 0; padding: 1rem 1.5rem; border-left: 4px solid var(--primary); background: var(--muted); border-radius: 0 6px 6px 0; font-style: italic; color: var(--fg); font-size: 1rem; line-height: 1.8; }
 
-        /* Article Header */
-        .article-header {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 4rem 2rem 2rem;
-        }
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: block; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
 
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .breadcrumb a {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .breadcrumb a:hover {
-            color: var(--accent-blue);
-        }
-
-        .article-header h1 {
-            font-size: 2.8rem;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .article-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        .meta-item i {
-            color: var(--accent-cyan);
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            padding: 0.4rem 0.9rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        /* Article Content */
-        .article-content {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .article-body {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 3rem;
-        }
-
-        .article-body h2 {
-            font-size: 2rem;
-            margin: 2.5rem 0 1.5rem;
-            color: var(--text-primary);
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--accent-cyan);
-        }
-
-        .article-body h2:first-child {
-            margin-top: 0;
-        }
-
-        .article-body h3 {
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem;
-            color: var(--accent-cyan);
-        }
-
-        .article-body h4 {
-            font-size: 1.2rem;
-            margin: 1.5rem 0 1rem;
-            color: var(--text-primary);
-        }
-
-        .article-body p {
-            margin-bottom: 1.5rem;
-            line-height: 1.9;
-            color: var(--text-secondary);
-        }
-
-        .article-body strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .article-body ul, .article-body ol {
-            margin-bottom: 1.5rem;
-            padding-left: 2rem;
-        }
-
-        .article-body li {
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        .article-body ul li::marker {
-            color: var(--accent-cyan);
-        }
-
-        /* Code Blocks */
-        .article-body code {
-            background: var(--code-bg);
-            color: var(--accent-green);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .article-body pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            overflow-x: auto;
-        }
-
-        .article-body pre code {
-            background: none;
-            padding: 0;
-            color: var(--accent-green);
-        }
-
-        /* Callouts */
-        .callout {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            border-left: 4px solid;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .callout-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            font-size: 1.1rem;
-        }
-
-        .callout.warning {
-            border-color: var(--accent-yellow);
-            background: rgba(251, 191, 36, 0.05);
-        }
-
-        .callout.warning .callout-title {
-            color: var(--accent-yellow);
-        }
-
-        .callout.error {
-            border-color: var(--accent-red);
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .callout.error .callout-title {
-            color: var(--accent-red);
-        }
-
-        .callout.success {
-            border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .callout.success .callout-title {
-            color: var(--accent-green);
-        }
-
-        .callout.info {
-            border-color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .callout.info .callout-title {
-            color: var(--accent-blue);
-        }
-
-        .callout p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Blockquotes */
-        blockquote {
-            margin: 2rem 0;
-            padding: 1.5rem 2rem;
-            border-left: 4px solid var(--accent-cyan);
-            background: rgba(6, 182, 212, 0.05);
-            font-style: italic;
-            color: var(--text-primary);
-        }
-
-        /* Footer */
-        .article-footer {
-            max-width: 900px;
-            margin: 3rem auto;
-            padding: 0 2rem;
-        }
-
-        .back-to-blog {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .back-to-blog:hover {
-            background: var(--bg-tertiary);
-            color: var(--accent-cyan);
-            border-color: var(--accent-cyan);
-        }
-
-        /* Related Posts */
-        .related-posts {
-            max-width: 900px;
-            margin: 3rem auto;
-            padding: 0 2rem 4rem;
-        }
-
-        .related-posts h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .related-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .related-card:hover {
-            border-color: var(--accent-cyan);
-            transform: translateY(-4px);
-        }
-
-        .related-card h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            font-size: 1.2rem;
-        }
-
-        .related-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .article-header h1 {
-                font-size: 2rem;
-            }
-
-            .article-body {
-                padding: 2rem 1.5rem;
-            }
-
-            .article-body h2 {
-                font-size: 1.6rem;
-            }
-
-            .article-body h3 {
-                font-size: 1.3rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-            }
-        }
-    </style>
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
 </head>
 <body>
-    <nav>
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../index.html" class="nav-link">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <a href="../blog.html" class="nav-link">
-                    <i class="fas fa-blog"></i> Blog
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <header class="article-header">
-        <div class="breadcrumb">
-            <a href="../blog.html">Blog</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>Setting Up Nexus</span>
-        </div>
+<div class="cursor-dot" id="cursorDot"></div>
 
-        <h1>Setting Up Nexus Repository Manager: Architecture Mismatches, Silent Failures, and Production Artifact Management</h1>
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
 
-        <div class="article-meta">
-            <div class="meta-item">
-                <i class="fas fa-calendar-alt"></i>
-                February 11, 2026
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                8 min read
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-user"></i>
-                Noah Vastola
-            </div>
-        </div>
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
 
-        <div class="tags">
-            <span class="tag">DigitalOcean</span>
-            <span class="tag">Nexus</span>
-            <span class="tag">Linux</span>
-            <span class="tag">Maven</span>
-            <span class="tag">Gradle</span>
-            <span class="tag">Java</span>
-        </div>
-    </header>
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Setting Up Nexus</span>
+    </div>
+    
+    <h1 class="post-title">Setting Up Nexus Repository Manager: Architecture Mismatches, Silent Failures, and Production Artifact Management</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> Feb 11, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 8 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">DigitalOcean</span>
+      <span class="post-tag">Nexus</span>
+      <span class="post-tag">Linux</span>
+      <span class="post-tag">Maven</span>
+      <span class="post-tag">Gradle</span>
+      <span class="post-tag">Java</span>
+    </div>
+  </div>
+</section>
 
-    <main class="article-content">
-        <article class="article-body">
+<div class="article-wrap">
+  <article class="article-body">
 
-            <p>
-                After successfully deploying a Java application to DigitalOcean (see <a href="devops-project-1.html" style="color: var(--accent-cyan); text-decoration: none;">previous post</a>), I moved on to the next challenge: setting up a centralized artifact repository. In that first project, I manually copied JAR files from my laptop to the server using <code>scp</code>. That works for learning, but it doesn't scale. In a real development team, you need a central place to store build artifacts—a "source of truth" where everyone pulls from the same versioned releases.
-            </p>
+    <p>
+      After successfully deploying a Java application to DigitalOcean (see <a href="devops-project-1.html">previous post</a>), I moved on to the next challenge: setting up a centralized artifact repository. In that first project, I manually copied JAR files from my laptop to the server using <code>scp</code>. That works for learning, but it doesn't scale. In a real development team, you need a central place to store build artifacts—a "source of truth" where everyone pulls from the same versioned releases.
+    </p>
 
-            <p>Enter <strong>Nexus Repository Manager</strong>.</p>
-            
+    <p>Enter <strong>Nexus Repository Manager</strong>.</p>
 
-            <p>
-                Nexus is an artifact repository that stores compiled software artifacts—JAR files, Docker images, npm packages, Python wheels, whatever you're building. It's like GitHub, but for compiled code instead of source code. When your CI/CD pipeline builds an application, it publishes the artifact to Nexus. When you deploy that application, you pull the exact same artifact from Nexus.
-            </p>
+    <p>
+      Nexus is an artifact repository that stores compiled software artifacts—JAR files, Docker images, npm packages, Python wheels, whatever you're building. It's like GitHub, but for compiled code instead of source code. When your CI/CD pipeline builds an application, it publishes the artifact to Nexus. When you deploy that application, you pull the exact same artifact from Nexus.
+    </p>
 
-            <p>
-                This seemed straightforward. Install Nexus, configure a repository, publish some JARs. Maybe an hour or two.
-            </p>
+    <p>
+      This seemed straightforward. Install Nexus, configure a repository, publish some JARs. Maybe an hour or two.
+    </p>
 
-            <p>
-                <strong>It took me an entire afternoon (about 4 hours).</strong> And I learned more about CPU architectures, Linux process management, and permission systems than I bargained for.
-            </p>
+    <p>
+      <strong>It took me an entire afternoon (about 4 hours).</strong> And I learned more about CPU architectures, Linux process management, and permission systems than I bargained for.
+    </p>
 
-            <h2>The Plan (And What Actually Happened)</h2>
+    <h2>The Plan (And What Actually Happened)</h2>
 
-            <p><strong>What I thought I'd do:</strong></p>
-            <ol>
-                <li>Install Nexus on a DigitalOcean droplet (15 minutes)</li>
-                <li>Configure a Maven repository (15 minutes)</li>
-                <li>Publish artifacts from Gradle and Maven projects (30 minutes)</li>
-            </ol>
+    <p><strong>What I thought I'd do:</strong></p>
+    <ol>
+      <li>Install Nexus on a DigitalOcean droplet (15 minutes)</li>
+      <li>Configure a Maven repository (15 minutes)</li>
+      <li>Publish artifacts from Gradle and Maven projects (30 minutes)</li>
+    </ol>
 
-            <p><strong>What actually happened:</strong></p>
-            <ol>
-                <li>Nexus wouldn't start (silent failure, no logs)</li>
-                <li>Discovered I'd downloaded the wrong CPU architecture</li>
-                <li>Rebuilt the entire server with the correct version</li>
-                <li>Spent hours understanding Nexus's RBAC permission model</li>
-                <li>Configured Gradle and Maven publishing workflows from scratch</li>
-                <li>Learned about blob stores and cleanup policies the hard way</li>
-            </ol>
+    <p><strong>What actually happened:</strong></p>
+    <ol>
+      <li>Nexus wouldn't start (silent failure, no logs)</li>
+      <li>Discovered I'd downloaded the wrong CPU architecture</li>
+      <li>Rebuilt the entire server with the correct version</li>
+      <li>Spent hours understanding Nexus's RBAC permission model</li>
+      <li>Configured Gradle and Maven publishing workflows from scratch</li>
+      <li>Learned about blob stores and cleanup policies the hard way</li>
+    </ol>
 
-            <p>But let's start from the beginning.</p>
+    <p>But let's start from the beginning.</p>
 
-            <h2>Part 1: Installing Nexus (Or Trying To)</h2>
+    <h2>Part 1: Installing Nexus (Or Trying To)</h2>
 
-            <p>
-                I spun up a new DigitalOcean droplet—larger specs than the Java app server since Nexus requires more resources:
-            </p>
-            <ul>
-                <li>Ubuntu 22.04 LTS</li>
-                <li>8 GB RAM (Nexus is memory-intensive)</li>
-                <li>160 GB SSD (artifact storage needs space)</li>
-                <li>4 vCPUs</li>
-            </ul>
+    <p>I spun up a new DigitalOcean droplet—larger specs than the Java app server since Nexus requires more resources:</p>
+    <ul>
+      <li>Ubuntu 22.04 LTS</li>
+      <li>8 GB RAM (Nexus is memory-intensive)</li>
+      <li>160 GB SSD (artifact storage needs space)</li>
+      <li>4 vCPUs</li>
+    </ul>
 
-            <p>I SSH'd in, updated packages, and installed Java (Nexus requires Java to run):</p>
+    <p>I SSH'd in, updated packages, and installed Java (Nexus requires Java to run):</p>
 
-            <pre><code>sudo apt update && sudo apt upgrade -y
+    <pre><code>sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-17-jdk -y</code></pre>
 
-            <p>Then I followed the Nexus installation guide:</p>
+    <p>Then I followed the Nexus installation guide:</p>
 
-            <pre><code># Download Nexus
+    <pre><code># Download Nexus
 cd /opt
 sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
 
 # Extract
 sudo tar -xvzf latest-unix.tar.gz</code></pre>
 
-            <p>Nexus installs in two directories:</p>
-            <ul>
-                <li><code>/opt/nexus/</code> - The application itself</li>
-                <li><code>/opt/sonatype-work/nexus3/</code> - Data, logs, and configuration</li>
-            </ul>
+    <p>Nexus installs in two directories:</p>
+    <ul>
+      <li><code>/opt/nexus/</code> — The application itself</li>
+      <li><code>/opt/sonatype-work/nexus3/</code> — Data, logs, and configuration</li>
+    </ul>
 
-            <h3>Creating a Dedicated Nexus User</h3>
+    <h3>Creating a Dedicated Nexus User</h3>
 
-            <p>Following the principle of least privilege (which I learned in Project 1), I created a dedicated user to run Nexus:</p>
+    <p>Following the principle of least privilege (which I learned in Project 1), I created a dedicated user to run Nexus:</p>
 
-            <pre><code>sudo adduser nexus
+    <pre><code>sudo adduser nexus
 sudo chown -R nexus:nexus /opt/nexus /opt/sonatype-work/nexus3</code></pre>
 
-            <h3>Running Nexus as the Dedicated User</h3>
+    <h3>Running Nexus as the Dedicated User</h3>
 
-            <p>With the nexus user created and owning the directories, I switched to that user:</p>
+    <p>With the nexus user created and owning the directories, I switched to that user:</p>
 
-            <pre><code>su - nexus</code></pre>
+    <pre><code>su - nexus</code></pre>
 
-            <p>Then I started Nexus:</p>
+    <p>Then I started Nexus:</p>
 
-            <pre><code>/opt/nexus/bin/nexus start</code></pre>
+    <pre><code>/opt/nexus/bin/nexus start</code></pre>
 
-            <p><strong>Output:</strong></p>
+    <p><strong>Output:</strong></p>
 
-            <pre><code>Starting nexus</code></pre>
+    <pre><code>Starting nexus</code></pre>
 
-            <p>I checked if it was running:</p>
+    <p>I checked if it was running:</p>
 
-            <pre><code>/opt/nexus/bin/nexus status</code></pre>
+    <pre><code>/opt/nexus/bin/nexus status</code></pre>
 
-            <p><strong>Output:</strong></p>
+    <p><strong>Output:</strong></p>
 
-            <pre><code>nexus is running.</code></pre>
+    <pre><code>nexus is running.</code></pre>
 
-            <p>Great! It said it was running. I opened my browser: <code>http://143.198.XXX.XXX:8081</code></p>
+    <p>Great! It said it was running. I opened my browser: <code>http://143.198.XXX.XXX:8081</code></p>
 
-            <p><strong>Connection refused.</strong></p>
+    <p><strong>Connection refused.</strong></p>
 
-            <h2>Part 2: The Silent Failure</h2>
+    <h2>Part 2: The Silent Failure</h2>
 
-            <p>
-                This is the most frustrating type of error: the <strong>silent failure</strong>. The <code>nexus status</code> command claimed it was running. But nothing was accessible.
-            </p>
+    <p>
+      This is the most frustrating type of error: the <strong>silent failure</strong>. The <code>nexus status</code> command claimed it was running. But nothing was accessible.
+    </p>
 
-            <p>I verified the process was actually running:</p>
+    <p>I verified the process was actually running:</p>
 
-            <pre><code>ps aux | grep nexus</code></pre>
+    <pre><code>ps aux | grep nexus</code></pre>
 
-            <p>I saw the nexus process in the list. So it was running... or was it?</p>
+    <p>I saw the nexus process in the list. So it was running... or was it?</p>
 
-            <p>I checked what was listening on port 8081:</p>
+    <p>I checked what was listening on port 8081:</p>
 
-            <pre><code>sudo netstat -tulpn | grep 8081</code></pre>
+    <pre><code>sudo netstat -tulpn | grep 8081</code></pre>
 
-            <p>Nothing. No output. No process was listening on that port.</p>
+    <p>Nothing. No output. No process was listening on that port.</p>
 
-            <p>So Nexus claimed to be running, showed up in the process list, but wasn't actually listening for connections. Something was failing silently.</p>
+    <p>So Nexus claimed to be running, showed up in the process list, but wasn't actually listening for connections. Something was failing silently.</p>
 
-            <p>I checked the logs in <code>/opt/sonatype-work/nexus3/log/</code>:</p>
+    <p>I checked the logs in <code>/opt/sonatype-work/nexus3/log/</code>:</p>
 
-            <pre><code>sudo tail -f /opt/sonatype-work/nexus3/log/nexus.log</code></pre>
+    <pre><code>sudo tail -f /opt/sonatype-work/nexus3/log/nexus.log</code></pre>
 
-            <p>The log file was... empty. No errors. No warnings. Just silence.</p>
+    <p>The log file was... empty. No errors. No warnings. Just silence.</p>
 
-            <p><strong>What do you do when there are no error messages?</strong></p>
+    <p><strong>What do you do when there are no error messages?</strong></p>
 
-            <h3>Running Nexus in Foreground Mode</h3>
+    <h3>Running Nexus in Foreground Mode</h3>
 
-            <p>
-                After an hour of frustrated Googling, I found a suggestion: run Nexus in foreground mode instead of as a background process. This forces it to output logs directly to the terminal instead of writing to log files.
-            </p>
+    <p>
+      After an hour of frustrated Googling, I found a suggestion: run Nexus in foreground mode instead of as a background process. This forces it to output logs directly to the terminal instead of writing to log files.
+    </p>
 
-            <p>First, I stopped the backgrounded instance:</p>
+    <p>First, I stopped the backgrounded instance:</p>
 
-            <pre><code>/opt/nexus/bin/nexus stop</code></pre>
+    <pre><code>/opt/nexus/bin/nexus stop</code></pre>
 
-            <p>Then I ran it in foreground mode:</p>
+    <p>Then I ran it in foreground mode:</p>
 
-            <pre><code>/opt/nexus/bin/nexus run</code></pre>
+    <pre><code>/opt/nexus/bin/nexus run</code></pre>
 
-            <p><strong>Immediately, I got output:</strong></p>
+    <p><strong>Immediately, I got output:</strong></p>
 
-            <div class="callout error">
-                <div class="callout-title">
-                    <i class="fas fa-times-circle"></i> Exec Format Error
-                </div>
-                <pre><code>/opt/nexus/bin/nexus: /opt/nexus/bin/nexus: cannot execute binary file: Exec format error</code></pre>
-            </div>
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Exec Format Error</div>
+      <pre><code>/opt/nexus/bin/nexus: /opt/nexus/bin/nexus: cannot execute binary file: Exec format error</code></pre>
+    </div>
 
-            <h3>The "Exec Format Error" Revelation</h3>
+    <h3>The "Exec Format Error" Revelation</h3>
 
-            <p>
-                <code>Exec format error</code> means you're trying to run a binary that was compiled for a different CPU architecture than what your system has.
-            </p>
+    <p>
+      <code>Exec format error</code> means you're trying to run a binary that was compiled for a different CPU architecture than what your system has.
+    </p>
 
-            <p>
-                It's like taking a program built specifically for a new Apple Silicon Mac (M-series) and trying to run it on an older Intel Mac. The operating system might be exactly the same, but the underlying processor architecture speaks a completely different language, so the binary can't execute.
-            </p>
+    <p>
+      It's like taking a program built specifically for a new Apple Silicon Mac (M-series) and trying to run it on an older Intel Mac. The operating system might be exactly the same, but the underlying processor architecture speaks a completely different language, so the binary can't execute.
+    </p>
 
-            <p>I checked my server's architecture:</p>
+    <p>I checked my server's architecture:</p>
 
-            <pre><code>uname -m</code></pre>
+    <pre><code>uname -m</code></pre>
 
-            <p><strong>Output:</strong> <code>x86_64</code></p>
+    <p><strong>Output:</strong> <code>x86_64</code></p>
 
-            <p>That's Intel/AMD architecture (also called amd64).</p>
+    <p>That's Intel/AMD architecture (also called amd64).</p>
 
-            <p>Then I looked at the filename of the Nexus tarball I'd downloaded: <code>nexus-3.x.x-unix-aarch64.tar.gz</code></p>
+    <p>Then I looked at the filename of the Nexus tarball I'd downloaded: <code>nexus-3.x.x-unix-aarch64.tar.gz</code></p>
 
-            <p><strong>There it was.</strong></p>
+    <p><strong>There it was.</strong></p>
 
-            <p>
-                <code>aarch64</code> is ARM architecture—the same architecture used in Apple's M1/M2 chips, Raspberry Pi, and AWS Graviton instances. I had accidentally downloaded the ARM version of Nexus and was trying to run it on an x86_64 server.
-            </p>
-            
+    <p>
+      <code>aarch64</code> is ARM architecture—the same architecture used in Apple's M1/M2 chips, Raspberry Pi, and AWS Graviton instances. I had accidentally downloaded the ARM version of Nexus and was trying to run it on an x86_64 server.
+    </p>
 
-            <div class="callout info">
-                <div class="callout-title">
-                    <i class="fas fa-microchip"></i> Architecture Primer
-                </div>
-                <p>For anyone coming from a Windows/Mac background where this distinction doesn't matter much:</p>
-                <p><strong>x86_64 (Intel/AMD):</strong></p>
-                <ul>
-                    <li>Used in most cloud servers (AWS EC2 general instances, DigitalOcean standard droplets)</li>
-                    <li>Most common desktop/laptop processors</li>
-                    <li>Also called "amd64" or "x64"</li>
-                </ul>
-                <p><strong>ARM (aarch64):</strong></p>
-                <ul>
-                    <li>Used in modern Apple Silicon (M1/M2/M3), AWS Graviton, Raspberry Pi</li>
-                    <li>More energy-efficient, increasingly common in cloud (Graviton is cheaper)</li>
-                    <li>Completely different instruction set from x86</li>
-                </ul>
-                <p>You <strong>cannot</strong> run an ARM binary on an x86 system or vice versa. The CPU literally doesn't understand the instructions.</p>
-            </div>
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-microchip"></i> Architecture Primer</div>
+      <p>For anyone coming from a Windows/Mac background where this distinction doesn't matter much:</p>
+      <p><strong>x86_64 (Intel/AMD):</strong></p>
+      <ul>
+        <li>Used in most cloud servers (AWS EC2 general instances, DigitalOcean standard droplets)</li>
+        <li>Most common desktop/laptop processors</li>
+        <li>Also called "amd64" or "x64"</li>
+      </ul>
+      <p><strong>ARM (aarch64):</strong></p>
+      <ul>
+        <li>Used in modern Apple Silicon (M1/M2/M3), AWS Graviton, Raspberry Pi</li>
+        <li>More energy-efficient, increasingly common in cloud (Graviton is cheaper)</li>
+        <li>Completely different instruction set from x86</li>
+      </ul>
+      <p>You <strong>cannot</strong> run an ARM binary on an x86 system or vice versa. The CPU literally doesn't understand the instructions.</p>
+    </div>
 
-            <p><strong>Production lesson:</strong> Always verify architecture before downloading binaries. Use <code>uname -m</code> to check.</p>
+    <p><strong>Production lesson:</strong> Always verify architecture before downloading binaries. Use <code>uname -m</code> to check.</p>
 
-            <h2>Part 3: The Correct Installation</h2>
+    <h2>Part 3: The Correct Installation</h2>
 
-            <p>I deleted everything and started over with the correct version:</p>
+    <p>I deleted everything and started over with the correct version:</p>
 
-            <pre><code># Remove the wrong version
+    <pre><code># Remove the wrong version
 sudo rm -rf /opt/nexus /opt/sonatype-work/nexus3
 
 # Download the x86_64 (unix) version
@@ -668,43 +371,41 @@ sudo wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
 sudo tar -xvzf latest-unix.tar.gz
 sudo chown -R nexus:nexus /opt/nexus /opt/sonatype-work/nexus3</code></pre>
 
-            <p>This time, when I ran Nexus in foreground mode:</p>
+    <p>This time, when I ran Nexus in foreground mode:</p>
 
-            <pre><code>sudo -u nexus /opt/nexus/bin/nexus run</code></pre>
+    <pre><code>sudo -u nexus /opt/nexus/bin/nexus run</code></pre>
 
-            <p><strong>Actual startup logs appeared:</strong></p>
+    <p><strong>Actual startup logs appeared:</strong></p>
 
-            <pre><code>-------------------------------------------------
+    <pre><code>-------------------------------------------------
 
 Started Sonatype Nexus OSS 3.64.0-04
 
 -------------------------------------------------</code></pre>
 
-            <p>Success!</p>
-            <p>I accessed <code>http://143.198.XXX.XXX:8081</code> and saw the Nexus UI.</p>
+    <p>Success!</p>
+    <p>I accessed <code>http://143.198.XXX.XXX:8081</code> and saw the Nexus UI.</p>
 
-            <h3>First-Time Login</h3>
+    <h3>First-Time Login</h3>
 
-            <p>Nexus generates a random admin password on first startup and stores it in a file:</p>
+    <p>Nexus generates a random admin password on first startup and stores it in a file:</p>
 
-            <pre><code>sudo cat /opt/sonatype-work/nexus3/admin.password</code></pre>
+    <pre><code>sudo cat /opt/sonatype-work/nexus3/admin.password</code></pre>
 
-            <p>I copied that password, logged in as <code>admin</code>, and immediately changed it to something secure.</p>
+    <p>I copied that password, logged in as <code>admin</code>, and immediately changed it to something secure.</p>
 
-            <div class="callout warning">
-                <div class="callout-title">
-                    <i class="fas fa-exclamation-triangle"></i> Security Note
-                </div>
-                <p>After logging in, Nexus prompts you to configure anonymous access. Since this is a learning environment and not production, I enabled it for convenience.</p>
-            </div>
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Security Note</div>
+      <p>After logging in, Nexus prompts you to configure anonymous access. Since this is a learning environment and not production, I enabled it for convenience.</p>
+    </div>
 
-            <h2>Part 4: Understanding Nexus Architecture</h2>
+    <h2>Part 4: Understanding Nexus Architecture</h2>
 
-            <p>Before configuring anything, I needed to understand how Nexus organizes artifacts. Coming from a background where "files go in folders," Nexus's structure took some getting used to.</p>
+    <p>Before configuring anything, I needed to understand how Nexus organizes artifacts. Coming from a background where "files go in folders," Nexus's structure took some getting used to.</p>
 
-            <h3>The Hierarchy</h3>
+    <h3>The Hierarchy</h3>
 
-            <pre><code>Nexus
+    <pre><code>Nexus
 ├── Blob Stores (physical storage)
 │   ├── default (where files actually live on disk)
 │   └── custom-blobs
@@ -716,81 +417,79 @@ Started Sonatype Nexus OSS 3.64.0-04
 └── Components (the actual artifacts)
     └── com.example.my-app:1.0-SNAPSHOT</code></pre>
 
-            <p><strong>Blob Stores:</strong> The actual filesystem location where artifacts are stored. Think of this as the "hard drive."</p>
-            <p><strong>Repositories:</strong> Logical containers that determine access rules, versioning policies, and what kind of artifacts can be stored. Think of these as "databases" or "buckets."</p>
-            <p><strong>Components:</strong> The actual JAR files, with metadata about group ID, artifact ID, and version.</p>
+    <p><strong>Blob Stores:</strong> The actual filesystem location where artifacts are stored. Think of this as the "hard drive."</p>
+    <p><strong>Repositories:</strong> Logical containers that determine access rules, versioning policies, and what kind of artifacts can be stored. Think of these as "databases" or "buckets."</p>
+    <p><strong>Components:</strong> The actual JAR files, with metadata about group ID, artifact ID, and version.</p>
 
-            <h3>Repository Types</h3>
+    <h3>Repository Types</h3>
 
-            <p><strong>Hosted:</strong> You upload artifacts here (your own builds)</p>
-            <ul>
-                <li><code>maven-snapshots</code> - Development versions (1.0-SNAPSHOT)</li>
-                <li><code>maven-releases</code> - Production versions (1.0, 2.0)</li>
-            </ul>
+    <p><strong>Hosted:</strong> You upload artifacts here (your own builds)</p>
+    <ul>
+      <li><code>maven-snapshots</code> — Development versions (1.0-SNAPSHOT)</li>
+      <li><code>maven-releases</code> — Production versions (1.0, 2.0)</li>
+    </ul>
 
-            <p><strong>Proxy:</strong> Caches artifacts from external repositories (like Maven Central)</p>
-            <ul>
-                <li><code>maven-central</code> - Proxies https://repo1.maven.org/maven2</li>
-            </ul>
+    <p><strong>Proxy:</strong> Caches artifacts from external repositories (like Maven Central)</p>
+    <ul>
+      <li><code>maven-central</code> — Proxies https://repo1.maven.org/maven2</li>
+    </ul>
 
-            <p><strong>Group:</strong> Combines multiple repositories into one URL</p>
-            <ul>
-                <li><code>maven-public</code> - Combines snapshots, releases, and central</li>
-            </ul>
+    <p><strong>Group:</strong> Combines multiple repositories into one URL</p>
+    <ul>
+      <li><code>maven-public</code> — Combines snapshots, releases, and central</li>
+    </ul>
 
-            <p>
-                <strong>Why groups matter:</strong> Developers configure their build tools to point to ONE repository URL (the group). Nexus handles checking snapshots, then releases, then proxying to Maven Central if needed.
-            </p>
+    <p>
+      <strong>Why groups matter:</strong> Developers configure their build tools to point to ONE repository URL (the group). Nexus handles checking snapshots, then releases, then proxying to Maven Central if needed.
+    </p>
 
-            <h2>Part 5: Setting Up Users and Permissions</h2>
+    <h2>Part 5: Setting Up Users and Permissions</h2>
 
-            <p>I wasn't going to use the admin account for publishing artifacts. That violates least privilege (again). Instead, I created a dedicated CI/CD user with limited permissions.</p>
+    <p>I wasn't going to use the admin account for publishing artifacts. That violates least privilege (again). Instead, I created a dedicated CI/CD user with limited permissions.</p>
 
-            <h3>Creating a User</h3>
-            <p><strong>Settings → Security → Users → Create User</strong></p>
-            <ul>
-                <li><strong>Username:</strong> <code>ci-user</code></li>
-                <li><strong>Email:</strong> <code>ci@example.com</code></li>
-                <li><strong>Status:</strong> Active</li>
-            </ul>
+    <h3>Creating a User</h3>
+    <p><strong>Settings → Security → Users → Create User</strong></p>
+    <ul>
+      <li><strong>Username:</strong> <code>ci-user</code></li>
+      <li><strong>Email:</strong> <code>ci@example.com</code></li>
+      <li><strong>Status:</strong> Active</li>
+    </ul>
 
-            <h3>Understanding Nexus Roles and Privileges</h3>
-            <p>Nexus has a granular permission system. A <strong>privilege</strong> is a single permission (like "read from repository X" or "write to repository Y"). A <strong>role</strong> is a collection of privileges.</p>
+    <h3>Understanding Nexus Roles and Privileges</h3>
+    <p>Nexus has a granular permission system. A <strong>privilege</strong> is a single permission (like "read from repository X" or "write to repository Y"). A <strong>role</strong> is a collection of privileges.</p>
 
-            <p>I created a custom role <code>ci-deploy-role</code> with privileges to:</p>
-            <ul>
-                <li>Upload to <code>maven-snapshots</code></li>
-                <li>Upload to <code>maven-releases</code></li>
-                <li>Download from all repositories</li>
-            </ul>
+    <p>I created a custom role <code>ci-deploy-role</code> with privileges to:</p>
+    <ul>
+      <li>Upload to <code>maven-snapshots</code></li>
+      <li>Upload to <code>maven-releases</code></li>
+      <li>Download from all repositories</li>
+    </ul>
 
-            <p><strong>Specific Privileges Assigned:</strong></p>
-            <ul>
-                <li><code>nx-repository-view-maven2-maven-snapshots-*</code> (all actions)</li>
-                <li><code>nx-repository-view-maven2-maven-releases-*</code> (all actions)</li>
-                <li><code>nx-repository-view-maven2-*-read</code> (read from all Maven repos)</li>
-            </ul>
+    <p><strong>Specific Privileges Assigned:</strong></p>
+    <ul>
+      <li><code>nx-repository-view-maven2-maven-snapshots-*</code> (all actions)</li>
+      <li><code>nx-repository-view-maven2-maven-releases-*</code> (all actions)</li>
+      <li><code>nx-repository-view-maven2-*-read</code> (read from all Maven repos)</li>
+    </ul>
 
-            <p>Then I assigned this role to <code>ci-user</code>.</p>
+    <p>Then I assigned this role to <code>ci-user</code>.</p>
 
-            <div class="callout info">
-                <div class="callout-title">
-                    <i class="fas fa-user-shield"></i> Why Not Just Use Admin?
-                </div>
-                <p>
-                    If the CI/CD credentials get leaked, you want the blast radius contained. A compromised <code>ci-user</code> can only upload artifacts. A compromised <code>admin</code> can delete repositories, create users, and shut down Nexus entirely.
-                </p>
-            </div>
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-user-shield"></i> Why Not Just Use Admin?</div>
+      <p>
+        If the CI/CD credentials get leaked, you want the blast radius contained. A compromised <code>ci-user</code> can only upload artifacts. A compromised <code>admin</code> can delete repositories, create users, and shut down Nexus entirely.
+      </p>
+    </div>
 
-            <h2>Part 6: Publishing from a Gradle Project</h2>
+    <h2>Part 6: Publishing from a Gradle Project</h2>
 
-            <p>Now for the actual workflow: building an artifact locally and publishing it to Nexus.</p>
+    <p>Now for the actual workflow: building an artifact locally and publishing it to Nexus.</p>
 
-            <h3>Adding the Maven Publish Plugin</h3>
+    <h3>Adding the Maven Publish Plugin</h3>
 
-            <p>In <code>build.gradle</code>:</p>
+    <p>In <code>build.gradle</code>:</p>
 
-            <pre><code>plugins {
+    <pre><code>plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.0'
@@ -802,11 +501,11 @@ sourceCompatibility = 17
 
 apply plugin: 'maven-publish'</code></pre>
 
-            <p>The <code>maven-publish</code> plugin gives Gradle the ability to publish to Maven-format repositories. Even though this is a Gradle project, Maven and Gradle share the same artifact format for Java libraries.</p>
+    <p>The <code>maven-publish</code> plugin gives Gradle the ability to publish to Maven-format repositories. Even though this is a Gradle project, Maven and Gradle share the same artifact format for Java libraries.</p>
 
-            <h3>Configuring the Publication</h3>
+    <h3>Configuring the Publication</h3>
 
-            <pre><code>publishing{
+    <pre><code>publishing{
     publications {
         maven(MavenPublication){
             artifact("build/libs/my-app-$version" + ".jar") {
@@ -828,50 +527,48 @@ apply plugin: 'maven-publish'</code></pre>
     }
 }</code></pre>
 
-            <p><strong>Key details:</strong></p>
-            <ol>
-                <li><strong>Targeting Snapshots:</strong> For this phase of the project, we are hardcoding the URL to point directly to our <code>maven-snapshots</code> repository since we are actively developing and testing the build.</li>
-                <li><strong>Credentials:</strong> Never hardcode usernames and passwords in <code>build.gradle</code> (that file gets committed to Git). Instead, use properties.</li>
-                <li><strong>allowInsecureProtocol:</strong> Required because I'm using HTTP instead of HTTPS. In production, you'd set up HTTPS with Let's Encrypt and remove this line.</li>
-            </ol>
+    <p><strong>Key details:</strong></p>
+    <ol>
+      <li><strong>Targeting Snapshots:</strong> For this phase of the project, we are hardcoding the URL to point directly to our <code>maven-snapshots</code> repository since we are actively developing and testing the build.</li>
+      <li><strong>Credentials:</strong> Never hardcode usernames and passwords in <code>build.gradle</code> (that file gets committed to Git). Instead, use properties.</li>
+      <li><strong>allowInsecureProtocol:</strong> Required because I'm using HTTP instead of HTTPS. In production, you'd set up HTTPS with Let's Encrypt and remove this line.</li>
+    </ol>
 
-            <h3>Storing Credentials Safely</h3>
+    <h3>Storing Credentials Safely</h3>
 
-            <p>I created <code>gradle.properties</code> in the project root:</p>
+    <p>I created <code>gradle.properties</code> in the project root:</p>
 
-            <pre><code>repoUser=ci-user
+    <pre><code>repoUser=ci-user
 repoPassword=&lt;actual-password&gt;</code></pre>
 
-            <p>Then <strong>immediately</strong> added it to <code>.gitignore</code>:</p>
+    <p>Then <strong>immediately</strong> added it to <code>.gitignore</code>:</p>
 
-            <pre><code>echo "gradle.properties" >> .gitignore</code></pre>
+    <pre><code>echo "gradle.properties" >> .gitignore</code></pre>
 
-            <p><strong>Why this matters:</strong> Git history is forever. Even if you delete a file later, the credentials remain in your commit history. GitHub scans for exposed credentials and will notify you (or worse, bots will find them and compromise your systems).</p>
+    <p><strong>Why this matters:</strong> Git history is forever. Even if you delete a file later, the credentials remain in your commit history. GitHub scans for exposed credentials and will notify you (or worse, bots will find them and compromise your systems).</p>
 
-            <p>Then I ran the publish task:</p>
+    <p>Then I ran the publish task:</p>
 
-            <pre><code>gradle publish</code></pre>
+    <pre><code>gradle publish</code></pre>
 
-            <div class="callout success">
-                <div class="callout-title">
-                    <i class="fas fa-check-circle"></i> Success
-                </div>
-                <pre><code>> Task :publish
+    <div class="callout success">
+      <div class="callout-title"><i class="fa-solid fa-circle-check"></i> Success</div>
+      <pre><code>> Task :publish
 Publishing com.example:my-app:1.0-SNAPSHOT
 Uploading to nexus...
 BUILD SUCCESSFUL in 3s</code></pre>
-            </div>
+    </div>
 
-            <p>I went to Nexus UI → Browse → Components → <code>maven-snapshots</code> and there it was. First artifact published. ✅</p>
+    <p>I went to Nexus UI → Browse → Components → <code>maven-snapshots</code> and there it was. First artifact published. ✅</p>
 
-            <h2>Part 7: Publishing from a Maven Project</h2>
+    <h2>Part 7: Publishing from a Maven Project</h2>
 
-            <p>The workflow for Maven is similar but uses different configuration files.</p>
+    <p>The workflow for Maven is similar but uses different configuration files.</p>
 
-            <h3>Adding the Deployment Plugin</h3>
-            <p>In <code>pom.xml</code>:</p>
+    <h3>Adding the Deployment Plugin</h3>
+    <p>In <code>pom.xml</code>:</p>
 
-            <pre><code>&lt;build&gt;
+    <pre><code>&lt;build&gt;
     &lt;plugins&gt;
         &lt;plugin&gt;
             &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
@@ -881,20 +578,20 @@ BUILD SUCCESSFUL in 3s</code></pre>
     &lt;/plugins&gt;
 &lt;/build&gt;</code></pre>
 
-            <h3>Configuring the Repository</h3>
-            <p>Also in <code>pom.xml</code>:</p>
+    <h3>Configuring the Repository</h3>
+    <p>Also in <code>pom.xml</code>:</p>
 
-            <pre><code>&lt;distributionManagement&gt;
+    <pre><code>&lt;distributionManagement&gt;
     &lt;snapshotRepository&gt;
         &lt;id&gt;nexus-snapshots&lt;/id&gt;
         &lt;url&gt;http://143.198.XXX.XXX:8081/repository/maven-snapshots/&lt;/url&gt;
     &lt;/snapshotRepository&gt;
 &lt;/distributionManagement&gt;</code></pre>
 
-            <h3>Storing Credentials (Maven Way)</h3>
-            <p>Maven stores credentials globally, not per-project. I created <code>~/.m2/settings.xml</code>:</p>
+    <h3>Storing Credentials (Maven Way)</h3>
+    <p>Maven stores credentials globally, not per-project. I created <code>~/.m2/settings.xml</code>:</p>
 
-            <pre><code>&lt;settings&gt;
+    <pre><code>&lt;settings&gt;
     &lt;servers&gt;
         &lt;server&gt;
             &lt;id&gt;nexus-snapshots&lt;/id&gt;
@@ -904,192 +601,200 @@ BUILD SUCCESSFUL in 3s</code></pre>
     &lt;/servers&gt;
 &lt;/settings&gt;</code></pre>
 
-            <p>The <code>&lt;id&gt;</code> in <code>settings.xml</code> matches the <code>&lt;id&gt;</code> in <code>pom.xml</code>. That's how Maven connects them.</p>
+    <p>The <code>&lt;id&gt;</code> in <code>settings.xml</code> matches the <code>&lt;id&gt;</code> in <code>pom.xml</code>. That's how Maven connects them.</p>
 
-            <p>Deploying:</p>
+    <p>Deploying:</p>
 
-            <pre><code>mvn package
+    <pre><code>mvn package
 mvn deploy</code></pre>
 
-            <h2>Part 8: The Blob Store Cleanup Surprise</h2>
+    <h2>Part 8: The Blob Store Cleanup Surprise</h2>
 
-            <p>
-                Later that afternoon, after publishing several test artifacts, I wanted to clean up. I deleted some test components from the Nexus UI and checked disk space.
-            </p>
+    <p>
+      Later that afternoon, after publishing several test artifacts, I wanted to clean up. I deleted some test components from the Nexus UI and checked disk space.
+    </p>
 
-            <p><strong>It hadn't changed.</strong></p>
+    <p><strong>It hadn't changed.</strong></p>
 
-            <div class="callout warning">
-                <div class="callout-title">
-                    <i class="fas fa-exclamation-triangle"></i> Soft Deletes
-                </div>
-                <p>
-                    Deleting artifacts in the Nexus UI doesn't actually delete them from disk. It only marks them as deleted in the database. This is a "soft delete."
-                </p>
-                <p>
-                    <strong>Why?</strong> Nexus uses content-addressed storage. Multiple artifacts can reference the same underlying blob if they're identical files. If Nexus immediately deleted the blob when you deleted one artifact, other artifacts referencing that blob would break.
-                </p>
-            </div>
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Soft Deletes</div>
+      <p>
+        Deleting artifacts in the Nexus UI doesn't actually delete them from disk. It only marks them as deleted in the database. This is a "soft delete."
+      </p>
+      <p>
+        <strong>Why?</strong> Nexus uses content-addressed storage. Multiple artifacts can reference the same underlying blob if they're identical files. If Nexus immediately deleted the blob when you deleted one artifact, other artifacts referencing that blob would break.
+      </p>
+    </div>
 
-            <h3>The Two-Phase Cleanup Process</h3>
-            <p>To actually free disk space, you need to run two tasks:</p>
-            <ol>
-                <li><strong>Cleanup Policy:</strong> Marks blobs as eligible for deletion.</li>
-                <li><strong>Compact Blob Store:</strong> Actually removes the marked blobs from disk.</li>
-            </ol>
+    <h3>The Two-Phase Cleanup Process</h3>
+    <p>To actually free disk space, you need to run two tasks:</p>
+    <ol>
+      <li><strong>Cleanup Policy:</strong> Marks blobs as eligible for deletion.</li>
+      <li><strong>Compact Blob Store:</strong> Actually removes the marked blobs from disk.</li>
+    </ol>
 
-            <p>
-                After configuring a cleanup policy and running the "Compact blob store" task, I finally reclaimed 24 GB of space.
-            </p>
+    <p>After configuring a cleanup policy and running the "Compact blob store" task, I finally reclaimed 24 GB of space.</p>
 
-            <h3>The Storage Metrics Issue</h3>
-            <p>
-                Even after compaction, the metrics in the UI might not update immediately because Nexus caches blob store statistics. You may need to run the "Rebuild blob store storage attributes" task to force a refresh.
-            </p>
+    <h3>The Storage Metrics Issue</h3>
+    <p>
+      Even after compaction, the metrics in the UI might not update immediately because Nexus caches blob store statistics. You may need to run the "Rebuild blob store storage attributes" task to force a refresh.
+    </p>
 
-            <h2>Part 9: Understanding SNAPSHOT vs RELEASE Versioning</h2>
+    <h2>Part 9: Understanding SNAPSHOT vs RELEASE Versioning</h2>
 
-            <p>Throughout this project, I kept seeing references to "snapshots" and "releases" but didn't fully understand the distinction. Here's what I learned:</p>
+    <p>Throughout this project, I kept seeing references to "snapshots" and "releases" but didn't fully understand the distinction. Here's what I learned:</p>
 
-            <h3>SNAPSHOT Versions</h3>
-            <p><strong>Format:</strong> <code>1.0-SNAPSHOT</code>, <code>2.5-SNAPSHOT</code></p>
-            <p><strong>Purpose:</strong> Development versions that are actively changing.</p>
-            <p><strong>Behavior:</strong></p>
-            <ul>
-                <li>Every build replaces the previous SNAPSHOT.</li>
-                <li>Maven/Gradle re-download SNAPSHOTs periodically (default: daily).</li>
-                <li>Not meant for production use.</li>
-            </ul>
+    <h3>SNAPSHOT Versions</h3>
+    <p><strong>Format:</strong> <code>1.0-SNAPSHOT</code>, <code>2.5-SNAPSHOT</code></p>
+    <p><strong>Purpose:</strong> Development versions that are actively changing.</p>
+    <p><strong>Behavior:</strong></p>
+    <ul>
+      <li>Every build replaces the previous SNAPSHOT.</li>
+      <li>Maven/Gradle re-download SNAPSHOTs periodically (default: daily).</li>
+      <li>Not meant for production use.</li>
+    </ul>
 
-            <h3>RELEASE Versions</h3>
-            <p><strong>Format:</strong> <code>1.0</code>, <code>2.0</code>, <code>1.5.3</code></p>
-            <p><strong>Purpose:</strong> Stable, immutable versions for production.</p>
-            <p><strong>Behavior:</strong></p>
-            <ul>
-                <li>Once published, a release version <strong>never changes</strong>.</li>
-                <li>If you try to republish the same release version, Nexus rejects it.</li>
-                <li>Production deployments reference specific release versions.</li>
-            </ul>
+    <h3>RELEASE Versions</h3>
+    <p><strong>Format:</strong> <code>1.0</code>, <code>2.0</code>, <code>1.5.3</code></p>
+    <p><strong>Purpose:</strong> Stable, immutable versions for production.</p>
+    <p><strong>Behavior:</strong></p>
+    <ul>
+      <li>Once published, a release version <strong>never changes</strong>.</li>
+      <li>If you try to republish the same release version, Nexus rejects it.</li>
+      <li>Production deployments reference specific release versions.</li>
+    </ul>
 
-            <h2>What I Learned (The Real Takeaways)</h2>
+    <h2>What I Learned (The Real Takeaways)</h2>
 
-            <h3>1. Silent Failures Require Foreground Debugging</h3>
-            <p>When a service claims to be running but isn't, don't trust systemd. Run the binary directly to see the error.</p>
+    <h3>1. Silent Failures Require Foreground Debugging</h3>
+    <p>When a service claims to be running but isn't, don't trust systemd. Run the binary directly to see the error.</p>
 
-            <h3>2. CPU Architecture Is Not Optional</h3>
-            <p>I assumed "Linux" meant "works on any Linux." It doesn't. Binaries are compiled for specific CPU architectures, and x86_64 ≠ ARM.</p>
+    <h3>2. CPU Architecture Is Not Optional</h3>
+    <p>I assumed "Linux" meant "works on any Linux." It doesn't. Binaries are compiled for specific CPU architectures, and x86_64 ≠ ARM.</p>
 
-            <h3>3. Credentials Management Is a Spectrum</h3>
-            <p>Hardcoding is bad. Local ignore files are okay for learning. Secrets managers (Vault, AWS Secrets) are mandatory for production.</p>
+    <h3>3. Credentials Management Is a Spectrum</h3>
+    <p>Hardcoding is bad. Local ignore files are okay for learning. Secrets managers (Vault, AWS Secrets) are mandatory for production.</p>
 
-            <h3>4. Nexus Storage Is Not Intuitive</h3>
-            <p>Deleting in the UI ≠ freeing disk space. You must understand the blob store compaction lifecycle.</p>
+    <h3>4. Nexus Storage Is Not Intuitive</h3>
+    <p>Deleting in the UI ≠ freeing disk space. You must understand the blob store compaction lifecycle.</p>
 
-            <h3>5. RBAC Is Worth the Effort</h3>
-            <p>Creating dedicated users with minimal permissions is annoying upfront but essential for security. It limits the blast radius if credentials are compromised.</p>
+    <h3>5. RBAC Is Worth the Effort</h3>
+    <p>Creating dedicated users with minimal permissions is annoying upfront but essential for security. It limits the blast radius if credentials are compromised.</p>
 
-            <h3>6. Maven and Gradle Share More Than You Think</h3>
-            <p>Both publish to Maven-format repositories. Both use the same artifact structure (groupId:artifactId:version). You can use one Nexus repository for projects using different build tools.</p>
+    <h3>6. Maven and Gradle Share More Than You Think</h3>
+    <p>Both publish to Maven-format repositories. Both use the same artifact structure (groupId:artifactId:version). You can use one Nexus repository for projects using different build tools.</p>
 
-            <h2>Production Considerations</h2>
+    <h2>Production Considerations</h2>
 
-            <p>This was a learning environment. In production, I'd add:</p>
-            <ul>
-                <li><strong>HTTPS with SSL/TLS:</strong> Currently using plain text HTTP (insecure).</li>
-                <li><strong>Automated Backups:</strong> If the server dies, my artifacts are gone.</li>
-                <li><strong>Monitoring:</strong> Prometheus metrics to track disk space and uptime.</li>
-                <li><strong>Access Logging:</strong> Centralized logging (ELK stack) for security audits and troubleshooting.</li>
-                <li><strong>High Availability:</strong> A multi-node cluster for redundancy.</li>
-            </ul>
+    <p>This was a learning environment. In production, I'd add:</p>
+    <ul>
+      <li><strong>HTTPS with SSL/TLS:</strong> Currently using plain text HTTP (insecure).</li>
+      <li><strong>Automated Backups:</strong> If the server dies, my artifacts are gone.</li>
+      <li><strong>Monitoring:</strong> Prometheus metrics to track disk space and uptime.</li>
+      <li><strong>Access Logging:</strong> Centralized logging (ELK stack) for security audits and troubleshooting.</li>
+      <li><strong>High Availability:</strong> A multi-node cluster for redundancy.</li>
+    </ul>
 
-            <h2>How This Connects to Real CI/CD</h2>
+    <h2>How This Connects to Real CI/CD</h2>
 
-            <p>Right now, I'm publishing artifacts manually from my laptop. In a real environment:</p>
+    <p>Right now, I'm publishing artifacts manually from my laptop. In a real environment:</p>
 
-            <p><strong>Developer workflow:</strong></p>
-            <ol>
-                <li>Developer pushes code to Git (GitHub, GitLab)</li>
-                <li>CI server (Jenkins, GitHub Actions) detects the push</li>
-                <li>CI builds the application (<code>gradle build</code> or <code>mvn package</code>)</li>
-                <li>CI publishes the artifact to Nexus (<code>gradle publish</code> or <code>mvn deploy</code>)</li>
-                <li>CI triggers deployment to dev environment</li>
-            </ol>
+    <p><strong>Developer workflow:</strong></p>
+    <ol>
+      <li>Developer pushes code to Git (GitHub, GitLab)</li>
+      <li>CI server (Jenkins, GitHub Actions) detects the push</li>
+      <li>CI builds the application (<code>gradle build</code> or <code>mvn package</code>)</li>
+      <li>CI publishes the artifact to Nexus (<code>gradle publish</code> or <code>mvn deploy</code>)</li>
+      <li>CI triggers deployment to dev environment</li>
+    </ol>
 
-            <p><strong>Deployment workflow:</strong></p>
-            <ol>
-                <li>Deployment tool (Ansible, Terraform, Kubernetes) pulls artifact from Nexus</li>
-                <li>Deploys exact version (e.g., <code>1.0</code>) to target environment</li>
-                <li>No building on deployment servers—just download and run</li>
-            </ol>
+    <p><strong>Deployment workflow:</strong></p>
+    <ol>
+      <li>Deployment tool (Ansible, Terraform, Kubernetes) pulls artifact from Nexus</li>
+      <li>Deploys exact version (e.g., <code>1.0</code>) to target environment</li>
+      <li>No building on deployment servers—just download and run</li>
+    </ol>
 
-            <p>
-                <strong>Benefits:</strong> Same artifact tested in dev/staging is deployed to prod (reproducibility). No "works on my machine" issues. Rollback is trivial.
-            </p>
+    <p>
+      <strong>Benefits:</strong> Same artifact tested in dev/staging is deployed to prod (reproducibility). No "works on my machine" issues. Rollback is trivial.
+    </p>
 
-            <h2>Reflection</h2>
-            <p>
-                <strong>Time investment:</strong> ~4 hours<br>
-                <strong>Cost:</strong> $48/month for the 8GB droplet (Nexus is hungry).
-            </p>
-            <p>
-                <strong>What I'd do differently:</strong> Verify architecture FIRST. Set up HTTPS from the start. Configure cleanup policies immediately, not as an afterthought.
-            </p>
+    <h2>Reflection</h2>
+    <p>
+      <strong>Time investment:</strong> ~4 hours<br>
+      <strong>Cost:</strong> $48/month for the 8GB droplet (Nexus is hungry).
+    </p>
+    <p>
+      <strong>What I'd do differently:</strong> Verify architecture FIRST. Set up HTTPS from the start. Configure cleanup policies immediately, not as an afterthought.
+    </p>
 
-            <h2>What's Next</h2>
-            <p>
-                With Nexus running and artifacts being published, the next phase is <strong>containerization</strong>. I'll be learning Docker fundamentals, building images for the Java application, and pushing them to AWS ECR.
-            </p>
-            <p>
-                I'm expecting more networking issues and version conflicts, but that's where the real learning happens.
-            </p>
+    <h2>What's Next</h2>
+    <p>
+      With Nexus running and artifacts being published, the next phase is <strong>containerization</strong>. I'll be learning Docker fundamentals, building images for the Java application, and pushing them to AWS ECR.
+    </p>
+    <p>
+      I'm expecting more networking issues and version conflicts, but that's where the real learning happens.
+    </p>
 
-            <blockquote>
-                If you're working through similar projects or running into Nexus issues, feel free to reach out. I'm documenting everything as I go—mistakes, dead ends, and all.
-            </blockquote>
+    <blockquote>
+      If you're working through similar projects or running into Nexus issues, feel free to reach out. I'm documenting everything as I go—mistakes, dead ends, and all.
+    </blockquote>
 
-        </article>
-    </main>
+  </article>
+</div>
 
-    <footer class="article-footer">
-        <a href="../blog.html" class="back-to-blog">
-            <i class="fas fa-arrow-left"></i> Back to All Posts
-        </a>
-    </footer>
+<div class="related-section">
+  <div class="related-title">Up Next in the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-3.html" class="related-card">
+      <h4>Docker Multi-Container Deployment</h4>
+      <p>Moving from localhost to AWS ECR: building container images and running multi-container applications.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top: 3rem; text-align: center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
 
-    <section class="related-posts">
-        <h3>Up Next in the Series</h3>
-        <div class="related-grid">
-            <a href="devops-project-3.html" class="related-card">
-                <h4>Docker Multi-Container Deployment</h4>
-                <p>Moving from localhost to AWS ECR: Building container images and running multi-container applications...</p>
-            </a>
-        </div>
-    </section>
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Nexus Repository Manager, Maven, Gradle, DigitalOcean, Artifact Management, CI/CD</p>
+    </div>
+  </div>
+</footer>
 
-    <script>
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
+<script src="../js/scripts.js"></script>
 
-        // Nav shadow on scroll
-        const nav = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 100) {
-                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.3)';
-            } else {
-                nav.style.boxShadow = 'none';
-            }
-        });
-    </script>
 </body>
 </html>
