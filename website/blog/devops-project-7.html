@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Complete CI/CD Pipeline with EKS and AWS ECR | Noah Vastola</title>
+<meta name="description" content="Building an end-to-end CI/CD pipeline deploying to AWS EKS. From dynamic envsubst manifests to debugging Docker socket permissions and EKS pod limits."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<link rel="stylesheet" href="../css/styles.css"/>
+
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
+
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
+
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
+
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
+
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
+
+  /* Blockquotes */
+  .article-body blockquote { margin: 2rem 0; padding: 1rem 1.5rem; border-left: 4px solid var(--primary); background: var(--muted); border-radius: 0 6px 6px 0; font-style: italic; color: var(--fg); font-size: 1rem; line-height: 1.8; }
+
+  /* Post Images */
+  .post-image { margin: 2rem 0; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+  .post-image img { width: 100%; display: block; }
+  .post-image .image-caption { background: var(--muted); padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--muted-fg); font-style: italic; border-top: 1px solid var(--border); }
+
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; flex-grow: 1; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
+
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
+
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>CI/CD Pipeline with EKS</span>
+    </div>
+    
+    <h1 class="post-title">Complete CI/CD Pipeline with EKS and AWS ECR</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> Apr 5, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 18 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">Jenkins</span>
+      <span class="post-tag">Kubernetes</span>
+      <span class="post-tag">AWS EKS</span>
+      <span class="post-tag">AWS ECR</span>
+      <span class="post-tag">Docker</span>
+      <span class="post-tag">Git</span>
+      <span class="post-tag">Java</span>
+      <span class="post-tag">Maven</span>
+      <span class="post-tag">Linux</span>
+    </div>
+  </div>
+</section>
+
+<div class="article-wrap">
+  <article class="article-body">
+
+    <p>This module built directly on top of the CI/CD pipeline I'd been developing across previous projects. Before getting to the main demos, I worked through several earlier exercises in the EKS module:</p>
+    
+    <ul>
+      <li>Create an AWS EKS cluster with a Node Group</li>
+      <li>Create an EKS cluster with a Fargate profile</li>
+      <li>Create an EKS cluster with <code>eksctl</code></li>
+      <li>CD — Deploy to EKS cluster from Jenkins Pipeline</li>
+      <li>CD — Deploy to LKE cluster from Jenkins Pipeline</li>
+    </ul>
+
+    <p>By the time I got to the two main demos — <em>Complete CI/CD Pipeline with EKS and private DockerHub registry</em> and <em>Complete CI/CD Pipeline with EKS and AWS ECR</em> — I had a working EKS cluster and a Jenkins pipeline that could build and push images. What I didn't have was a deploy stage that actually did anything. That's what this project was about.</p>
+
+    <p><strong>What I had going in:</strong> a Jenkins pipeline with version incrementing, Maven build, Docker build and push, and a git commit of the version bump — with an empty deploy stage. <strong>What this project added:</strong> dynamic Kubernetes manifests, the full Jenkins-to-EKS deployment loop, and a real understanding of what breaks when you try to wire all of it together at once. I'll walk through it in two parts — first getting it working with Docker Hub, then swapping in ECR.</p>
+
+    <h2>Understanding What the Pipeline Is Actually Doing</h2>
+
+    <p>Before getting into the implementation, it's worth being explicit about the full pipeline flow, because each stage sets up the next and the ordering matters.</p>
+
+    <p><strong>Stage 1 — Increment version:</strong> Reads the current version from <code>pom.xml</code>, bumps the incremental version using the Maven Build Helper plugin, and sets an <code>IMAGE_NAME</code> environment variable combining that version with the Jenkins build number (e.g. <code>1.1.12-6</code>). Every downstream stage that references <code>$IMAGE_NAME</code> is using what was set here.</p>
+
+    <p><strong>Stage 2 — Build app:</strong> Runs <code>mvn clean package</code> to compile the Java source and produce a <code>.jar</code> in the <code>target/</code> directory. The Dockerfile expects that jar to exist — if this stage doesn't run first, the Docker build fails.</p>
+
+    <p><strong>Stage 3 — Build image:</strong> Builds the Docker image tagged with <code>$IMAGE_NAME</code>, logs into the registry, and pushes. At the end of this stage, the image exists in the registry and is ready to be pulled by the cluster.</p>
+
+    <p><strong>Stage 4 — Deploy:</strong> Uses AWS credentials to authenticate with EKS, runs <code>envsubst</code> to substitute <code>$IMAGE_NAME</code> and <code>$APP_NAME</code> into the Kubernetes manifests, and applies them to the cluster. This is the stage that was empty before this project.</p>
+
+    <p><strong>Stage 5 — Commit version update:</strong> Commits the updated <code>pom.xml</code> back to GitLab so the next pipeline run starts from the incremented version. This stage running last matters — if it ran before the deploy and the deploy failed, you'd have committed a version bump for a build that never actually deployed.</p>
+
+    <p>The key thing this ordering enforces: you never deploy an image that wasn't built in the same pipeline run, and you never commit a version bump for a build that failed. Each stage is a checkpoint.</p>
+
+    <h2>Part 1: Wiring Up the Deploy Stage</h2>
+
+    <p>The deploy stage up to this point just echoed a placeholder string. The goal now was to have Jenkins actually apply Kubernetes manifests to the EKS cluster after pushing the image. That meant two things: creating the Kubernetes config files, and figuring out how to pass a dynamic image name into them at pipeline runtime.</p>
+
+    <p>I created a <code>kubernetes/</code> directory in the repo with a <code>deployment.yaml</code> and <code>service.yaml</code>. The skeleton was straightforward — a Deployment managing replicas and a ClusterIP Service. The problem was the image field. Every pipeline run generates a new version tag. Hard-coding it was never an option.</p>
+
+    <h3>The Image Name Problem and envsubst</h3>
+
+    <p>The solution is <code>envsubst</code> — a utility that takes a file, scans it for <code>$VARIABLE</code> syntax, substitutes them with matching environment variables from the current shell context, and outputs the result to stdout. The file on disk never changes. In the Jenkinsfile deploy stage:</p>
+
+    <pre><code>sh 'envsubst &lt; kubernetes/deployment.yaml | kubectl apply -f -'
+sh 'envsubst &lt; kubernetes/service.yaml | kubectl apply -f -'</code></pre>
+
+    <p>The substituted output gets piped straight to <code>kubectl apply</code>. No temp files, no file mutation. The image field in <code>deployment.yaml</code> just holds a variable reference:</p>
+
+    <pre><code>image: nvastola/demo-app:$IMAGE_NAME</code></pre>
+
+    <p><code>IMAGE_NAME</code> is already set earlier in the pipeline during the version increment stage. I also pulled the app name into a variable so I wasn't repeating the string across the manifest in multiple places. The full environment block in the deploy stage:</p>
+
+    <pre><code>environment {
+    AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
+    AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
+    APP_NAME              = 'java-maven-app'
+}</code></pre>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Three Approaches to Dynamic Manifests — and Why envsubst Wins Here</div>
+      <ul>
+        <li><strong>sed:</strong> Does in-place substitution but mutates the file on disk. Every pipeline run leaves a modified file in the workspace — you'd need to reset it, gitignore it, or deal with the diff noise. Not clean for a versioned config file.</li>
+        <li><strong>Helm:</strong> Handles dynamic values well and adds packaging, rollback, and release management. The right answer for a team managing multiple services in production. More scaffolding than a two-manifest demo requires.</li>
+        <li><strong>envsubst:</strong> Reads the file, substitutes <code>$VARIABLE</code> references, outputs to stdout. File on disk never touched. One line in the Jenkinsfile per manifest. Exactly the right level of complexity for this use case.</li>
+      </ul>
+    </div>
+
+    <p><code>envsubst</code> isn't installed in Jenkins out of the box. You have to add it manually inside the container:</p>
+
+    <pre><code>docker exec -u 0 -it jenkins bash
+apt-get install gettext-base</code></pre>
+
+    <p>Running <code>envsubst</code> with no arguments after installing just hangs waiting for stdin — that's expected. As long as it doesn't throw an error, you're good.</p>
+
+    <h3>Giving the Cluster Access to Docker Hub</h3>
+
+    <p>The Docker Hub repo is private, so the EKS cluster needs credentials to pull from it. This is a one-time operation — not something that belongs in the pipeline since the pipeline runs every time. You create a <code>docker-registry</code> type secret directly in the cluster:</p>
+
+    <pre><code>kubectl create secret docker-registry my-registry-key \
+  --docker-server=docker.io \
+  --docker-username=nvastola \
+  --docker-password=&lt;password&gt;</code></pre>
+
+    <p>The secret gets stored in Kubernetes and referenced by name in the deployment spec — the cluster handles authentication automatically every time a Pod starts and needs to pull the image. This pattern is registry-agnostic: Docker Hub, ECR, GCR all use the same <code>docker-registry</code> secret type. Only the server URL changes.</p>
+
+    <pre><code>spec:
+  imagePullSecrets:
+    - name: my-registry-key
+  containers:
+    - name: $APP_NAME
+      image: nvastola/demo-app:$IMAGE_NAME
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 8080</code></pre>
+
+    <p><code>imagePullPolicy: Always</code> ensures Kubernetes fetches the image on every Pod start regardless of whether a previous version already exists on the node. For a pipeline that's generating a new tag every run, this matters.</p>
+
+    <h2>Five Failures Before It Worked</h2>
+
+    <p>I want to be honest about how this went. The pipeline ran six times before it succeeded. Each failure was a different layer of the setup I hadn't completed. In order:</p>
+
+    <h3>Build 1: Docker Not Found</h3>
+
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <p><code>/var/jenkins_home/workspace/.../script.sh: docker: not found</code> — Jenkins could execute the pipeline script, but Docker CLI wasn't installed inside the container.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Fix</div>
+      <p>Dropped into the container as root and installed it: <code>apt-get install docker.io</code>.</p>
+    </div>
+
+    <h3>Build 2: Socket Not Mounted</h3>
+
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <p><code>Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?</code> — Docker CLI was there, but <code>/var/run/docker.sock</code> from the host wasn't mounted into the container, so it had no daemon to talk to.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Fix</div>
+      <p>Had to recreate the Jenkins container with the socket mounted. You can't add a volume to a running container — stop, remove, recreate:</p>
+      <pre><code>docker run -d -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name jenkins jenkins/jenkins:lts</code></pre>
+      <p>Because I had <code>jenkins_home</code> on a named volume, all my credentials and job configs survived the recreation. This was not an accident — I'd made sure to use a named volume from the start of this module after learning that lesson the hard way in an earlier demo.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-lightbulb"></i> Lesson Learned</div>
+      <p>When standing up a Jenkins container for Docker builds, mount the socket and install the CLI before running anything else. Skipping either one will cost you builds. And if you forget the socket mount, you're recreating the container regardless — do it right the first time.</p>
+    </div>
+
+    <h3>Build 3: Socket Permission Denied</h3>
+
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <p><code>permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock</code> — the socket was mounted and reachable, but the jenkins user didn't have permission to use it.</p>
+    </div>
+
+    <p>This one took longer than it should have. I added Jenkins to the docker group inside the container — which didn't work. The reason: the kernel doesn't check group names, it checks GID numbers. The docker group inside the container had a different GID than the one owning the socket on the host.</p>
+
+    <p>Running <code>stat -c '%g' /var/run/docker.sock</code> on the host showed GID 112. The group inside the container had a different number entirely. The fix was aligning the GID:</p>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Fix</div>
+      <pre><code>docker exec -u root jenkins groupmod -g 112 docker
+docker restart jenkins</code></pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-lightbulb"></i> Lesson Learned</div>
+      <p>When you see a socket permission error after mounting <code>/var/run/docker.sock</code>, don't just add the user to a group called "docker" and call it done. Check what GID the socket actually has on the host with <code>stat -c '%g' /var/run/docker.sock</code>, then make sure the group inside the container matches that number. The name is irrelevant — the kernel only sees the GID.</p>
+    </div>
+
+    <h3>Build 4: Git Identity Unknown</h3>
+
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <p><code>Author identity unknown — Please tell me who you are.</code> — The pipeline reached the commit version update stage for the first time, and git refused to commit because no identity was configured inside the Jenkins container.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Fix</div>
+      <pre><code>docker exec -u jenkins jenkins git config --global user.email "ci@jenkins"
+docker exec -u jenkins jenkins git config --global user.name "Jenkins"</code></pre>
+    </div>
+
+    <h3>Build 5: GitLab Access Denied</h3>
+
+    <div class="callout error">
+      <div class="callout-title"><i class="fa-solid fa-circle-xmark"></i> Error</div>
+      <p><code>remote: HTTP Basic: Access denied.</code> on git push — the GitLab credential stored in Jenkins had either expired or didn't have the right scope.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> The Fix</div>
+      <p>Regenerated a GitLab personal access token with <code>write_repository</code> scope and updated the credential in Jenkins UI.</p>
+    </div>
+
+    <p>Build 6 succeeded. Five failures, five different layers — CLI, socket mount, socket permissions, git identity, git credentials. None of them were related to the actual Kubernetes deployment logic. That's how it goes when you're standing up infrastructure from scratch: the pipeline doesn't break on the interesting stuff first. It breaks on the prerequisite you forgot to finish.</p>
+
+    <h2>The Pods Were Pending — And It Wasn't the Deployment</h2>
+
+    <p>After the first successful build I ran <code>kubectl get pods</code> expecting to see my app running. Instead, everything was stuck on Pending. The describe output said:</p>
+
+    <pre><code>Warning  FailedScheduling  default-scheduler  0/2 nodes are available: 2 Too many pods.</code></pre>
+
+    <p>My EKS cluster was using <code>t3.micro</code> nodes. AWS caps the number of pods per node based on ENI and IP address limits — on a <code>t3.micro</code>, that ceiling is 4 pods. The <code>kube-system</code> pods (CoreDNS ×2, aws-node ×2, kube-proxy ×2, metrics-server ×2) were already consuming all 4 slots on each of my 2 nodes before my app pod had any chance of being scheduled.</p>
+
+    <p>You can see exactly how tight things are with:</p>
+
+    <pre><code>kubectl describe nodes | grep -E "Non-terminated Pods|pods"</code></pre>
+
+    <p>In my case it came back showing 4 pods running and a limit of 4 on each node. No room. Adding a third node freed up 4 more slots and the pod scheduled immediately.</p>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> EKS Pod Limits by Instance Type — Know This Before You Provision</div>
+      <p>AWS calculates max pods per node using the formula: <code>(ENIs × (IPs per ENI - 1)) + 2</code>. Every Pod needs an IP address, and each instance type supports a fixed number of network interfaces with a fixed number of IPs each. This is a hard ceiling — not a resource quota you can configure away.</p>
+      <ul>
+        <li><strong>t3.micro:</strong> 4 pods max</li>
+        <li><strong>t3.small:</strong> 11 pods max</li>
+        <li><strong>t3.medium:</strong> 17 pods max</li>
+        <li><strong>t3.large:</strong> 35 pods max</li>
+      </ul>
+      <p>The <code>kube-system</code> pods alone fill a <code>t3.micro</code> cluster entirely before you deploy a single application pod. Always check the AWS ENI max pods table before sizing a cluster.</p>
+    </div>
+
+    <p>For anyone hitting this: it's not your deployment, it's your instance type. The cost difference between micro and small is negligible. The operational friction difference is not.</p>
+
+    <h2>Part 2: Replacing Docker Hub with AWS ECR</h2>
+
+    <p>With the full pipeline working against Docker Hub, the second half of this demo swaps in ECR as the registry. The steps follow the same pattern — create a registry, create credentials, create a pull secret in the cluster, update the Jenkinsfile — but the specifics are different enough to be worth walking through.</p>
+
+    <p>The reason you'd use ECR over Docker Hub in a real AWS environment comes down to three things. First, ECR gives you unlimited private repositories — Docker Hub's free tier limits you to one, which doesn't scale when you're running multiple services. Second, ECR integrates directly with IAM, meaning you can give your EKS nodes pull permissions through IAM roles instead of storing static credentials anywhere. Third, images stay inside your AWS account and VPC — they never leave the AWS network on the way to your cluster, which matters for both latency and compliance.</p>
+
+    <h3>Create the ECR Repository</h3>
+
+    <p>AWS Console → ECR → Create repository → Private → name it (I used <code>java-maven-app</code>) → keep defaults → create. Once it exists, the "View push commands" button gives you the exact login command for your account and region:</p>
+
+    <pre><code>aws ecr get-login-password --region us-east-2 | \
+  docker login --username AWS --password-stdin \
+  &lt;account-id&gt;.dkr.ecr.us-east-2.amazonaws.com</code></pre>
+
+    <h3>Create Credentials in Jenkins</h3>
+
+    <p>ECR's username is always literally <code>AWS</code>. The password is a token you generate on demand:</p>
+
+    <pre><code>aws ecr get-login-password --region us-east-2</code></pre>
+
+    <p>Run that locally, copy the output, and create a username/password credential in Jenkins with ID <code>ecr-credentials</code>. Unlike Docker Hub, you also have to specify the server URL explicitly when logging in — Docker Hub is the assumed default, ECR is not.</p>
+
+    <h3>Update the Jenkinsfile</h3>
+
+    <p>The ECR repo URL is long and shows up in multiple places — the build tag, push command, and docker login. Rather than repeat it or risk a typo, extract it into environment variables at the top of the pipeline:</p>
+
+    <pre><code>environment {
+    DOCKER_REPO_SERVER = "&lt;account-id&gt;.dkr.ecr.us-east-2.amazonaws.com"
+    DOCKER_REPO        = "${DOCKER_REPO_SERVER}/java-maven-app"
+}</code></pre>
+
+    <p>The build image stage then becomes:</p>
+
+    <pre><code>withCredentials([usernamePassword(credentialsId: 'ecr-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+    sh "docker build -t ${DOCKER_REPO}:${IMAGE_NAME} ."
+    sh "echo $PASS | docker login -u $USER --password-stdin ${DOCKER_REPO_SERVER}"
+    sh "docker push ${DOCKER_REPO}:${IMAGE_NAME}"
+}</code></pre>
+
+    <p>And the image field in <code>deployment.yaml</code> updates to reference <code>$DOCKER_REPO</code>:</p>
+
+    <pre><code>image: $DOCKER_REPO:$IMAGE_NAME</code></pre>
+
+    <p>If you need to change the repo URL later, it's one variable instead of four hardcoded strings.</p>
+
+    <h3>Create the ECR Pull Secret</h3>
+
+    <p>Same concept as the Docker Hub secret — the cluster needs credentials to pull from a private registry. Identical structure, just pointed at ECR:</p>
+
+    <pre><code>kubectl create secret docker-registry aws-registry-key \
+  --docker-server=&lt;account-id&gt;.dkr.ecr.us-east-2.amazonaws.com \
+  --docker-username=AWS \
+  --docker-password=$(aws ecr get-login-password --region us-east-2)</code></pre>
+
+    <p>Update <code>imagePullSecrets</code> in <code>deployment.yaml</code> to reference <code>aws-registry-key</code> and the cluster is ready to pull from ECR.</p>
+
+    <h2>Verifying It All Worked</h2>
+
+    <p>Committed the changes, pushed, and the webhook triggered the pipeline automatically. After a successful build, three things confirmed the whole chain was working:</p>
+
+    <ol>
+      <li><strong>ECR had the new image</strong> — visible in the AWS console with the version tag generated during that specific pipeline run.</li>
+    </ol>
+
+    <div class="post-image">
+      <img src="../assets/img/ecr-repo.png" alt="ECR Repository showing tagged images" style="background: var(--muted); min-height: 200px; display: flex; align-items: center; justify-content: center;"/>
+      <div class="image-caption">The java-maven-app image in ECR, tagged with the version generated during that pipeline run.</div>
+    </div>
+
+    <ol start="2">
+      <li><strong>Pods were running</strong> — <code>kubectl get pods</code> showed the <code>java-maven-app</code> pods in Running state, not Pending.</li>
+      <li><strong>Image source confirmed</strong> — <code>kubectl describe pod &lt;pod-name&gt;</code> showed the full ECR URL in the image field with the dynamically substituted version tag. That's the check that actually matters. It's easy to see pods running and assume everything is fine. Seeing the exact ECR URL with the correct version tag in the pod description is proof that <code>envsubst</code> did its job, the right image was pushed, and Kubernetes pulled from the right place. Extremely satisfying after five failed builds to finally see it all connected.</li>
+    </ol>
+
+    <h2>What I Learned</h2>
+
+    <h3>1. Pipelines Break on the Prerequisites, Not the Logic</h3>
+    <p>Five of the six failures had nothing to do with Kubernetes or the deploy stage. Missing CLI, missing socket mount, GID mismatch, missing git identity, expired token — each one blocked the pipeline before it could reach anything interesting. When you're standing up infrastructure from scratch, expect this. The only way through is methodically completing each layer before assuming the next one will work.</p>
+
+    <h3>2. Linux Permissions Care About Numbers, Not Names</h3>
+    <p>The GID mismatch on the Docker socket was the most counterintuitive failure. Jenkins was in a group called <code>docker</code>. The socket was owned by a group also called <code>docker</code>. Still denied — because the GIDs didn't match. The kernel doesn't resolve group names, it compares numbers. This is the kind of thing that's not obvious until you've been burned by it.</p>
+
+    <h3>3. EKS Pod Limits Are a Networking Constraint, Not a Resource One</h3>
+    <p>The <code>t3.micro</code> ceiling isn't a quota you can raise with a config change — it's derived from the number of ENIs AWS can attach to that instance type and the IPs available on each. Knowing this before sizing a cluster would have saved me a debugging cycle. Check the documented limits before you provision.</p>
+
+    <h3>4. envsubst Is the Right Tool for Dynamic Manifests</h3>
+    <p>Pass the file in, get a substituted version out, pipe it to <code>kubectl</code>. The original file stays untouched. One line per manifest. It does exactly one thing and does it cleanly. For a two-manifest deploy stage, it's the right level of complexity — not <code>sed</code>, not Helm.</p>
+
+    <h2>Production Considerations</h2>
+
+    <p><strong>ECR token expiry.</strong> The ECR login token expires after 12 hours. The static credential stored in Jenkins will eventually stop working. In a real environment you'd handle this with IRSA (IAM Roles for Service Accounts) so the cluster nodes can pull from ECR using IAM permissions directly — no static credentials, no expiry problem.</p>
+
+    <p><strong>Namespace isolation.</strong> Everything here ran in the <code>default</code> namespace. In practice you'd have separate namespaces per environment with RBAC scoped accordingly. Default is fine for getting something working; it's not where production workloads should live.</p>
+
+    <p><strong>Instance sizing.</strong> The <code>t3.micro</code> pod ceiling is a real operational constraint, not just a demo inconvenience. Even for a development cluster, starting on <code>t3.small</code> gives you enough headroom to actually run something without fighting the scheduler. The cost difference is negligible; the operational friction difference is not.</p>
+
+    <p><strong>No resource requests or limits.</strong> The Deployment in this project didn't define resource requests or limits. In a real cluster that means one misbehaving pod can starve everything else on the node. The previous project covered how to size these — they should be in every Deployment.</p>
+
+    <h2>Reflection</h2>
+
+    <p><strong>What this project was:</strong> The one where individual tools became a system. I'd built each piece of this pipeline in isolation across earlier projects. This demo forced them to actually hand off to each other — git push triggers Jenkins, Jenkins increments the version, builds the image, pushes to ECR, substitutes the image name into the manifest, applies it to the cluster. Nothing manual after the push.</p>
+
+    <p><strong>What worked:</strong> Having <code>jenkins_home</code> on a named volume from the start. When I had to recreate the container to add the socket mount, I kept every credential and job configuration I'd set up in the UI. If I hadn't done that, Build 2 would have cost me a lot more than just one failed run.</p>
+
+    <p><strong>What I'd do differently:</strong> Complete the full container setup — socket mount, Docker CLI, GID alignment, git identity — before running the pipeline at all. I knew these steps were needed and still ran the pipeline before finishing them. Not a catastrophic mistake, but a pattern worth breaking.</p>
+
+    <p><strong>Cost:</strong> DigitalOcean droplet for Jenkins + EKS cluster (two t3.micro nodes, then three to clear the pod ceiling). Cluster was deleted after the project.</p>
+
+    <h2>What's Next</h2>
+
+    <p>With the full Jenkins-to-EKS pipeline working, the next module moves into Terraform. The cluster I've been provisioning manually throughout these demos — node groups, VPC, IAM roles — is going to start getting defined as code. The goal is infrastructure that's reproducible, version-controlled, and not dependent on remembering which console buttons I clicked.</p>
+
+    <p><a href="https://gitlab.com/nvastola/java-maven-app-eks/-/blob/jenkins-jobs/README.md" target="_blank">GitLab Repository &rarr;</a></p>
+
+  </article>
+</div>
+
+<div class="related-section">
+  <div class="related-title">Continue the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-4.html" class="related-card">
+      <h4>Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</h4>
+      <p>Building reusable Groovy pipeline code, the script object pattern, and how enterprises scale CI/CD.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-5.html" class="related-card">
+      <h4>Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</h4>
+      <p>OpenSSL key formats, Git user context, dynamic versioning, and the moment everything ran green.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-6.html" class="related-card">
+      <h4>Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h4>
+      <p>Deploying Google's 11-service Online Boutique on a real Linode LKE cluster, hardening with probes, resource limits, and more.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top:3rem; text-align:center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Kubernetes, AWS EKS, AWS ECR, Docker, CI/CD, Jenkins Pipeline, envsubst</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/scripts.js"></script>
+
+</body>
+</html>

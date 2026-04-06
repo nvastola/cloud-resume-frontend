@@ -209,15 +209,16 @@
     </div>
     <div class="proj-grid reveal" id="projGrid">
 
-      <div class="proj-card" data-tags="AWS,Docker,Linux">
+      <div class="proj-card" data-tags="AWS,Docker,Kubernetes,Linux">
         <div class="proj-thumb"><i class="devicon-amazonwebservices-plain-wordmark colored"></i></div>
         <div class="proj-body">
-          <div class="proj-name">Complete CI/CD Pipeline: Git Commit to AWS Deployment</div>
-          <div class="proj-desc">Full commit-to-production pipeline with dynamic semantic versioning, automated Docker image builds, and remote SSH deployments via Jenkins and Docker Compose.</div>
-          <div class="proj-tag-row"><span class="proj-tag">Jenkins</span><span class="proj-tag">AWS</span><span class="proj-tag">Docker</span><span class="proj-tag">Maven</span><span class="proj-tag">Java</span><span class="proj-tag">Git</span><span class="proj-tag">Linux</span><span class="proj-tag">Docker Hub</span></div>
+          <div class="proj-name">Complete CI/CD Pipeline with EKS and AWS ECR</div>
+          <div class="proj-desc">Building an end-to-end CI/CD pipeline deploying to AWS EKS. Features dynamic envsubst manifests, AWS ECR integration, and automated Docker image builds via Jenkins.</div>
+          <div class="proj-tag-row"><span class="proj-tag">Jenkins</span><span class="proj-tag">Kubernetes</span><span class="proj-tag">AWS EKS</span><span class="proj-tag">AWS ECR</span><span class="proj-tag">Java</span><span class="proj-tag">Maven</span><span class="proj-tag">Linux</span><span class="proj-tag">Docker</span><span class="proj-tag">Git</span>
+          </div>
           <div class="proj-links">
-            <a href="blog/devops-project-5.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
-            <a href="https://gitlab.com/nvastola/java-maven-app-aws/-/blob/jenkins-jobs/README.md" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+            <a href="blog/devops-project-7.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/java-maven-app-eks/-/blob/jenkins-jobs/README.md" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
           </div>
         </div>
       </div>
@@ -265,10 +266,24 @@
     
     <div class="blog-grid reveal">
 
+      <a href="blog/devops-project-7.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-amazonwebservices-plain-wordmark colored"></i></div>
+        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
+          <div>
+            <div class="blog-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Apr 5, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 18 min</span>
+            </div>
+            <div class="blog-ttl">Complete CI/CD Pipeline with EKS and AWS ECR</div>
+            <div class="blog-excerpt">Building an end-to-end CI/CD pipeline deploying to AWS EKS. From dynamic envsubst manifests to debugging Docker socket permissions and EKS pod limits.</div>
+          </div>
+          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </a>
+
       <a href="blog/devops-project-6.html" class="blog-card" style="display: flex; flex-direction: column;">
         <div class="blog-thumb"><i class="devicon-kubernetes-plain colored"></i></div>
         <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
-          
           <div>
             <div class="blog-meta-row">
               <span><i class="fa-regular fa-calendar"></i> Mar 19, 2026</span>
@@ -277,41 +292,21 @@
             <div class="blog-ttl">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</div>
             <div class="blog-excerpt">Deploying Google's 11-service Online Boutique on a real Linode cluster and hardening it with probes, resource limits, replicas, and debugging three real errors along the way.</div>
           </div>
-          
           <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
         </div>
       </a>
 
-      <a href="blog/devops-project-4.html" class="blog-card" style="display: flex; flex-direction: column;">
-        <div class="blog-thumb"><i class="devicon-jenkins-line"></i></div>
+      <a href="blog/devops-project-5.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-amazonwebservices-plain-wordmark colored"></i></div>
         <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
-          
           <div>
             <div class="blog-meta-row">
-              <span><i class="fa-regular fa-calendar"></i> Feb 27, 2026</span>
-              <span><i class="fa-regular fa-clock"></i> 18 min</span>
+              <span><i class="fa-regular fa-calendar"></i> Mar 7, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 20 min</span>
             </div>
-            <div class="blog-ttl">Jenkins Shared Library: When Copy-Paste Becomes a Maintenance Nightmare</div>
-            <div class="blog-excerpt">Built a reusable Groovy shared library to eliminate Jenkins CI/CD pipeline duplication — detailing the 7-commit debugging story, credential UUID hunt, and the script object pattern.</div>
+            <div class="blog-ttl">Complete CI/CD Pipeline: From Git Commit to AWS Deployment in One Click</div>
+            <div class="blog-excerpt">Building end-to-end automation with Jenkins, AWS EC2, Docker Compose, and dynamic versioning. From OpenSSL key format battles to achieving zero-touch deployments.</div>
           </div>
-
-          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a href="blog/devops-project-3.html" class="blog-card" style="display: flex; flex-direction: column;">
-        <div class="blog-thumb"><i class="devicon-docker-plain colored"></i></div>
-        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
-          
-          <div>
-            <div class="blog-meta-row">
-              <span><i class="fa-regular fa-calendar"></i> Feb 17, 2026</span>
-              <span><i class="fa-regular fa-clock"></i> 14 min</span>
-            </div>
-            <div class="blog-ttl">Docker Multi-Container Deployment: From Localhost to AWS ECR</div>
-            <div class="blog-excerpt">Containerizing Node.js + MongoDB, pushing to ECR, and learning why "localhost" doesn't work in Docker the hard way.</div>
-          </div>
-
           <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
         </div>
       </a>
@@ -322,9 +317,9 @@
       <div class="currently-card">
         <div>
           <h3><i class="fa-solid fa-graduation-cap"></i> Currently Learning</h3>
-          <p>AWS EKS</p>
+          <p>Terraform</p>
         </div>
-        <img src="assets/img/eks.png" alt="AWS EKS" style="margin-left: auto;"/>
+        <img src="assets/img/terraform.png" alt="Terraform" style="margin-left: auto;"/>
       </div>
       <div class="currently-card">
         <div>
