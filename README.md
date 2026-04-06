@@ -237,20 +237,6 @@ This enables custom domain support without Azure Front Door's $35/month cost.
    ```bash
    git push origin main
    ```
-
-## Skills Demonstrated
-
-- ✅ Infrastructure as Code (Terraform)
-- ✅ CI/CD Pipeline Development (GitHub Actions)
-- ✅ Cloud Platform Management (Azure)
-- ✅ CDN Configuration (CloudFlare)
-- ✅ Automated Testing (Cypress)
-- ✅ Version Control (Git)
-- ✅ Cost Optimization
-- ✅ DNS Management
-- ✅ Security Best Practices (Service Principals, Secrets Management)
-- ✅ DevOps Methodologies
-
 ## Lessons Learned
 
 ### Technical Challenges
@@ -270,14 +256,9 @@ This enables custom domain support without Azure Front Door's $35/month cost.
 - Implemented automated testing in deployment pipeline
 - Followed principle of least privilege for service accounts
 
-## Future Enhancements
+## Acknowledgements
 
-- [ ] Add backend API (Azure Functions)
-- [ ] Implement visitor counter with database
-- [ ] Add monitoring and alerting (Azure Monitor)
-- [ ] Implement blue-green deployments
-- [ ] Add infrastructure for staging environment
-- [ ] Implement automated rollback on test failure
+Design inspired by the portfolio of [Ashlok Chaudhary](https://github.com/ashlok2003) — credit where it's due.
 
 ## Resources
 
