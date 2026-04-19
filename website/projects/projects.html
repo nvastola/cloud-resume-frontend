@@ -27,7 +27,7 @@
   .proj-tag { display: inline-flex; align-items: center; gap: 0.4rem; }
 
   /* Filtering layout */
-  .filter-section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 3rem; position: relative; z-index: 10; text-align: center; }
+  .filter-section { max-width: 1200px; margin: 0 auto; padding: 0 0rem 0rem; position: relative; z-index: 10; text-align: center; }
   .filter-label { font-family: var(--mono-font); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 1rem; }
   .f-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
 </style>
@@ -105,7 +105,7 @@
   </div>
 </section>
 
-<section style="padding-top: 2rem;">
+<section style="padding-top: 0rem;">
   <div class="container" style="max-width: 1200px;">
     <div class="proj-grid" id="projGrid">
 
@@ -257,7 +257,7 @@
           <div class="card-top">
             <span class="card-topic-pill"><i class="fa-solid fa-code-branch"></i> CI/CD with Jenkins</span>
           </div>
-          <div class="proj-name">End-to-End CI/CD Pipeline with Automated Versioning</div>
+          <div class="proj-name">Deploying to EC2: From Git Commit to Production with Docker Compose</div>
           <div class="proj-desc">Full commit-to-production pipeline with dynamic semantic versioning, automated Docker image builds, and remote SSH deployments via Jenkins and Docker Compose.</div>
           <div class="proj-tag-row">
             <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="">Jenkins</span>
@@ -312,7 +312,7 @@
           <div class="card-top">
             <span class="card-topic-pill"><i class="fa-solid fa-code-branch"></i> CI/CD with Jenkins</span>
           </div>
-          <div class="proj-name">Complete CI/CD Pipeline with EKS and AWS ECR</div>
+          <div class="proj-name">Deploying to Kubernetes: A Complete Jenkins, ECR, and EKS Pipeline</div>
           <div class="proj-desc">Building an end-to-end CI/CD pipeline deploying to AWS EKS. Features dynamic envsubst manifests, AWS ECR integration, and automated Docker image builds via Jenkins.</div>
           <div class="proj-tag-row">
             <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="">Jenkins</span>
@@ -328,6 +328,34 @@
         </div>
       </div>
       
+      <div class="proj-card reveal" data-topic="iac">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.simpleicons.org/terraform/7B42BC" alt="Terraform" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="Jenkins" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="AWS" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-solid fa-layer-group"></i> IaC</span>
+          </div>
+          <div class="proj-name">Automating EC2 Provisioning in a Jenkins CI/CD Pipeline with Terraform</div>
+          <div class="proj-desc">Replacing manual EC2 deployment with Infrastructure as Code. Automating Jenkins pipelines with Terraform, dynamic IP retrieval, and solving initialization timing.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.simpleicons.org/terraform/7B42BC" alt="">Terraform</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg" alt="">Jenkins</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="">AWS EC2</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="">Docker</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-8.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://gitlab.com/nvastola/java-maven-app-tf/-/blob/feature/starting-code/README.md?ref_type=heads" target="_blank" class="proj-link"><i class="fa-brands fa-gitlab"></i> GitLab</a>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div style="text-align:center;margin-top:4rem" class="reveal">
       <a href="../index.html#projects" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>

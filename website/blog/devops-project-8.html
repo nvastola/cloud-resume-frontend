@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Automating EC2 Provisioning with Terraform in Jenkins | Noah Vastola</title>
+<meta name="description" content="Replacing manual EC2 deployment with Infrastructure as Code. Automating Jenkins pipelines with Terraform, dynamic IP retrieval, and solving initialization timing."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<link rel="stylesheet" href="../css/styles.css"/>
+
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
+
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
+
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
+
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
+
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
+
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; flex-grow: 1; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
+
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
+
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Automating EC2 Provisioning with Terraform</span>
+    </div>
+    
+    <h1 class="post-title">Automating EC2 Provisioning in a Jenkins CI/CD Pipeline with Terraform</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> Apr 16, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 14 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">Terraform</span>
+      <span class="post-tag">Jenkins</span>
+      <span class="post-tag">Docker</span>
+      <span class="post-tag">AWS</span>
+      <span class="post-tag">Git</span>
+      <span class="post-tag">Java</span>
+      <span class="post-tag">Maven</span>
+      <span class="post-tag">Linux</span>
+      <span class="post-tag">Docker Hub</span>
+    </div>
+  </div>
+</section>
+
+<div class="article-wrap">
+  <article class="article-body">
+
+    <p>For this project I took an existing Jenkins CI/CD pipeline that deployed a Java Maven application to a manually-created EC2 instance and replaced that manual step entirely with Terraform. By the end, the pipeline handled everything: building the application, building and pushing the Docker image, provisioning the server, and deploying the containers — no AWS console interaction required.</p>
+
+    <p>The starting point was a pipeline I had already built. It built a JAR, built a Docker image, pushed it to a private Docker Hub repo, and used the SSH Agent plugin to copy a Docker Compose file and an execution script to a remote EC2 instance before running the containers. It worked. But the EC2 instance had been created manually, and the server's public IP was hardcoded directly in the Jenkinsfile. Every time you needed a new server, you'd go to AWS, create it, grab the IP, paste it in, and run the pipeline. This project automated that last piece.</p>
+
+    <h2>The Four Steps</h2>
+
+    <p>Before touching any code, the work broke down into four distinct steps:</p>
+
+    <ol>
+      <li>Create an SSH key pair for the EC2 instance and give it to Jenkins</li>
+      <li>Install Terraform inside the Jenkins container</li>
+      <li>Add Terraform configuration files to the application repository</li>
+      <li>Update the Jenkinsfile to provision and deploy in sequence</li>
+    </ol>
+
+    <p>Each one had to be done in order. You can't write the Jenkinsfile stages until Terraform is installed. You can't run Terraform without credentials. You can't deploy without a server. The dependencies were linear.</p>
+
+    <h2>Step 1: The Key Pair Problem</h2>
+
+    <p>Whenever you provision an EC2 instance you need to associate an SSH key pair with it so you can connect to it afterward. In previous Terraform work I had handled this by defining an <code>aws_key_pair</code> resource in the config — the public key from my local machine gets uploaded to AWS, and the private key stays with me.</p>
+
+    <p>That approach doesn't translate cleanly to a pipeline. The pipeline runs inside a Jenkins container. Getting a public key out of that container and into a Terraform resource block isn't impossible, but it adds complexity that isn't necessary. The simpler path: create the key pair manually in the AWS console, download the <code>.pem</code> private key, and hand it to Jenkins as a credential.</p>
+
+    <ul>
+      <li><strong>Key pair name:</strong> <code>myapp-key-pair</code></li>
+    </ul>
+
+    <p>Inside the Jenkins multibranch pipeline project, I created a new SSH credential called <code>server-ssh-key</code>. Username is <code>ec2-user</code> — the default user on Amazon Linux EC2 instances, which is what you use when connecting via SSH. The private key is the contents of the <code>.pem</code> file pasted directly in. Jenkins stores it securely, and the pipeline can reference it by credential ID when it needs to SSH into the server.</p>
+
+    <p>The Terraform config then just references the key pair by name instead of creating it:</p>
+
+    <pre><code>key_name = "myapp-key-pair"</code></pre>
+
+    <p>AWS already has the key. Terraform points to it. Jenkins holds the private half.</p>
+
+    <h2>Step 2: Installing Terraform in the Jenkins Container</h2>
+
+    <p>The pipeline stages execute inside the Jenkins container. For <code>terraform init</code> and <code>terraform apply</code> to work in a pipeline step, the Terraform binary needs to be inside that container — not just on the host machine.</p>
+
+    <p>Jenkins has Terraform plugins available. I installed it directly instead. Plugins are often limiting in what commands and flags they expose; having the binary available means full CLI access, which matters when you're scripting complex provisioning logic.</p>
+
+    <p>The process: SSH into the DigitalOcean droplet hosting Jenkins, enter the container as root, and install from HashiCorp's official Debian repository.</p>
+
+    <pre><code>docker exec -u 0 -it &lt;container_id&gt; bash</code></pre>
+
+    <p>Since you're logged in as root inside the container, <code>sudo</code> is unnecessary — remove it from any commands copied from the documentation. Once the installation completes:</p>
+
+    <pre><code>terraform -v</code></pre>
+
+    <p>Terraform available inside the Jenkins container. Step two done.</p>
+
+    <h2>Step 3: Terraform Configuration in the Application Repository</h2>
+
+    <p>The Terraform configuration files live inside the application repository, inside a <code>terraform/</code> folder. This is the right place for them — everything the application needs to run, including its infrastructure, should be version-controlled alongside the code. When Jenkins checks out the repository to run a build, it gets the Terraform config too.</p>
+
+    <p>The folder ended up with three files:</p>
+
+    <pre><code>terraform/
+├── main.tf
+├── variables.tf
+└── entry-script.sh</code></pre>
+
+    <h3>main.tf</h3>
+    <p>The core infrastructure: a VPC, a subnet, an internet gateway, a default route table for public access, a default security group, and the EC2 instance itself. The security group allows SSH from a personal IP address and port 8080 for the application. The instance is Amazon Linux, t3.micro, using the latest AMI fetched via a data source. One notable setting on the instance resource is <code>user_data_replace_on_change = true</code> — if the <code>entry-script.sh</code> changes, Terraform will replace the instance rather than leaving the old initialization script in place.</p>
+
+    <p>One output block matters a lot and becomes important later:</p>
+
+    <pre><code>output "ec2-public_ip" {
+  value = aws_instance.myapp-server.public_ip
+}</code></pre>
+
+    <h3>variables.tf</h3>
+    <p>Variables were extracted from <code>main.tf</code> into their own file — standard Terraform practice. Most of them got default values so the pipeline doesn't have to supply everything explicitly: VPC and subnet CIDR blocks, <code>t3.micro</code> instance type, <code>us-east-2</code> region, and <code>dev</code> as the default <code>env_prefix</code>. Both <code>my_ip</code> and <code>jenkins_ip</code> have hardcoded defaults — personal machine IP and Jenkins server IP respectively — so SSH access from both is baked in without needing to pass them at runtime.</p>
+
+    <p>The <code>public_key_location</code> variable from earlier work was removed entirely since we're no longer creating the key pair from Terraform.</p>
+
+    <h3>entry-script.sh</h3>
+    <p>The <code>user_data</code> script that runs on the instance during initialization. It installs Docker via <code>yum</code> (Amazon Linux), starts the Docker daemon, adds <code>ec2-user</code> to the Docker group so Docker commands don't require <code>sudo</code>, and installs Docker Compose by downloading the binary directly from GitHub releases:</p>
+
+    <pre><code>#!/bin/bash
+sudo yum update -y && sudo yum install -y docker
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+
+# install docker-compose
+sudo curl -SL "https://github.com/docker/compose/releases/download/v5.1.2/docker-compose-linux-x86_64" \
+  -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose</code></pre>
+
+    <p>This runs <em>after</em> the instance is created. That timing matters, and it causes a problem addressed in the Jenkinsfile.</p>
+
+    <h2>Step 4: Updating the Jenkinsfile</h2>
+
+    <p>This is where everything connects. Four distinct problems had to be solved in the Jenkinsfile before the pipeline could run cleanly. The file also loads a Jenkins shared library from GitLab at the top, which is where the <code>buildJar()</code>, <code>buildImage()</code>, <code>dockerLogin()</code>, and <code>dockerPush()</code> functions are defined — keeping the Jenkinsfile itself clean and reusable.</p>
+
+    <h3>Running Terraform from the Right Directory</h3>
+    <p>Terraform commands have to execute from inside the directory where the configuration files live. The Jenkinsfile handles this with Jenkins' <code>dir()</code> block:</p>
+
+    <pre><code>stage('provision server') {
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('jenkins_aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
+        TF_VAR_env_prefix     = 'test'
+    }
+    steps {
+        script {
+            dir('terraform') {
+                sh "terraform init"
+                sh "terraform apply --auto-approve"
+                EC2_PUBLIC_IP = sh(
+                    script: "terraform output ec2-public_ip",
+                    returnStdout: true
+                ).trim()
+            }
+        }
+    }
+}</code></pre>
+
+    <p><code>--auto-approve</code> is required — there's no interactive confirmation in an automated pipeline.</p>
+
+    <h3>Authenticating Terraform with AWS</h3>
+    <p>Terraform's AWS provider needs credentials to create resources. They shouldn't be hardcoded in <code>main.tf</code>. The solution: set them as environment variables scoped to the provision server stage, pulling from credentials already stored in Jenkins. The <code>TF_VAR_</code> prefix is how you pass values into Terraform variables from outside the config — <code>TF_VAR_env_prefix = 'test'</code> overrides the <code>env_prefix</code> variable at runtime, tagging all provisioned resources with <em>test</em> instead of the default <em>dev</em>. Any Terraform variable can be overridden this way — region, instance type, availability zone, whatever needs to vary per environment or pipeline run.</p>
+
+    <h3>Getting the Dynamic IP Address</h3>
+    <p>The hardcoded IP address in the deploy stage was the whole reason for this project. After Terraform provisions the instance, its public IP needs to be passed to the deploy stage dynamically. The output block in <code>main.tf</code> exposes it; <code>terraform output</code> retrieves it and <code>returnStdout: true</code> captures the result into a Jenkinsfile variable — all inside the same <code>dir('terraform')</code> block so it runs from the right directory:</p>
+
+    <pre><code>EC2_PUBLIC_IP = sh(
+    script: "terraform output ec2-public_ip",
+    returnStdout: true
+).trim()</code></pre>
+
+    <p><code>.trim()</code> strips any trailing whitespace. From that point forward, <code>${EC2_PUBLIC_IP}</code> is available in any subsequent stage. The same pattern works for any other output you define — VPC IDs, subnet IDs, load balancer DNS names, anything Terraform knows about the resources it created.</p>
+
+    <h3>The Initialization Timing Problem</h3>
+    <p>Terraform considers its job done as soon as AWS marks the instance active. But the <code>entry-script.sh</code> commands — installing Docker, installing Docker Compose, adding the user to the Docker group — run during the initialization phase <em>after</em> that. If the deploy stage executes immediately, Docker isn't installed yet and the pipeline fails.</p>
+
+    <p>The fix is straightforward:</p>
+
+    <pre><code>stage('deploy') {
+    environment {
+        DOCKER_CREDS = credentials('docker-hub-creds')
+    }
+    steps {
+        script {
+            echo "waiting for EC2 server to initialize"
+            sleep(time: 90, unit: "SECONDS")
+
+            echo 'deploying docker image to EC2...'
+            echo "${EC2_PUBLIC_IP}"
+
+            def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"
+            def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
+
+            sshagent(['server-ssh-key']) {
+                sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+            }
+        }
+    }
+}</code></pre>
+
+    <p>90 seconds gives the initialization process time to complete before any remote commands run. It's not elegant — on subsequent runs where the instance already exists, that 90 seconds is wasted. A better version would check initialization state conditionally and only sleep on first provision. But for a working pipeline it solves the problem cleanly.</p>
+
+    <h2>Part 3: The Two Problems That Remained</h2>
+
+    <p>With the pipeline running, two things still broke on the first real execution.</p>
+
+    <h3>Jenkins Can't SSH into the EC2 Instance</h3>
+    <p>The security group allowed SSH from a personal IP address. Jenkins has its own IP and was never added to the allowed list — so when the deploy stage tried to connect, it was blocked.</p>
+
+    <p>The fix: add a <code>jenkins_ip</code> variable to <code>variables.tf</code> and expand the security group's SSH ingress rule to accept both IPs:</p>
+
+    <pre><code>ingress {
+  from_port   = 22
+  to_port     = 22
+  protocol    = "tcp"
+  cidr_blocks = [var.my_ip, var.jenkins_ip]
+}</code></pre>
+
+    <p>If the Jenkins server IP is static, set it as the default value and leave it. If it's dynamic, it can be overridden at pipeline runtime via <code>TF_VAR_jenkins_ip</code> the same way environment variables are set.</p>
+
+    <h3>Docker Login Has to Run on the EC2 Instance, Not Jenkins</h3>
+    <p>The deploy stage runs <code>docker-compose</code> on the EC2 instance, which needs to pull images from a private Docker Hub repository. The Docker login that was already in the pipeline authenticated the Jenkins server — for <em>pushing</em> images. The EC2 instance is a different machine and has never authenticated with Docker Hub.</p>
+
+    <p>The fix happens in two places.</p>
+
+    <p>In <code>server-cmds.sh</code>, Docker login runs before the compose command. Rather than referencing positional parameters inline, the script exports them as named variables first for clarity:</p>
+
+    <pre><code>#!/usr/bin/env bash
+
+export IMAGE=$1
+export DOCKER_USER=$2
+export DOCKER_PWD=$3
+echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin
+docker-compose -f docker-compose.yaml up --detach
+echo "success"</code></pre>
+
+    <p>The <code>docker-compose.yaml</code> references <code>${IMAGE}</code> directly as an environment variable — no hardcoded image name anywhere in the compose file.</p>
+
+    <p>In the Jenkinsfile, Docker Hub credentials are scoped to the deploy stage's own <code>environment {}</code> block:</p>
+
+    <pre><code>DOCKER_CREDS = credentials('docker-hub-creds')</code></pre>
+
+    <p>When Jenkins parses a username/password credential type, it automatically creates two derived environment variables:</p>
+    <ul>
+      <li><code>DOCKER_CREDS_USR</code> — the username</li>
+      <li><code>DOCKER_CREDS_PSW</code> — the password</li>
+    </ul>
+
+    <p>Name the credential <code>ABC</code> and you get <code>ABC_USR</code> and <code>ABC_PSW</code>. These get passed as arguments when calling the script:</p>
+
+    <pre><code>def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"</code></pre>
+
+    <h3>One Last Thing: .pem File Permissions</h3>
+    <p>Before connecting to the instance manually to verify the result, the <code>.pem</code> file permissions need to be locked down:</p>
+
+    <pre><code>chmod 400 myapp-key-pair.pem</code></pre>
+
+    <p>SSH will refuse to use a key file that's too permissive. AWS enforces this as a security requirement. It's easy to forget if you downloaded the file and haven't connected with it before.</p>
+
+    <h2>The Pipeline Running End to End</h2>
+
+    <p>With all of it in place, the full pipeline execution went like this:</p>
+
+    <ol>
+      <li><strong>Build</strong> — JAR compiled, Docker image built, Docker Hub login succeeded, image pushed to the private repo</li>
+      <li><strong>Provision Server</strong> — <code>terraform init</code> ran and initialized the AWS provider; <code>terraform apply</code> created the VPC, subnet, internet gateway, route table, security group (with both personal IP and Jenkins IP), and EC2 instance</li>
+      <li><strong>Deploy</strong> — Pipeline waited 90 seconds for initialization, then copied <code>server-cmds.sh</code> and <code>docker-compose.yaml</code> to the instance via SCP, SSH'd in, ran Docker login against Docker Hub, then <code>docker-compose up --detach</code> pulled both images and started the containers</li>
+      <li><strong>Verification</strong> — SSH'd into the instance, ran <code>docker ps</code>, confirmed both the Java Maven app container and the Postgres container were running</li>
+    </ol>
+
+    <p>No manual AWS console steps. No hardcoded IP. The pipeline provisioned and deployed to a server that didn't exist when the build started.</p>
+
+    <h2>What I Learned</h2>
+
+    <p><strong>IaC belongs in the application repository.</strong> Keeping Terraform configuration alongside the application code means the CI/CD pipeline gets both in the same checkout. Infrastructure and application are versioned together, deployed together, and treated as a single unit. Separating them adds coordination overhead and creates drift.</p>
+
+    <p><strong>Plugins vs. direct installation.</strong> Terraform plugins for Jenkins exist, but installing the binary directly inside the container is more flexible. Plugins abstract away the CLI, which means you can only do what the plugin exposes. With the binary, you have full access to every flag, every command, and every edge case.</p>
+
+    <p><strong>terraform output is the bridge between provisioning and deployment.</strong> The dynamic IP problem looks hard until you realize Terraform already knows the answer — you just need to ask it. Defining outputs in your Terraform config and retrieving them with <code>returnStdout: true</code> turns any resource attribute into a Jenkinsfile environment variable. The same pattern works for anything: subnet IDs, security group IDs, load balancer DNS names.</p>
+
+    <p><strong>The initialization timing issue is a class of problem, not a one-off.</strong> Any time you provision infrastructure and immediately run commands against it in the same pipeline, there's a window between "infrastructure created" and "infrastructure ready." <code>sleep</code> is the blunt solution. The right long-term answer is a conditional check or a readiness poll — but knowing the problem exists is the first step.</p>
+
+    <p><strong>Credentials flow through layers.</strong> AWS credentials go into Terraform via environment variables. Docker credentials travel from Jenkins into the remote EC2 instance as script arguments, where <code>server-cmds.sh</code> exports them as named variables before passing them to <code>docker login</code>. Jenkins' auto-splitting of username/password credentials into <code>_USR</code> and <code>_PSW</code> variables is a clean pattern for passing secrets without concatenating them yourself.</p>
+
+    <p><a href="https://gitlab.com/nvastola/java-maven-app-tf/-/blob/feature/starting-code/README.md" target="_blank">GitLab Repository &rarr;</a></p>
+
+  </article>
+</div>
+
+<div class="related-section">
+  <div class="related-title">Continue the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-5.html" class="related-card">
+      <h4>Deploying to EC2: From Git Commit to Production with Docker Compose</h4>
+      <p>Building end-to-end automation with Jenkins, AWS EC2, Docker Compose, and dynamic versioning.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-6.html" class="related-card">
+      <h4>Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h4>
+      <p>Deploying Google's 11-service Online Boutique on a real Linode LKE cluster, hardening with probes and limits.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-7.html" class="related-card">
+      <h4>Deploying to Kubernetes: A Complete Jenkins, ECR, and EKS Pipeline</h4>
+      <p>Building an end-to-end CI/CD pipeline deploying to AWS EKS. From dynamic envsubst manifests to debugging EKS pod limits.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top:3rem; text-align:center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Terraform, AWS EC2, Jenkins Pipeline, Infrastructure as Code, CI/CD</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/scripts.js"></script>
+
+</body>
+</html>
