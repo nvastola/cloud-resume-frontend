@@ -151,11 +151,10 @@
         </div>
         <p class="tl-desc">Managing web infrastructure, security implementations, and member-facing systems for a professional public adjusters association.</p>
         <ul class="tl-list">
-          <li>Architected and launched a fully custom WordPress membership site, delivering a live production environment serving members across a multi-tier RBAC system with distinct permission scopes per membership level.</li>
-          <li>Developed custom child theme and PHP templates on Blocksy, heavily customizing layout, structure, and functionality to meet organizational requirements.</li>
-          <li>Assumed domain management via GoDaddy and administer DNS through Flywheel; facilitated Microsoft 365 tenant transfer from prior administrator, now managing all seats, mailboxes, and user accounts alongside SPF/DKIM/MX configuration and SMTP relay setup for authenticated email delivery.</li>
-          <li>Integrated Stripe payment processing and Mailchimp email automation via API and webhooks, reducing member registration from ~30 minutes of manual staff processing to under 2 minutes per applicant.</li>
-          <li>Maintained staging-to-production deployment workflow for WordPress core and plugin upgrades, with compatibility testing and rollback capability; implemented SSL/TLS, RBAC, and secure error logging as the security baseline for a live membership platform.</li>
+          <li>Managed Microsoft 365 administration and DNS infrastructure across GoDaddy and Flywheel, handling all user provisioning, mailbox management, and mail flow security via SPF, DKIM, and MX record configurations.</li>
+          <li>Developed a staging-to-production deployment workflow with compatibility testing and rollback procedures, successfully reducing the frequency of breaking changes and downtime on the live association site.</li>
+          <li>Implemented a multi-tier role-based access control (RBAC) system for the membership platform, accurately mapping membership levels to specific permission scopes to secure internal resources.</li>
+          <li>Standardized SSL/TLS encryption across all web properties and served as the lead technical contact for infrastructure decisions, vendor relations, and complex end-user support issues.</li>
         </ul>
         <div class="tl-badges">
           <span class="tl-badge">WordPress Administration</span>
@@ -266,6 +265,21 @@
     
     <div class="blog-grid reveal">
 
+      <a href="blog/devops-project-9.html" class="blog-card" style="display: flex; flex-direction: column;">
+        <div class="blog-thumb"><i class="devicon-python-plain colored"></i></div>
+        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
+          <div>
+            <div class="blog-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Apr 25, 2026</span>
+              <span><i class="fa-regular fa-clock"></i> 12 min</span>
+            </div>
+            <div class="blog-ttl">Automating Website Monitoring with Python</div>
+            <div class="blog-excerpt">Building a Python automation script to monitor web applications, send SMTP alerts, and self-heal containers via SSH and the Linode API.</div>
+          </div>
+          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </a>
+
       <a href="blog/devops-project-8.html" class="blog-card" style="display: flex; flex-direction: column;">
         <div class="blog-thumb"><i class="devicon-terraform-plain colored"></i></div>
         <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
@@ -296,30 +310,15 @@
         </div>
       </a>
 
-      <a href="blog/devops-project-6.html" class="blog-card" style="display: flex; flex-direction: column;">
-        <div class="blog-thumb"><i class="devicon-kubernetes-plain colored"></i></div>
-        <div class="blog-body" style="display: flex; flex-direction: column; flex-grow: 1;">
-          <div>
-            <div class="blog-meta-row">
-              <span><i class="fa-regular fa-calendar"></i> Mar 19, 2026</span>
-              <span><i class="fa-regular fa-clock"></i> 20 min</span>
-            </div>
-            <div class="blog-ttl">Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</div>
-            <div class="blog-excerpt">Deploying Google's 11-service Online Boutique on a real Linode cluster and hardening it with probes, resource limits, replicas, and debugging three real errors along the way.</div>
-          </div>
-          <div class="blog-cta" style="margin-top: auto; padding-top: 1.5rem;">Read Post <i class="fa-solid fa-arrow-right"></i></div>
-        </div>
-      </a>
-
     </div>
 
     <div class="currently-grid reveal">
       <div class="currently-card">
         <div>
           <h3><i class="fa-solid fa-graduation-cap"></i> Currently Learning</h3>
-          <p>Python</p>
+          <p>Ansible</p>
         </div>
-        <img src="assets/img/python.png" alt="Python" style="margin-left: auto;"/>
+        <img src="assets/img/ansible.png" alt="Ansible" style="margin-left: auto;"/>
       </div>
       <div class="currently-card">
         <div>
@@ -349,7 +348,7 @@
         <div class="cert-body">
           <div class="cert-name">CompTIA Security+</div>
         </div>
-        <div class="cert-overlay"><div><h4>CompTIA Security+</h4><p>Industry-standard security certification demonstrating knowledge of core security functions and concepts.</p><small>Issued: 2025</small></div></div>
+        <div class="cert-overlay"><div><h4>CompTIA Security+</h4><small>Issued: August 2025</small></div></div>
         <div class="cert-bdr"></div>
       </div>
       <div class="cert-card">
@@ -357,7 +356,15 @@
         <div class="cert-body">
           <div class="cert-name">CompTIA Network+</div>
         </div>
-        <div class="cert-overlay"><div><h4>CompTIA Network+</h4><p>Validates the technical skills needed to securely establish, maintain, and troubleshoot essential networks.</p><small>Issued: 2025</small></div></div>
+        <div class="cert-overlay"><div><h4>CompTIA Network+</h4><small>Issued: June 2025</small></div></div>
+        <div class="cert-bdr"></div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-img">
+          <i class="fa-brands fa-aws"></i>
+        </div>
+        <div class="cert-body"><div class="cert-name">AWS Cloud Practitioner</div></div>
+        <div class="cert-overlay"><div><h4>AWS Cloud Practitioner</h4><small>Issued: May 2026</small></div></div>
         <div class="cert-bdr"></div>
       </div>
       <div class="cert-card">
@@ -366,14 +373,6 @@
           <div class="cert-name">B.S. Information Systems &amp; Analytics</div>
         </div>
         <div class="cert-overlay"><div><h4>B.S. Information Systems &amp; Analytics</h4><p>Louisiana State University</p><small>GPA: 3.67 &bull; Dec 2026</small></div></div>
-        <div class="cert-bdr"></div>
-      </div>
-      <div class="cert-card">
-        <div class="cert-img">
-          <i class="fa-brands fa-aws"></i>
-        </div>
-        <div class="cert-body"><div class="cert-name">AWS Cloud Practitioner</div></div>
-        <div class="cert-overlay"><div><h4>AWS Cloud Practitioner</h4><p>Currently working through AWS EKS and solutions architecture fundamentals.</p><small>In progress</small></div></div>
         <div class="cert-bdr"></div>
       </div>
     </div>
@@ -483,6 +482,7 @@
       <ul>
         <li><a href="#certifications">CompTIA Security+</a></li>
         <li><a href="#certifications">CompTIA Network+</a></li>
+        <li><a href="#certifications">AWS Cloud Practitioner</a></li>
         <li><a href="#certifications">B.S. ISA &ndash; LSU</a></li>
       </ul>
     </div>

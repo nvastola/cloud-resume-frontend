@@ -94,13 +94,14 @@
 <section style="padding: 0;">
   <div class="filter-section reveal" style="transition-delay: 0.3s;">
     <div class="filter-label"><i class="fa-solid fa-filter" style="margin-right:.4rem"></i>Filter by topic</div>
-    <div class="filter-bar" style="justify-content: center;">
+    <div class="filter-bar" style="justify-content: center; flex-wrap: wrap;">
       <button class="f-btn on" data-f="all">All Projects</button>
       <button class="f-btn" data-f="linux"><span class="dot"></span> Linux &amp; Servers</button>
       <button class="f-btn" data-f="containers"><span class="dot"></span> Containers</button>
       <button class="f-btn" data-f="cicd"><span class="dot"></span> CI/CD with Jenkins</button>
       <button class="f-btn" data-f="kubernetes"><span class="dot"></span> Kubernetes</button>
       <button class="f-btn" data-f="iac"><span class="dot"></span> Infrastructure as Code</button>
+      <button class="f-btn" data-f="automation"><span class="dot"></span> Python &amp; Automation</button>
     </div>
   </div>
 </section>
@@ -356,6 +357,33 @@
         </div>
       </div>
 
+      <div class="proj-card reveal" data-topic="automation">
+        <div class="proj-thumb">
+          <div class="thumb-icons">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="Linux" loading="lazy">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" loading="lazy">
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="card-top">
+            <span class="card-topic-pill"><i class="fa-brands fa-python"></i> Automation</span>
+          </div>
+          <div class="proj-name">Automating Website Monitoring with Python</div>
+          <div class="proj-desc">Built a Python script to monitor web apps, send SMTP email alerts, and self-heal containers automatically via SSH and the Linode API.</div>
+          <div class="proj-tag-row">
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="">Python</span>
+            <span class="proj-tag">Linux</span>
+            <span class="proj-tag">Linode</span>
+            <span class="proj-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="">Docker</span>
+          </div>
+          <div class="proj-links">
+            <a href="../blog/devops-project-9.html" class="proj-link"><i class="fa-solid fa-book-open"></i> Blog Post</a>
+            <a href="https://github.com/nvastola/web-monitoring-python" target="_blank" class="proj-link"><i class="fa-brands fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div style="text-align:center;margin-top:4rem" class="reveal">
       <a href="../index.html#projects" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
@@ -384,6 +412,7 @@
       <ul>
         <li><a href="../index.html#certifications">CompTIA Security+</a></li>
         <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">AWS Cloud Practitioner</a></li>
         <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
       </ul>
     </div>

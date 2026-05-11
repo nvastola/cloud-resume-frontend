@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Automating Website Monitoring with Python | Noah Vastola</title>
+<meta name="description" content="Building a Python automation script to monitor web applications, send SMTP alerts, and self-heal containers via SSH and the Linode API."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<link rel="stylesheet" href="../css/styles.css"/>
+
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); margin-right: 0.2rem; }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
+
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
+
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
+
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
+
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
+
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; flex-grow: 1; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
+
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
+
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Automating Python Monitoring</span>
+    </div>
+    
+    <h1 class="post-title">Automating Website Monitoring with Python</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> May 10, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 12 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">Python</span>
+      <span class="post-tag">Linode</span>
+      <span class="post-tag">Docker</span>
+      <span class="post-tag">Linux</span>
+    </div>
+  </div>
+</section>
+
+<div class="article-wrap">
+  <article class="article-body">
+
+    <p>This project shifted focus away from the AWS and Kubernetes work I've been doing and into Python automation. The goal: build a program that monitors a running web application, sends an email notification when it goes down, and automatically restarts it — either at the container level or by rebooting the server entirely — without any manual intervention.</p>
+
+    <p>By the end, a single Python script was doing all of that on a schedule, every five minutes, by itself.</p>
+
+    <p><strong>What I had going in:</strong> Python fundamentals, some experience with the <code>boto3</code> library from previous AWS automation work. <strong>What this project added:</strong> HTTP monitoring, SMTP email via Python, SSH into remote servers using <code>paramiko</code>, the Linode API, and scheduling with the <code>schedule</code> library.</p>
+
+    <h2>The Setup</h2>
+
+    <p>The application being monitored is a simple Nginx container running on a Linode server — the same kind of setup I've done before on DigitalOcean, just on a different provider. Nginx runs on port 8080 and is accessible via the server's public IP.</p>
+
+    <pre><code>docker run -d -p 8080:80 nginx</code></pre>
+
+    <p>Navigating to <code>http://&lt;server-ip&gt;:8080</code> returns the standard Nginx welcome page with a 200 status code. That 200 is what the monitoring script watches for.</p>
+
+    <h2>Part 1: Checking Application Health</h2>
+
+    <p>The core of the script is a single HTTP request using the <code>requests</code> library. Same thing a browser does — just from Python.</p>
+
+    <pre><code>import requests
+
+response = requests.get('http://50.116.45.66:8080/')
+if response.status_code == 200:
+    print('Application is running successfully!')
+else:
+    print('Application is down. Fix it!')</code></pre>
+
+    <p><code>response.status_code</code> is the HTTP status code returned by the server. 200 means healthy. Anything else means something is wrong.</p>
+
+    <p>But there's a second failure mode that an <code>if/else</code> can't handle: what if the server doesn't return <em>anything</em>? If the container has crashed, or the server is completely unreachable, <code>requests.get()</code> throws an exception — the <code>if/else</code> never even runs. That's where <code>try/except</code> comes in.</p>
+
+    <pre><code>def monitor_application():
+    try:
+        response = requests.get('http://50.116.45.66:8080/')
+        if response.status_code == 200:
+            print('Application is running successfully!')
+        else:
+            print('Application is down. Fix it!')
+    except Exception as ex:
+        print(f'Connection error happened: {ex}')</code></pre>
+
+    <p>Two distinct failure cases, handled separately:</p>
+    <ul>
+      <li><strong>Non-200 response</strong> — server is reachable but returning an error. The container is probably still running but the application inside is unhealthy.</li>
+      <li><strong>Exception</strong> — server is completely unreachable. The container may have crashed entirely, or the server itself is down.</li>
+    </ul>
+
+    <p>Both need different recovery actions. That distinction drives the rest of the script's logic.</p>
+
+    <h2>Part 2: Email Notification</h2>
+
+    <p>Knowing the application is down is only useful if someone gets told about it. Python has a built-in <code>smtplib</code> module for sending email, so no external library needed for this part.</p>
+
+    <p>The flow: connect to Gmail's SMTP server on port 587, start TLS to encrypt the connection, authenticate with credentials, send the email.</p>
+
+    <pre><code>import smtplib
+import os
+
+EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+
+def send_notification(email_msg):
+    print('Sending an email...')
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        message = f"Subject: SITE DOWN\n{email_msg}"
+        smtp.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, message)</code></pre>
+
+    <p>A few things worth noting here:</p>
+
+    <p><strong>Credentials as environment variables.</strong> The email address and password are pulled from environment variables, not hardcoded. Hardcoding credentials in source code is never the right move — especially for a script that's going to sit in a repo.</p>
+
+    <p><strong>Gmail app passwords.</strong> Gmail requires either a dedicated app password (if 2FA is enabled) or explicitly allowing less secure app access. The app password approach is the right one — it's a credential scoped specifically to this use case and can be revoked independently.</p>
+
+    <p><strong><code>with</code> statement.</strong> The <code>with smtplib.SMTP(...)</code> syntax ensures the connection is properly closed even if something goes wrong mid-send. Same reason you use <code>with open()</code> for files — it handles cleanup automatically.</p>
+
+    <p><strong>One function for two scenarios.</strong> Both the non-200 case and the connection exception case need to send an email, but with different message bodies. Rather than duplicating the SMTP logic, <code>send_notification</code> takes the message as a parameter. The calling code just passes a different string depending on which failure happened.</p>
+
+    <h2>Part 3: Restarting the Container</h2>
+
+    <p>Sending an email tells someone the application is down. The next step is actually fixing it — automatically, without waiting for a human to respond.</p>
+
+    <p>When the application returns a non-200 status, the likely fix is restarting the Docker container. The script connects to the Linode server over SSH using <code>paramiko</code> and runs <code>docker start</code> remotely.</p>
+
+    <pre><code>import paramiko
+
+def restart_container():
+    print('Restarting the application...')
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect('50.116.45.66', username='root', key_filename='/home/noah/.ssh/id_rsa')
+    stdin, stdout, stderr = ssh.exec_command('docker start 1b0b2b85614f')
+    print(stdout.readlines())
+    ssh.close()</code></pre>
+
+    <p>A few things happening here:</p>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> AutoAddPolicy Note</div>
+      <p><code>set_missing_host_key_policy(paramiko.AutoAddPolicy())</code> — when you SSH into a server for the first time manually, you get an interactive prompt asking whether to trust the host key. In an automated script there's no interactive mode, so this automatically confirms that prompt. Without it, the connection fails the first time.</p>
+    </div>
+
+    <p><strong>Private key authentication.</strong> The script connects using the SSH private key at <code>/home/noah/.ssh/id_rsa</code>, which corresponds to the public key added to the Linode server. No password needed — same mechanism as the regular SSH command, just explicitly specified.</p>
+
+    <p><strong><code>exec_command</code></strong> returns three streams: stdin, stdout, stderr. We only care about stdout here — <code>readlines()</code> gives us the output of the Docker command so we can confirm it ran.</p>
+
+    <h2>Part 4: Rebooting the Server</h2>
+
+    <p>If the server is completely unreachable — the exception case — restarting the container isn't possible because there's no SSH connection to make. The fix at that level is rebooting the server itself using the Linode API, then restarting the container once it comes back up.</p>
+
+    <pre><code>import linode_api4
+import time
+
+LINODE_TOKEN = os.environ.get('LINODE_TOKEN')
+
+def restart_server_and_container():
+    print('Rebooting the server...')
+    client = linode_api4.LinodeClient(LINODE_TOKEN)
+    nginx_server = client.load(linode_api4.Instance, 97410049)
+    nginx_server.reboot()
+
+    while True:
+        nginx_server = client.load(linode_api4.Instance, 97410049)
+        if nginx_server.status == 'running':
+            time.sleep(5)
+            restart_container()
+            break</code></pre>
+
+    <p>The reboot triggers immediately, but the server takes time to come back up. Trying to SSH in and restart the container the moment <code>reboot()</code> returns will fail — the server isn't ready yet.</p>
+
+    <p>The <code>while True</code> loop solves this by polling the Linode API for the server's status on each iteration. The instance gets reloaded on every loop so we're checking the live state, not a cached value. As soon as <code>status == 'running'</code>, we sleep an extra 5 seconds as a buffer — even when the API reports running, the server may need a moment before it's ready to accept SSH connections — then call <code>restart_container()</code> and break the loop.</p>
+
+    <p>This is the same pattern used elsewhere in Python AWS automation: poll in a loop, check state, act when the condition is met, break.</p>
+
+    <h2>Part 5: Scheduling</h2>
+
+    <p>A monitoring script that only runs when you manually execute it isn't monitoring anything. The whole point is that it runs continuously on its own. The <code>schedule</code> library handles this cleanly.</p>
+
+    <pre><code>import schedule
+
+schedule.every(5).minutes.do(monitor_application)
+
+while True:
+    schedule.run_pending()</code></pre>
+
+    <p><code>schedule.every(5).minutes.do(monitor_application)</code> registers the function to run every 5 minutes. The <code>while True</code> loop keeps the program alive and calls <code>schedule.run_pending()</code> on each iteration to check whether it's time to fire the scheduled job.</p>
+
+    <h2>The Complete Script</h2>
+
+    <pre><code>import requests
+import smtplib
+import os
+import paramiko
+import linode_api4
+import time
+import schedule
+
+EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+LINODE_TOKEN = os.environ.get('LINODE_TOKEN')
+
+def restart_server_and_container():
+    print('Rebooting the server...')
+    client = linode_api4.LinodeClient(LINODE_TOKEN)
+    nginx_server = client.load(linode_api4.Instance, 97410049)
+    nginx_server.reboot()
+
+    while True:
+        nginx_server = client.load(linode_api4.Instance, 97410049)
+        if nginx_server.status == 'running':
+            time.sleep(5)
+            restart_container()
+            break
+
+def send_notification(email_msg):
+    print('Sending an email...')
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        message = f"Subject: SITE DOWN\n{email_msg}"
+        smtp.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, message)
+
+def restart_container():
+    print('Restarting the application...')
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect('50.116.45.66', username='root', key_filename='/home/noah/.ssh/id_rsa')
+    stdin, stdout, stderr = ssh.exec_command('docker start 1b0b2b85614f')
+    print(stdout.readlines())
+    ssh.close()
+
+def monitor_application():
+    try:
+        response = requests.get('http://50.116.45.66:8080/')
+        if response.status_code == 200:
+            print('Application is running successfully!')
+        else:
+            print('Application is down. Fix it!')
+            msg = f"Application returned {response.status_code}"
+            send_notification(msg)
+            restart_container()
+    except Exception as ex:
+        print(f'Connection error happened: {ex}')
+        msg = f"Application not accessible at all."
+        send_notification(msg)
+        restart_server_and_container()
+
+schedule.every(5).minutes.do(monitor_application)
+
+while True:
+    schedule.run_pending()</code></pre>
+
+    <h2>What I Learned</h2>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> try/except and if/else handle different types of failures</div>
+      <p><code>if/else</code> handles expected outcomes — a response came back, but it wasn't what we wanted. <code>try/except</code> handles unexpected failures — the code itself threw an exception before producing any result. The distinction matters because each failure mode requires a different recovery path. Using only one of them would leave gaps.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Paramiko makes SSH from Python straightforward</div>
+      <p>The pattern — create client, set host key policy, connect with credentials, execute command, read output, close — is clean and reusable. The same approach works for any maintenance or automation task on a remote server, not just Docker commands.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Poll in a loop for async state changes</div>
+      <p>Rebooting a server and then immediately trying to use it doesn't work. The pattern of loading fresh state on each loop iteration, checking a condition, and breaking when it's met is the right way to wait for an async operation to complete without blocking indefinitely.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Credentials belong in environment variables</div>
+      <p>Nothing in this script is hardcoded except the server IP and container ID. In production you'd pull those from config as well, but the credentials — email, password, API token — are always environment variables. That's not optional.</p>
+    </div>
+
+    <h2>Production Considerations</h2>
+
+    <p><strong>Hardcoded server IP and container ID.</strong> Both are embedded in the script. In a real setup these would come from config or environment variables so the script doesn't need to change when the infrastructure does.</p>
+
+    <p><strong>Single point of monitoring.</strong> This script runs on a local machine. If that machine goes down, monitoring stops. Production monitoring would run on a separate server, ideally in a different region, or use a managed monitoring service.</p>
+
+    <p><strong>No success notification after recovery.</strong> The script sends an alert when the application goes down and tries to fix it, but doesn't confirm whether the fix worked. Adding a follow-up health check after <code>restart_container()</code> and sending a recovery email would close that loop.</p>
+
+    <p><strong>Gmail app password expiry.</strong> App passwords don't expire on their own, but they're tied to the Google account and can be revoked. For a long-running production script, a dedicated sending account or a transactional email service (SendGrid, SES) is more appropriate.</p>
+
+    <h2>Reflection</h2>
+
+    <p><strong>What this project was:</strong> The first one that felt like a complete operational tool rather than a demo. It monitors, alerts, and self-heals — three distinct capabilities wired together into a single script that runs on its own.</p>
+
+    <p><strong>What worked:</strong> The incremental build approach. Starting with just the HTTP check, then adding email, then SSH restart, then server reboot, then scheduling. Each step worked before moving to the next. By the time the scheduler was added, every piece was already verified.</p>
+
+    <p><strong>What I'd do differently:</strong> The hardcoded container ID is the biggest limitation. <code>docker start 1b0b2b85614f</code> only works for that specific container on that specific server. A more robust version would look up the container by name rather than ID.</p>
+
+    <p><strong>What's next:</strong> Ansible — configuration management and automation of server setup. Rather than SSHing into servers and running commands manually the way this script does, Ansible lets you define the desired state of a server in a playbook and apply it repeatably across any number of hosts.</p>
+
+    <p><a href="https://github.com/nvastola/web-monitoring-python" target="_blank">GitHub Repository &rarr;</a></p>
+
+  </article>
+</div>
+
+<div class="related-section">
+  <div class="related-title">Continue the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-6.html" class="related-card">
+      <h4>Deploy Microservices on Kubernetes with Production &amp; Security Best Practices</h4>
+      <p>Deploying Google's 11-service Online Boutique on a real Linode LKE cluster, hardening with probes and limits.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-7.html" class="related-card">
+      <h4>Deploying to Kubernetes: A Complete Jenkins, ECR, and EKS Pipeline</h4>
+      <p>Building an end-to-end CI/CD pipeline deploying to AWS EKS. From dynamic envsubst manifests to debugging EKS pod limits.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-8.html" class="related-card">
+      <h4>Automating EC2 Provisioning in a Jenkins CI/CD Pipeline with Terraform</h4>
+      <p>Replacing manual EC2 deployment with Infrastructure as Code. Automating Jenkins pipelines with Terraform and dynamic IP retrieval.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top:3rem; text-align:center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">AWS Cloud Practitioner</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Python Automation, Paramiko, SMTP, Linode API, Docker, DevOps Scripting</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/scripts.js"></script>
+
+</body>
+</html>
