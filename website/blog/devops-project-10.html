@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Running Ansible from a Jenkins Pipeline | Noah Vastola</title>
+<meta name="description" content="Integrating Jenkins CI/CD with Ansible for remote server configuration. Dynamic inventories, SSH pipelines, and coordinating infrastructure as code."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<link rel="stylesheet" href="../css/styles.css"/>
+
+<style>
+  /* Post Hero Layout */
+  #post-hero { padding-top: 140px; padding-bottom: 3rem; text-align: center; }
+  .hero-inner { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  .breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: var(--mono-font); font-size: 0.75rem; color: var(--muted-fg); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .breadcrumb a { color: var(--primary); font-weight: 600; transition: opacity 0.2s; }
+  .breadcrumb a:hover { opacity: 0.75; }
+  .breadcrumb i { font-size: 0.65rem; opacity: 0.5; }
+  
+  .post-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; color: var(--fg); margin-bottom: 1.5rem; }
+  .post-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .meta-item { display: flex; align-items: center; gap: 0.4rem; color: var(--muted-fg); font-size: 0.875rem; font-family: var(--mono-font); }
+  .meta-item i { color: var(--fg); margin-right: 0.2rem; }
+  
+  .post-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .post-tag { font-family: var(--mono-font); font-size: 0.7rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 4px; background: var(--muted); color: var(--muted-fg); border: 1px solid var(--border); text-transform: uppercase; }
+
+  /* Article Layout */
+  .article-wrap { max-width: 800px; margin: 0 auto; padding: 0 2rem 5rem; }
+  .article-body { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3rem 4rem; text-align: left; }
+  @media(max-width: 768px) { .article-body { padding: 2rem; } }
+
+  /* Typography */
+  .article-body h2 { font-size: 1.5rem; font-weight: 700; color: var(--fg); margin: 3rem 0 1.25rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); letter-spacing: -0.02em; }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin: 2rem 0 1rem; }
+  .article-body p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--muted-fg); font-size: 1rem; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body strong { color: var(--fg); font-weight: 600; }
+  .article-body a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  .article-body a:hover { opacity: 0.8; }
+  
+  /* Lists & Tables */
+  .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+  .article-body li { margin-bottom: 0.5rem; color: var(--muted-fg); line-height: 1.8; font-size: 1rem; }
+  .article-body ul li { list-style-type: square; }
+  .article-body ul li::marker { color: var(--border); }
+  .article-body table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+  .article-body th, .article-body td { padding: 0.75rem 1rem; border: 1px solid var(--border); text-align: left; color: var(--muted-fg); }
+  .article-body th { background: var(--muted); color: var(--fg); font-weight: 600; font-family: var(--mono-font); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+
+  /* Code Formatting */
+  .article-body code { font-family: var(--mono-font); font-size: 0.85em; background: var(--muted); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .article-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; }
+  .article-body pre code { background: none; border: none; color: var(--fg); padding: 0; font-size: 0.85rem; line-height: 1.6; }
+
+  /* Callouts / Admonitions */
+  .callout { margin: 2rem 0; padding: 1.25rem 1.5rem; background: var(--card); border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; }
+  .callout-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono-font); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.info { border-left-color: var(--primary); }
+  .callout.info .callout-title { color: var(--primary); }
+  .callout.warning { border-left-color: #f59e0b; }
+  .callout.warning .callout-title { color: #f59e0b; }
+  .callout.error { border-left-color: #ef4444; }
+  .callout.error .callout-title { color: #ef4444; }
+  .callout.success { border-left-color: #10b981; }
+  .callout.success .callout-title { color: #10b981; }
+
+  /* Related Posts Footer */
+  .related-section { max-width: 800px; margin: 0 auto; padding: 0 2rem 4rem; }
+  .related-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .related-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .related-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; }
+  .related-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+  .related-card h4 { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.5rem; line-height: 1.4; }
+  .related-card p { font-size: 0.85rem; color: var(--muted-fg); line-height: 1.6; margin-bottom: 1rem; flex-grow: 1; }
+  .related-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--fg); font-family: var(--mono-font); text-transform: uppercase; }
+  .related-card:hover .related-cta { color: var(--primary); }
+</style>
+
+<script>
+(function(){
+  var s = localStorage.getItem('nv-theme') || 'dark';
+  if(s === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+})();
+</script>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-avatar">NV</div>
+      <span>Noah Vastola</span>
+    </a>
+    <div class="nav-links">
+      <a href="../index.html#about" class="nav-link"><i class="fa-solid fa-user"></i> About</a>
+      <a href="../index.html#skills" class="nav-link"><i class="fa-solid fa-code"></i> Skills</a>
+      <a href="../index.html#experience" class="nav-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+      <a href="../projects/projects.html" class="nav-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+      <a href="../blog.html" class="nav-link active"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <a href="../index.html#contact" class="contact-btn" title="Contact me"><i class="fa-solid fa-envelope"></i></a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="../index.html#about" class="mob-link"><i class="fa-solid fa-user"></i> About</a>
+  <a href="../index.html#skills" class="mob-link"><i class="fa-solid fa-code"></i> Skills</a>
+  <a href="../index.html#experience" class="mob-link"><i class="fa-solid fa-briefcase"></i> Experience</a>
+  <a href="../projects/projects.html" class="mob-link"><i class="fa-solid fa-diagram-project"></i> Projects</a>
+  <a href="../blog.html" class="mob-link"><i class="fa-solid fa-pen-nib"></i> Blogs</a>
+  <div class="mob-actions">
+    <button class="theme-btn" id="themeBtnMob"><i class="fa-solid fa-moon" id="themeIconMob"></i></button>
+    <a href="../index.html#contact" class="contact-btn"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+</div>
+
+<section id="post-hero" class="grid-bg">
+  <div class="hero-inner reveal">
+    <div class="breadcrumb">
+      <a href="../blog.html">Blog</a>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Ansible &amp; Jenkins Integration</span>
+    </div>
+    
+    <h1 class="post-title">Running Ansible from a Jenkins Pipeline</h1>
+    
+    <div class="post-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i> May 15, 2026</span>
+      <span class="meta-item"><i class="fa-regular fa-clock"></i> 15 min read</span>
+      <span class="meta-item"><i class="fa-solid fa-pen-nib"></i> Noah Vastola</span>
+    </div>
+    
+    <div class="post-tags">
+      <span class="post-tag">Ansible</span>
+      <span class="post-tag">Jenkins</span>
+      <span class="post-tag">AWS</span>
+      <span class="post-tag">Docker</span>
+      <span class="post-tag">DigitalOcean</span>
+      <span class="post-tag">Boto3</span>
+      <span class="post-tag">Java</span>
+      <span class="post-tag">Maven</span>
+      <span class="post-tag">Linux</span>
+      <span class="post-tag">Git</span>
+    </div>
+  </div>
+</section>
+
+<div class="article-wrap">
+  <article class="article-body">
+
+    <p>This project brought two tools together that I'd been using separately: Jenkins for CI/CD pipelines and Ansible for server configuration. The goal was to trigger an Ansible playbook from a Jenkins pipeline — not by installing Ansible on the Jenkins server, but by having Jenkins reach out to a dedicated Ansible control node and execute the playbook remotely.</p>
+
+    <p>By the end, a single pipeline run was copying all necessary files to the Ansible server, preparing it, and configuring two EC2 instances with Docker and Docker Compose — without touching any of them manually.</p>
+
+    <p><strong>What I had going in:</strong> Jenkins pipelines, Ansible playbooks, EC2 instances, dynamic inventory. <strong>What this project added:</strong> the SSH Pipeline Steps plugin, the <code>sshagent</code> and <code>sshCommand</code> patterns for remote execution from Jenkins, credential handling for multiple servers in a single pipeline, and a Groovy string interpolation security issue I'd hit before and resolved properly this time.</p>
+
+    <h2>The Architecture</h2>
+
+    <p>Previous projects installed tools directly in the Jenkins container — <code>kubectl</code>, <code>terraform</code>, the Docker CLI. Ansible is different. The common practice is a dedicated Ansible control node: a separate server where Ansible is installed, and from which it connects to and configures managed nodes.</p>
+
+    <p>So the setup here is three separate machines:</p>
+
+    <ul>
+      <li><strong>Jenkins server</strong> — DigitalOcean droplet, running Jenkins in Docker</li>
+      <li><strong>Ansible server</strong> — DigitalOcean droplet, the control node</li>
+      <li><strong>EC2 instances (&times;2)</strong> — the managed nodes being configured</li>
+    </ul>
+
+    <p>Jenkins doesn't run Ansible directly. It copies the necessary files to the Ansible server, then triggers the playbook execution there remotely. The Ansible server does the actual work.</p>
+
+    <h2>Setting Up the Ansible Server</h2>
+
+    <p>A fresh Ubuntu droplet on DigitalOcean. SSH in and install:</p>
+
+    <pre><code>apt update
+apt install ansible -y
+apt install python3-boto3</code></pre>
+
+    <p><code>boto3</code> is required because the playbook uses a dynamic inventory — instead of hardcoding EC2 IP addresses, the AWS EC2 inventory plugin fetches them from AWS at runtime. That plugin needs AWS credentials and the <code>boto3</code> Python library to authenticate.</p>
+
+    <p>AWS credentials go in the default location:</p>
+
+    <pre><code>mkdir ~/.aws
+nano ~/.aws/credentials
+# paste your access key and secret</code></pre>
+
+    <p>That's all the manual setup needed on the Ansible server. Everything else — copying the playbook, inventory, config, and SSH key — gets handled by the pipeline.</p>
+
+    <h2>The Ansible Files</h2>
+
+    <p>Three files live in an <code>ansible/</code> directory in the Java Maven app repo so Jenkins has access to them and can copy them to the Ansible server.</p>
+
+    <h3>Dynamic Inventory</h3>
+
+    <p>Instead of a static hosts file, the inventory uses the AWS EC2 plugin to fetch instances dynamically:</p>
+
+    <pre><code># inventory_aws_ec2.yaml
+---
+plugin: aws_ec2
+regions:
+  - us-east-1
+keyed_groups:
+  - key: tags
+    prefix: "tag"
+  - key: instance_type
+    prefix: instance_type</code></pre>
+
+    <p>Any EC2 instance in <code>us-east-1</code> gets picked up automatically. No IP addresses to maintain.</p>
+
+    <h3>Ansible Configuration</h3>
+
+    <pre><code># ansible.cfg
+[defaults]
+host_key_checking = False
+inventory = inventory_aws_ec2.yaml
+
+enable_plugins = aws_ec2
+
+remote_user = ec2-user
+private_key_file = ~/ssh-key.pem</code></pre>
+
+    <p><code>host_key_checking = False</code> skips the interactive host key confirmation — necessary for automated execution. <code>private_key_file = ~/ssh-key.pem</code> points to where the pipeline will copy the EC2 SSH key. The file doesn't exist on the Ansible server yet when this config is written — the pipeline puts it there.</p>
+
+    <h3>The Playbook</h3>
+
+    <p>Installs Docker and Docker Compose on all EC2 instances in the inventory:</p>
+
+    <pre><code># my-playbook.yaml
+- name: Install Docker
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        update_cache: yes
+        state: present
+    - name: Start docker daemon
+      systemd:
+        name: docker
+        state: started
+
+- name: Install Docker-compose
+  hosts: all
+  tasks:
+    - name: Create docker-compose directory
+      file:
+        path: ~/.docker/cli-plugins
+        state: directory
+    - name: Get architecture of remote machine
+      shell: uname -m
+      register: remote_arch
+    - name: Install docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-{{ remote_arch.stdout }}"
+        dest: ~/.docker/cli-plugins/docker-compose
+        mode: +x</code></pre>
+
+    <p>The architecture detection step is worth noting — <code>uname -m</code> runs on the remote EC2 instance and its output gets registered as <code>remote_arch</code>. That value then gets substituted into the Docker Compose download URL so the right binary gets fetched for whatever architecture the instance is running on. No hardcoding <code>x86_64</code> and hoping for the best.</p>
+
+    <h2>The EC2 Instances</h2>
+
+    <p>Two Amazon Linux 2 instances launched in EC2. The only important configuration step: create a new key pair called <code>ansible-jenkins</code> and download the <code>.pem</code> file. Ansible needs this key to SSH into the instances and configure them. Everything else on the instances — Docker, Docker Compose — will be handled by the playbook. No manual SSH required.</p>
+
+    <h2>The Jenkins Credentials</h2>
+
+    <p>Three credentials needed in Jenkins before writing the pipeline:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Credential ID</th>
+          <th>Type</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>ansible-server-key</code></td>
+          <td>SSH username with private key</td>
+          <td>Connect to the Ansible DigitalOcean droplet</td>
+        </tr>
+        <tr>
+          <td><code>ec2-server-key</code></td>
+          <td>SSH username with private key</td>
+          <td>The <code>.pem</code> file for the EC2 instances (copied to Ansible server by pipeline)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> OpenSSH Key Format Note</div>
+      <p>Recent versions of OpenSSH generate keys in the new OpenSSH format (<code>-----BEGIN OPENSSH PRIVATE KEY-----</code>). Jenkins doesn't support this format. If your key starts with that header, convert it to PEM first:</p>
+      <pre><code>ssh-keygen -p -m PEM -f ~/.ssh/your-key</code></pre>
+    </div>
+
+    <h2>The Jenkinsfile</h2>
+
+    <p>Two stages. First: copy all necessary files to the Ansible server. Second: execute the playbook remotely.</p>
+
+    <pre><code>pipeline {
+    agent any
+    environment {
+        ANSIBLE_SERVER = "67.205.186.70"
+    }
+    stages {
+        stage("copy files to ansible server") {
+            steps {
+                script {
+                    echo "copying all necessary files to ansible control node"
+                    sshagent(['ansible-server-key']) {
+                        sh "scp -o StrictHostKeyChecking=no ansible/* root@${ANSIBLE_SERVER}:/root"
+
+                        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-server-key', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
+                            sh 'scp $keyfile root@$ANSIBLE_SERVER:/root/ssh-key.pem'
+                        }
+                    }
+                }
+            }
+        }
+        stage("execute ansible playbook") {
+            steps {
+                script {
+                    echo "calling ansible playbook to configure ec2 instances"
+                    def remote = [:]
+                    remote.name = "ansible-server"
+                    remote.host = ANSIBLE_SERVER
+                    remote.allowAnyHosts = true
+
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server-key', keyFileVariable: 'keyfile', usernameVariable: 'user')]) {
+                        remote.user = user
+                        remote.identityFile = keyfile
+                        sshScript remote: remote, script: "prepare-ansible-server.sh"
+                        sshCommand remote: remote, command: "ansible-playbook my-playbook.yaml"
+                    }
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h3>Stage 1 — Copy Files to Ansible Server</h3>
+    <p><code>sshagent(['ansible-server-key'])</code> opens an SSH agent session using the Ansible server credential. Inside that block, <code>scp</code> copies everything in the <code>ansible/</code> directory to the Ansible server's root home directory.</p>
+
+    <p>The EC2 private key needs separate handling. It's stored in Jenkins as <code>ec2-server-key</code> and needs to land on the Ansible server as <code>~/ssh-key.pem</code> — exactly where <code>ansible.cfg</code> says to look for it. A nested <code>withCredentials</code> block extracts the key file path and copies it across with a second <code>scp</code> command.</p>
+
+    <p>Note the <strong>single quotes</strong> on the second <code>scp</code> line. This is the Groovy string interpolation security fix — using double quotes with <code>$variable</code> would expose the secret on the command line through Groovy's interpolation. Single quotes tell Groovy to leave variable substitution to the shell, keeping the key contents out of the command line history.</p>
+
+    <h3>Stage 2 — Execute Ansible Playbook</h3>
+    <p>This stage uses the SSH Pipeline Steps plugin, which isn't installed by default. It enables remote command execution from Jenkins.</p>
+
+    <p>A <code>remote</code> object is built as a Groovy map with the Ansible server's connection details:</p>
+
+    <pre><code>def remote = [:]
+remote.name = "ansible-server"
+remote.host = ANSIBLE_SERVER
+remote.allowAnyHosts = true</code></pre>
+
+    <p><code>withCredentials</code> then populates <code>remote.user</code> and <code>remote.identityFile</code> from the stored credential. With the remote object fully configured, two operations run:</p>
+
+    <pre><code>sshScript remote: remote, script: "prepare-ansible-server.sh"
+sshCommand remote: remote, command: "ansible-playbook my-playbook.yaml"</code></pre>
+
+    <p><code>sshScript</code> executes the preparation shell script on the Ansible server. <code>sshCommand</code> runs the playbook. The playbook picks up its configuration from <code>ansible.cfg</code>, finds the EC2 instances via the dynamic inventory, and connects to them using the <code>.pem</code> file that stage 1 already copied into place.</p>
+
+    <h3>The Preparation Script</h3>
+
+    <pre><code>#!/usr/bin/env bash
+
+apt update
+apt install ansible -y
+apt install python3-boto3</code></pre>
+
+    <p>This runs before every playbook execution. If Ansible is already installed nothing changes, but it ensures the server is always in a known state regardless of whether it was provisioned fresh or already configured. Idempotent by design.</p>
+
+    <h2>Putting It Together</h2>
+
+    <p>The pipeline execution order:</p>
+
+    <pre><code>Jenkins checkout
+  &rarr; scp ansible/* &rarr; Ansible server ~/
+  &rarr; scp ssh-key.pem &rarr; Ansible server ~/ssh-key.pem
+  &rarr; sshScript: prepare-ansible-server.sh
+  &rarr; sshCommand: ansible-playbook my-playbook.yaml
+      &rarr; aws_ec2 plugin fetches EC2 IPs from AWS
+      &rarr; Ansible SSHes to EC2 instances using ssh-key.pem
+      &rarr; Installs Docker and starts daemon
+      &rarr; Installs Docker Compose</code></pre>
+
+    <p>The console output shows the playbook recap at the end — both EC2 instances with <code>changed</code> status confirming Docker and Docker Compose were installed. Neither instance was touched manually.</p>
+
+    <h2>What I Learned</h2>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Jenkins doesn't need to run every tool directly</div>
+      <p>The pattern here — Jenkins coordinates, a dedicated server executes — is cleaner than cramming every tool into the Jenkins container. Ansible has its own dependencies, its own credential model, its own way of connecting to managed nodes. Keeping it on a separate server respects that. Jenkins just needs to know how to talk to it.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> The remote object pattern is reusable</div>
+      <p>The Groovy map approach for defining a remote server — host, user, identity file, allowAnyHosts — is the same regardless of what command you're running on it. Once you have that pattern, triggering anything on any remote server from a pipeline is straightforward.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title"><i class="fa-solid fa-triangle-exclamation"></i> Single quotes vs double quotes in Groovy is not optional</div>
+      <p>This is the same Groovy string interpolation warning I'd hit in previous pipelines and fixed without fully understanding why. Using double quotes with <code>$variable</code> inside an <code>sh</code> step causes Groovy to resolve the variable before passing the string to the shell — meaning secrets get expanded into the command text and can appear in logs or command history. Single quotes leave the <code>$variable</code> for the shell to resolve, where it stays out of Groovy's hands. For anything involving credentials, it's always single quotes.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title"><i class="fa-solid fa-circle-info"></i> Dynamic inventory decouples the playbook from infrastructure</div>
+      <p>Hard-coding IP addresses in a hosts file means updating the playbook every time an EC2 instance is replaced or scaled. The <code>aws_ec2</code> plugin eliminates that entirely — any instance in the region gets picked up automatically. The playbook doesn't know or care what the IPs are.</p>
+    </div>
+
+    <h2>Production Considerations</h2>
+
+    <p><strong>Hardcoded Ansible server IP.</strong> <code>ANSIBLE_SERVER</code> is set as an environment variable in the Jenkinsfile, which is better than repeating it inline, but it's still a hardcoded value. In a real setup this would come from a parameter or be stored in Jenkins as a credential.</p>
+
+    <p><strong>AWS credentials on the Ansible server are manual.</strong> The pipeline automates everything except placing the <code>~/.aws/credentials</code> file on the Ansible server. That step is still manual. You could automate it by passing the credentials from Jenkins via <code>withCredentials</code> and writing the file in the <code>sshScript</code> step.</p>
+
+    <p><strong><code>prepare-ansible-server.sh</code> runs on every build.</strong> For a stable, long-lived Ansible server this is unnecessary overhead. For ephemeral infrastructure where the Ansible server might be recreated, it's the right call. The tradeoff depends on how you manage the server.</p>
+
+    <p><strong>No tagging on EC2 instances.</strong> The dynamic inventory picks up all instances in the region. In a real environment you'd filter by tag so the playbook only targets the intended servers — not everything running in your account.</p>
+
+    <h2>Reflection</h2>
+
+    <p><strong>What this project was:</strong> The first one where Jenkins acted as a coordinator rather than the executor. Every previous pipeline ran tools directly on the Jenkins server. This one Jenkins coordinated two other systems — the Ansible control node and the EC2 managed nodes — without doing any of the configuration work itself. That's a different mental model and a more accurate picture of how pipelines work at scale.</p>
+
+    <p><strong>What worked:</strong> Having all three Ansible files in the application repo alongside the Jenkinsfile. Everything the pipeline needs is version-controlled in one place. The Ansible server is essentially stateless — the pipeline puts everything it needs there before running.</p>
+
+    <p><strong>What I'd do differently:</strong> Add EC2 instance tags from the start and filter the dynamic inventory by tag. Running the playbook against every instance in the region works fine in a demo account, but is one misfire away from configuring something it shouldn't in a shared environment.</p>
+
+    <p><strong>Cost:</strong> DigitalOcean droplet for Ansible server + two EC2 instances. All deleted after the project.</p>
+
+    <h2>What's Next</h2>
+
+    <p>With Ansible and Jenkins integrated, the next step is Prometheus and Grafana — monitoring and observability for the infrastructure and applications built throughout these projects. Rather than reacting to failures after the fact the way the Python monitoring script did, the goal is proactive visibility into what's happening across the cluster in real time.</p>
+
+    <p><a href="https://gitlab.com/nvastola/ansible-integration-jenkins" target="_blank">GitLab Repository &rarr;</a></p>
+
+  </article>
+</div>
+
+<div class="related-section">
+  <div class="related-title">Continue the Series</div>
+  <div class="related-grid">
+    <a href="devops-project-7.html" class="related-card">
+      <h4>Deploying to Kubernetes: A Complete Jenkins, ECR, and EKS Pipeline</h4>
+      <p>Building an end-to-end CI/CD pipeline deploying to AWS EKS. From dynamic envsubst manifests to debugging EKS pod limits.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-8.html" class="related-card">
+      <h4>Automating EC2 Provisioning in a Jenkins CI/CD Pipeline with Terraform</h4>
+      <p>Replacing manual EC2 deployment with Infrastructure as Code. Automating Jenkins pipelines with Terraform and dynamic IP retrieval.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+    <a href="devops-project-9.html" class="related-card">
+      <h4>Automated Website Monitoring with Python</h4>
+      <p>Building a Python automation script to monitor web applications, send SMTP alerts, and self-heal containers via SSH and the Linode API.</p>
+      <div class="related-cta">Read Post <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+  <div style="margin-top:3rem; text-align:center;">
+    <a href="../blog.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to All Posts</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-line"></div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h1>Noah Vastola</h1>
+      <p>Cloud Engineering &amp; DevOps specialist building scalable infrastructure through automation, reliability, and continuous improvement.</p>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Quick Links</div>
+      <ul>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../projects/projects.html">Projects</a></li>
+        <li><a href="../blog.html">Blogs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Credentials</div>
+      <ul>
+        <li><a href="../index.html#certifications">CompTIA Security+</a></li>
+        <li><a href="../index.html#certifications">CompTIA Network+</a></li>
+        <li><a href="../index.html#certifications">AWS Cloud Practitioner</a></li>
+        <li><a href="../index.html#certifications">B.S. ISA &ndash; LSU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="f-col-title">Connect</div>
+      <div class="f-socials">
+        <a href="https://github.com/nvastola" target="_blank" class="f-social" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/noahvastola/" target="_blank" class="f-social" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="mailto:noahvastola@gmail.com" class="f-social" title="Email"><i class="fa-solid fa-envelope"></i></a>
+        <a href="../assets/doc/Resume.pdf" target="_blank" class="f-social" title="Resume"><i class="fa-solid fa-file-pdf"></i></a>
+      </div>
+      <p class="f-keywords">Keywords: Ansible, Jenkins, AWS EC2, Dynamic Inventory, SSH Pipeline, Infrastructure as Code, CI/CD</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/scripts.js"></script>
+
+</body>
+</html>

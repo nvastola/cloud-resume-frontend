@@ -80,6 +80,7 @@ const skills = [
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', n:'Docker'},
   {t:'img', img:'https://cdn.simpleicons.org/helm/0F1689', n:'Helm'},
   {t:'img', img:'https://cdn.simpleicons.org/terraform/7B42BC', n:'Terraform'},
+  {t:'img', img:'https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/ansible.svg', n:'Ansible'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg', n:'Jenkins'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg', n:'GitHub Actions'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', n:'Git'},
