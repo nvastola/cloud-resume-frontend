@@ -73,25 +73,26 @@ window.addEventListener('load', updateTl);
 setTimeout(updateTl, 200);
 
 // Skills Rendering
+// Ordered so the first MAX entries reflect the systems and infrastructure
+// focus; cloud and CI/CD tooling follows rather than leads.
 const skills = [
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg', n:'AWS'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg', n:'Azure'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg', n:'Kubernetes'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', n:'Docker'},
-  {t:'img', img:'https://cdn.simpleicons.org/helm/0F1689', n:'Helm'},
-  {t:'img', img:'https://cdn.simpleicons.org/terraform/7B42BC', n:'Terraform'},
-  {t:'img', img:'https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/ansible.svg', n:'Ansible'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg', n:'Jenkins'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg', n:'GitHub Actions'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', n:'Git'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/powershell/powershell-original.svg', n:'PowerShell'},
+  {t:'icon', icon:'fa-brands fa-microsoft', color:'#00A4EF', n:'Windows Server'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg', n:'Linux'},
+  {t:'img', img:'https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/ansible.svg', n:'Ansible'},
+  {t:'img', img:'https://cdn.simpleicons.org/terraform/7B42BC', n:'Terraform'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', n:'Python'},
   {t:'img', img:'https://cdn.simpleicons.org/gnubash/4EAA25', n:'Bash'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/powershell/powershell-original.svg', n:'PowerShell'},
-  {t:'img', img:'https://cdn.simpleicons.org/digitalocean/0080FF', n:'DigitalOcean'},
-  {t:'icon', icon:'fa-brands fa-microsoft', color:'#00A4EF', n:'Windows Server'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', n:'Git'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', n:'Docker'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg', n:'Kubernetes'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg', n:'Azure'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg', n:'AWS'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg', n:'Jenkins'},
+  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/githubactions/githubactions-original.svg', n:'GitHub Actions'},
   {t:'img', img:'https://cdn.simpleicons.org/vmware/607078', n:'VMware'},
-  {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jira/jira-original.svg', n:'Jira'},
+  {t:'img', img:'https://cdn.simpleicons.org/helm/0F1689', n:'Helm'},
+  {t:'img', img:'https://cdn.simpleicons.org/digitalocean/0080FF', n:'DigitalOcean'},
   {t:'img', img:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg', n:'MySQL'},
   {t:'img', img:'https://cdn.simpleicons.org/apachemaven/C71A36', n:'Maven'},
 ];
