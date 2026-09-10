@@ -231,14 +231,6 @@ section { position: relative; overflow: hidden; padding: 6rem 0; }
 .blog-cta { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--fg); }
 .blog-card:hover .blog-cta { color: var(--primary); }
 
-/* Currently Learning/Reading */
-.currently-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
-.currently-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; display: flex; align-items: center; gap: 1.5rem; transition: border-color 0.2s; }
-.currently-card:hover { border-color: var(--fg); }
-.currently-card h3 { font-family: var(--mono-font); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
-.currently-card img { width: 64px; height: 64px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); padding: 0.25rem; background: var(--card); }
-.currently-card p { font-size: 1rem; font-weight: 600; color: var(--fg); line-height: 1.3; }
-
 /* Certifications */
 .certs-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 1000px; margin: 0 auto; }
 .cert-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
